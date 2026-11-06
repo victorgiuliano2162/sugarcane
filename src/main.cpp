@@ -18,8 +18,8 @@
 
 static const char* TAG = "MAIN";
 
-// Tamanho do tensor de entrada (224 x 224 x 3 bytes = 150.528 bytes)
-static const size_t TENSOR_SIZE = 224 * 224 * 3;
+// Tamanho do tensor de entrada (160 x 160 x 3 bytes = 76.800 bytes)
+static const size_t TENSOR_SIZE = 160 * 160 * 3;
 
 struct DecodedJob {
     int8_t* tensor_buf;
