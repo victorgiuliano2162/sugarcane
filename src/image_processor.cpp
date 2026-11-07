@@ -16,6 +16,7 @@ const int TARGET_W = 160;
 const int TARGET_H = 160;
 const int CHANNELS = 3;
 const int TOTAL_TARGET_PIXELS = TARGET_W * TARGET_H; // 25.600 pixels
+const int MAX_LUT_DIM = 4096;
 
 // ============================================================================
 // Estruturas de Suporte para Box Averaging (Opções A e C) e FastLUT (Opção B)
@@ -35,6 +36,22 @@ static BoxAccumulator* s_box_acc = nullptr;
 // Tabelas de busca rápida (Look-Up Tables) na SRAM para a Opção B (FastLUT)
 static uint16_t s_target_src_x[TARGET_W];
 static uint16_t s_target_src_y[TARGET_H];
+
+// Tabelas de mapeamento direto src -> dst na SRAM para eliminar ~786.432 divisões
+// inteiras por imagem durante o Box Averaging (Opções A e C)
+static uint8_t s_src_to_dst_x[MAX_LUT_DIM];
+static uint8_t s_src_to_dst_y[MAX_LUT_DIM];
+
+static void build_src_to_dst_lut(int w, int h) {
+    int limit_w = (w < MAX_LUT_DIM) ? w : MAX_LUT_DIM;
+    int limit_h = (h < MAX_LUT_DIM) ? h : MAX_LUT_DIM;
+    for (int x = 0; x < limit_w; x++) {
+        s_src_to_dst_x[x] = (uint8_t)((x * TARGET_W) / w);
+    }
+    for (int y = 0; y < limit_h; y++) {
+        s_src_to_dst_y[y] = (uint8_t)((y * TARGET_H) / h);
+    }
+}
 
 static bool ensure_box_accumulator_allocated() {
     if (s_box_acc != nullptr) {
@@ -71,10 +88,9 @@ static void finalize_box_average_to_tensor(int8_t* target_tensor) {
 }
 
 // ============================================================================
-// 1. [ATIVA NA PIPELINE] OPÇÃO A (Modo 5): RGB565 + Box Averaging
-//    - Maior acurácia global no dataset (82,73% - 455/550)
+// 1. [REGISTRO TÉCNICO] OPÇÃO A (Modo 5): RGB565 + Box Averaging
+//    - 90,55% de acurácia global (498/550) nas amostras limpas e 88,57% em val/ no v08
 //    - Ganho de +11,1 dB no PSNR global (38,2 dB vs 27,1 dB)
-//    - Recupera lesões finas: 4,5x mais acertos em 'smut' e +12% em 'Pokkah Boeng'
 // ============================================================================
 static int JPEGDraw_OptionA_BoxAvg_RGB565(JPEGDRAW* pDraw) {
     if (!s_box_acc) return 0;
@@ -85,7 +101,7 @@ static int JPEGDraw_OptionA_BoxAvg_RGB565(JPEGDRAW* pDraw) {
         int src_y = pDraw->y + j;
         if (src_y >= original_h) continue;
 
-        int dst_y = (src_y * TARGET_H) / original_h;
+        int dst_y = (src_y < MAX_LUT_DIM) ? s_src_to_dst_y[src_y] : ((src_y * TARGET_H) / original_h);
         if (dst_y >= TARGET_H) continue;
 
         int row_offset = j * pDraw->iWidth;
@@ -95,7 +111,7 @@ static int JPEGDraw_OptionA_BoxAvg_RGB565(JPEGDRAW* pDraw) {
             int src_x = pDraw->x + i;
             if (src_x >= original_w) continue;
 
-            int dst_x = (src_x * TARGET_W) / original_w;
+            int dst_x = (src_x < MAX_LUT_DIM) ? s_src_to_dst_x[src_x] : ((src_x * TARGET_W) / original_w);
             if (dst_x >= TARGET_W) continue;
 
             uint16_t pixel = pPixels[row_offset + i];
@@ -122,6 +138,7 @@ bool process_jpeg_option_a_boxavg_rgb565(uint8_t* jpeg_buffer, size_t jpeg_size,
     if (jpeg.openRAM(jpeg_buffer, jpeg_size, JPEGDraw_OptionA_BoxAvg_RGB565)) {
         original_w = jpeg.getWidth();
         original_h = jpeg.getHeight();
+        build_src_to_dst_lut(original_w, original_h);
         jpeg.setPixelType(RGB565_LITTLE_ENDIAN);
         jpeg.decode(0, 0, 0);
         jpeg.close();
@@ -202,9 +219,12 @@ bool process_jpeg_option_b_fastlut_rgb8888(uint8_t* jpeg_buffer, size_t jpeg_siz
 }
 
 // ============================================================================
-// 3. [REGISTRO TÉCNICO] OPÇÃO C (Modo 7): RGB8888 Nativo (24-bit) + Box Averaging
+// 3. [ATIVA NA PIPELINE] OPÇÃO C (Modo 7): RGB8888 Nativo (24-bit) + Box Averaging
+//    - 1º Lugar Absoluto com o modelo v08:
+//      * 91,09% de acurácia (501/550) e 86,20% de confiança nas amostras limpas
+//      * 89,41% de acurácia (962/1.076) na validação inédita (+5,95% vs Modo 0)
 //    - Padrão ouro matemático de sinal (Bias DC = 0,00, RMSE = 0,00, PSNR = Infinito)
-//    - Combina cor 24-bit exata com anti-aliasing por área (smut atinge 20% = 5x mais acertos)
+//    - Otimizado com LUT src->dst na SRAM (elimina ~786.432 divisões inteiras por frame)
 // ============================================================================
 static int JPEGDraw_OptionC_BoxAvg_RGB8888(JPEGDRAW* pDraw) {
     if (!s_box_acc) return 0;
@@ -215,7 +235,7 @@ static int JPEGDraw_OptionC_BoxAvg_RGB8888(JPEGDRAW* pDraw) {
         int src_y = pDraw->y + j;
         if (src_y >= original_h) continue;
 
-        int dst_y = (src_y * TARGET_H) / original_h;
+        int dst_y = (src_y < MAX_LUT_DIM) ? s_src_to_dst_y[src_y] : ((src_y * TARGET_H) / original_h);
         if (dst_y >= TARGET_H) continue;
 
         int row_offset = j * pDraw->iWidth;
@@ -225,7 +245,7 @@ static int JPEGDraw_OptionC_BoxAvg_RGB8888(JPEGDRAW* pDraw) {
             int src_x = pDraw->x + i;
             if (src_x >= original_w) continue;
 
-            int dst_x = (src_x * TARGET_W) / original_w;
+            int dst_x = (src_x < MAX_LUT_DIM) ? s_src_to_dst_x[src_x] : ((src_x * TARGET_W) / original_w);
             if (dst_x >= TARGET_W) continue;
 
             uint32_t pixel32 = pPixels32[row_offset + i];
@@ -252,6 +272,7 @@ bool process_jpeg_option_c_boxavg_rgb8888(uint8_t* jpeg_buffer, size_t jpeg_size
     if (jpeg.openRAM(jpeg_buffer, jpeg_size, JPEGDraw_OptionC_BoxAvg_RGB8888)) {
         original_w = jpeg.getWidth();
         original_h = jpeg.getHeight();
+        build_src_to_dst_lut(original_w, original_h);
         jpeg.setPixelType(RGB8888);
         jpeg.decode(0, 0, 0);
         jpeg.close();
@@ -263,8 +284,8 @@ bool process_jpeg_option_c_boxavg_rgb8888(uint8_t* jpeg_buffer, size_t jpeg_size
 }
 
 // ============================================================================
-// Entrada Principal da Pipeline (Ativa: Opção A - RGB565 + Box Averaging)
+// Entrada Principal da Pipeline (Ativa: Opção C - RGB8888 Nativo + Box Averaging)
 // ============================================================================
 bool process_jpeg(uint8_t* jpeg_buffer, size_t jpeg_size, int8_t* target_tensor) {
-    return process_jpeg_option_a_boxavg_rgb565(jpeg_buffer, jpeg_size, target_tensor);
+    return process_jpeg_option_c_boxavg_rgb8888(jpeg_buffer, jpeg_size, target_tensor);
 }
