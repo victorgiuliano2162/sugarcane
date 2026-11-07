@@ -79,9 +79,19 @@ void decode_task(void* pvParameters) {
 }
 
 // ==============================================================
-// Task 2: Inferência TensorFlow Lite Micro (Core 1 Exclusivo)
+// Task 2: Inferência TensorFlow Lite Micro (Core 1 + Fork-Join Dual-Core)
 // ==============================================================
 void inference_task(void* pvParameters) {
+    // ------------------------------------------------------------------------
+    // [IMPLEMENTAÇÃO: ATIVAÇÃO DO WORKER DUAL-CORE DO ESP-NN (v08)]
+    // Chamado a partir do Core 1 (onde roda a inference_task) para que o
+    // esp-nn crie a task auxiliar 'esp_nn_worker' fixada no Core 0.
+    // Durante interpreter->Invoke(), Core 1 e Core 0 dividem em paralelo
+    // (Fork-Join) as camadas de Conv2D 1x1, DepthwiseConv2D 3x3, Add e Mul
+    // usando os Scratch Buffers dedicados na SRAM Interna.
+    // ------------------------------------------------------------------------
+    classifier_enable_dual_core();
+
     DecodedJob job;
     while (true) {
         if (xQueueReceive(decoded_queue, &job, portMAX_DELAY)) {
@@ -90,10 +100,10 @@ void inference_task(void* pvParameters) {
                 memcpy(classifier_get_input_ptr(), job.tensor_buf, TENSOR_SIZE);
 
                 // Libera o buffer de volta ao pool IMEDIATAMENTE!
-                // O Core 0 já pode decodificar a próxima foto enquanto o Core 1 executa Invoke()
+                // O Core 0 já pode decodificar a próxima foto ou auxiliar no Fork-Join do esp-nn
                 xQueueSend(free_tensor_queue, &job.tensor_buf, portMAX_DELAY);
 
-                // Inferência dedicada com instruções SIMD no Core 1
+                // Inferência acelerada com SIMD + SRAM Scratch + Fork-Join Dual-Core
                 classifier_run(job.decode_time_ms);
                 web_server_send_ws_text(job.ws_fd, classifier_get_json_results());
             } else {

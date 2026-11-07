@@ -3,9 +3,20 @@
 #include "tflite_classifier.h"
 #include "esp_heap_caps.h"
 #include "esp_timer.h"
+#include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/schema/schema_generated.h"
+
+// ============================================================================
+// [IMPLEMENTAÇÃO: HEADERS ESP-NN PARA SCRATCH EM SRAM E DUAL-CORE (v08)]
+// ============================================================================
+#include <esp_nn.h>
+#include <esp_nn_multicore.h>
+
+static const char* TAG = "TFLITE_CLASSIFIER";
 
 const int NUM_CLASSES = 11;
 const char* LABELS[11] = {
@@ -24,7 +35,77 @@ const int kTensorArenaSize = 800 * 1024;
 static uint8_t* tensor_arena = nullptr;
 static char result_json[1024];
 
+// ============================================================================
+// [IMPLEMENTAÇÃO: BUFFERS DEDICADOS EM SRAM INTERNA PARA O ESP-NN (v08)]
+// Em vez de deixar o esp-nn usar a tensor_arena na PSRAM externa (40 MHz) para
+// operações críticas de im2col, padding e transposição SIMD 1x1/3x3, alocamos:
+//   1) s_sram_scratch_buf (48 KB, alinhado em 16 bytes na SRAM Interna DMA):
+//      Cobre 100% dos workspaces de Conv2D (máx ~24,5 KB) e DepthwiseConv2D
+//      (máx ~43 KB) do MobileNetV3 v08 via preferred_scratch_buffer.
+//   2) Scratch do worker Dual-Core (25 KB na SRAM Interna):
+//      Pré-alocado no boot via esp_nn_dual_core_scratch() para evitar
+//      realocações dinâmicas ou fragmentação durante a inferência.
+// ============================================================================
+static const size_t kPreferredSramScratchSize = 48 * 1024; // 49.152 bytes
+static const size_t kFallbackSramScratchSize  = 40 * 1024; // 40.960 bytes
+static const int    kDualCoreWorkerScratchSize = 25 * 1024; // 25.600 bytes (máx real v08: 24.576 B)
+
+static uint8_t* s_sram_scratch_buf = nullptr;
+static size_t   s_sram_scratch_size = 0;
+
+void classifier_enable_dual_core() {
+#if defined(ARCH_ESP32_S3) && ESP_NN_DUAL_CORE_SUPPORTED
+    if (!esp_nn_dual_core_active()) {
+        esp_nn_dual_core_enable();
+        ESP_LOGI(TAG, "[DUAL-CORE ESP-NN] Fork-Join ativado a partir do Core %d (worker no Core %d, ativo=%d)",
+                 (int)xPortGetCoreID(), (xPortGetCoreID() == 0) ? 1 : 0, (int)esp_nn_dual_core_active());
+    }
+#endif
+}
+
 bool classifier_init() {
+    // ------------------------------------------------------------------------
+    // [IMPLEMENTAÇÃO 1: ALOCAÇÃO DO PREFERRED SCRATCH BUFFER NA SRAM INTERNA]
+    // Alocamos antes de inicializar sub-sistemas pesados para garantir bloco
+    // contíguo na SRAM interna rápida (zero wait-states, 16-byte aligned).
+    // ------------------------------------------------------------------------
+#if defined(ARCH_ESP32_S3)
+    const uint32_t sram_caps = MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT | MALLOC_CAP_DMA;
+    s_sram_scratch_buf = (uint8_t*)heap_caps_aligned_alloc(16, kPreferredSramScratchSize, sram_caps);
+    if (s_sram_scratch_buf) {
+        s_sram_scratch_size = kPreferredSramScratchSize;
+    } else {
+        s_sram_scratch_buf = (uint8_t*)heap_caps_aligned_alloc(16, kFallbackSramScratchSize, sram_caps);
+        if (s_sram_scratch_buf) {
+            s_sram_scratch_size = kFallbackSramScratchSize;
+        }
+    }
+
+    if (s_sram_scratch_buf) {
+        esp_nn_set_conv_preferred_scratch_buf_esp32s3(s_sram_scratch_buf, s_sram_scratch_size);
+        esp_nn_set_depthwise_conv_preferred_scratch_buf_esp32s3(s_sram_scratch_buf, s_sram_scratch_size);
+        ESP_LOGI(TAG, "[SRAM SCRATCH] Buffer preferencial esp-nn alocado na SRAM Interna: %u bytes @ %p",
+                 (unsigned)s_sram_scratch_size, (void*)s_sram_scratch_buf);
+    } else {
+        ESP_LOGW(TAG, "[SRAM SCRATCH] Sem bloco contiguo na SRAM; usando fallback na tensor_arena (PSRAM)");
+    }
+
+    // ------------------------------------------------------------------------
+    // [IMPLEMENTAÇÃO 2: PRÉ-ALOCAÇÃO DO SCRATCH DO WORKER DUAL-CORE NA SRAM]
+    // Garante que a fatia do segundo núcleo (esp_nn_worker) também resida em
+    // SRAM interna desde a primeira inferência, sem realocações em runtime.
+    // ------------------------------------------------------------------------
+#if ESP_NN_DUAL_CORE_SUPPORTED
+    void* worker_sram = esp_nn_dual_core_scratch(kDualCoreWorkerScratchSize);
+    if (worker_sram) {
+        ESP_LOGI(TAG, "[SRAM DUAL-CORE] Scratch do worker pre-alocado na SRAM Interna: %d bytes @ %p",
+                 kDualCoreWorkerScratchSize, worker_sram);
+    }
+#endif
+    ESP_LOGI(TAG, "[MEMORIA] SRAM Interna livre apos buffers esp-nn: %u bytes",
+             (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+#endif
+
     FILE* f = fopen("/storage/model_mbnet_int8.tflite", "rb");
     if (!f) return false;
     
@@ -65,6 +146,11 @@ int8_t* classifier_get_input_ptr() {
 }
 
 bool classifier_run(uint32_t decode_time_ms) {
+    // [IMPLEMENTAÇÃO: GARANTIA DE ATIVAÇÃO DUAL-CORE NO NÚCLEO DE INFERÊNCIA]
+    if (!esp_nn_dual_core_active()) {
+        classifier_enable_dual_core();
+    }
+
     unsigned long start_time = esp_timer_get_time() / 1000;
     
     if (interpreter->Invoke() != kTfLiteOk) {
