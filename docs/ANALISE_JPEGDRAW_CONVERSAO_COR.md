@@ -265,10 +265,46 @@ Combina a decodificação `RGB8888` nativa de 24 bits com a interpolação por �
 
 ---
 
-## 6. Referências Cruzadas no Projeto
+## 6. Validação Empírica Pós-Retreinamento (`v08` — Deduplicação MD5 + `interpolation="area"`)
 
-- **Planilha Completa do Experimento (4.400 inferências = 550 amostras $\times$ 8 métodos):** [`model_inference_tests/resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv)
-- **Relatório Estatístico e Matrizes de Confusão dos Métodos:** [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md)
+Após retreinamento do modelo [`data/model_mbnet_int8.tflite`](file:///home/victor/projects/sugarcane/data/model_mbnet_int8.tflite) (`MD5: 95abc002c2e9c49175c9f5cc69a1a909`) com deduplicação criptográfica MD5 e `interpolation="area"`, repetimos a bateria completa dos 8 métodos sobre as 550 amostras limpas (sem colisão de rótulos entre pastas), confirmando experimentalmente a previsão da **Opção 3 (`Modo 7`)**:
+
+| Classe (50 amostras limpas) | 0. `RGB565 ZeroFill + Overwrite` | 2/4. `RGB8888 Nativo` (`Overwrite`/`FastLUT`) | 5. `RGB565 ZeroFill + BoxAvg` (Opção A) | 6. `RGB565 BitRep + BoxAvg` | 7. `RGB8888 Nativo + BoxAvg` (Opção C) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Banded Chlorosis** | 44 (88.0%) | 46 (92.0%) | **47 (94.0%)** | **47 (94.0%)** | **47 (94.0%)** |
+| **Brown Spot** | **50 (100%)** | **50 (100%)** | **50 (100%)** | **50 (100%)** | **50 (100%)** |
+| **BrownRust** | 46 (92.0%) | 46 (92.0%) | **48 (96.0%)** | **48 (96.0%)** | **48 (96.0%)** |
+| **Dried Leaves** | 37 (74.0%) | **37 (74.0%)** | 30 (60.0%) | 30 (60.0%) | 30 (60.0%) |
+| **Grassy shoot** | **50 (100%)** | **50 (100%)** | **50 (100%)** | **50 (100%)** | **50 (100%)** |
+| **Healthy Leaves** | 41 (82.0%) | **42 (84.0%)** | **42 (84.0%)** | **42 (84.0%)** | **42 (84.0%)** |
+| **Pokkah Boeng** | 40 (80.0%) | 42 (84.0%) | **50 (100%)** | **50 (100%)** | **50 (100%)** |
+| **Sett Rot** | **50 (100%)** | 49 (98.0%) | **50 (100%)** | **50 (100%)** | **50 (100%)** |
+| **Viral Disease** | 46 (92.0%) | 44 (88.0%) | 46 (92.0%) | 46 (92.0%) | **47 (94.0%)** |
+| **Yellow Leaf** | 43 (86.0%) | **46 (92.0%)** | 43 (86.0%) | 42 (84.0%) | 45 (90.0%) |
+| **smut** | **44 (88.0%)** | **44 (88.0%)** | 42 (84.0%) | 42 (84.0%) | 42 (84.0%) |
+| **TOTAL ACERTOS (`v08`)** | **491 / 550** | **496 / 550** | **498 / 550** | **497 / 550** | **501 / 550** |
+| **ACURÁCIA GLOBAL (`v08`)** | **89.27%** | **90.18%** | **90.55% (2º)** | **90.36%** | **91.09% (1º)** |
+| **CONFIANÇA MÉDIA (`v08`)** | 81.98% | 81.42% | 86.00% | 85.86% | **86.20% (1º)** |
+
+1. **Inversão Comprovada a Favor do `Modo 7 (RGB8888 + BoxAvg)`:** Com o retreinamento em `interpolation="area"`, o `Modo 7` passa a liderar tanto em **Acurácia Global (`91,09%` — `501/550`)** quanto em **Confiança Média (`86,20%`, +4,78 pontos percentuais acima do `FastLUT`)**.
+2. **Eliminação de 100% da Confusão `smut` $\leftrightarrow$ `Pokkah Boeng`:** `Pokkah Boeng` atinge **`50/50 (100%)`** nos modos `BoxAvg` e `smut` salta de `4%–20%` para **`84,0%–88,0%`** (`42–44/50`), com **zero falsos positivos cruzados** entre as duas classes.
+3. **Salto de +5,95% (+64 Acertos) no Conjunto de Validação Inédito (`val/` = 1.076 imagens, `SEED = 42`):** Ao avaliar exclusivamente sobre as **1.076 imagens retidas fora do treinamento** na divisão estratificada 80/20 do notebook `v08`, a diferença entre a amostragem pontual e o `BoxAvg` é ainda mais expressiva:
+   - **`Modo 0 (RGB565 Overwrite)`:** `898 / 1.076` (**`83,46%`**) | Confiança: `80,07%`
+   - **`Modo 4 (RGB8888 FastLUT)`:** `897 / 1.076` (**`83,36%`**) | Confiança: `79,99%`
+   - **`Modo 5 (RGB565 + BoxAvg — Opção A)`:** **`953 / 1.076` (`88,57%`)** — **+55 acertos (+5,11%)** | Confiança: **`83,01%`**
+   - **`Modo 7 (RGB8888 + BoxAvg — Opção C)`:** **`962 / 1.076` (`89,41%`)** — **+64 acertos (+5,95%)** | Confiança: **`83,34%`** (com destaque para `Yellow Leaf`: `61,6%` $\to$ `83,1%` [+21,5%], `BrownRust`: `78,0%` $\to$ `92,7%` [+14,7%], `Pokkah Boeng`: `78,4%` $\to$ `91,9%` [+13,5%] e `Sett Rot`: `93,1%` $\to$ `100,0%`).
+
+---
+
+## 7. Referências Cruzadas no Projeto
+
+- **Relatório Completo da Bateria `v08` (8.800 inferências):** [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md)
+- **Planilhas do Experimento `v08`:**
+  - [`model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv) (550 amostras limpas $\times$ 8 métodos)
+  - [`model_inference_tests/resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv) (550 primeiras amostras brutas $\times$ 8 métodos)
+- **Planilha e Relatório do Modelo Anterior (`v07`):**
+  - [`model_inference_tests/resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv)
+  - [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md)
 - **Relatórios das Baterias de Hardware Anteriores:**
   - [`model_inference_tests/RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO.md) (Single-Core Sequencial)
   - [`model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md) (Dual-Core Assíncrono Pipelined)
