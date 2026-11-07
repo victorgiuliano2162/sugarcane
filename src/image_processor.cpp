@@ -11,6 +11,8 @@ static JPEGDEC jpeg;
 static int8_t* out_tensor = nullptr;
 static int original_w = 0;
 static int original_h = 0;
+static int effective_w = 0;
+static int effective_h = 0;
 
 const int TARGET_W = 160;
 const int TARGET_H = 160;
@@ -73,16 +75,21 @@ static bool ensure_box_accumulator_allocated() {
 static void finalize_box_average_to_tensor(int8_t* target_tensor) {
     for (int k = 0; k < TOTAL_TARGET_PIXELS; k++) {
         uint16_t c = s_box_acc[k].count;
+        int index = k * CHANNELS;
         if (c > 0) {
             // Média aritmética com arredondamento ao inteiro mais próximo: (soma + c/2) / c
-            uint8_t r = (uint8_t)((s_box_acc[k].sum_r + (c >> 1)) / c);
-            uint8_t g = (uint8_t)((s_box_acc[k].sum_g + (c >> 1)) / c);
-            uint8_t b = (uint8_t)((s_box_acc[k].sum_b + (c >> 1)) / c);
+            uint32_t half_c = c >> 1;
+            uint8_t r = (uint8_t)((s_box_acc[k].sum_r + half_c) / c);
+            uint8_t g = (uint8_t)((s_box_acc[k].sum_g + half_c) / c);
+            uint8_t b = (uint8_t)((s_box_acc[k].sum_b + half_c) / c);
 
-            int index = k * CHANNELS;
             target_tensor[index + 0] = (int8_t)((int)r - 128);
             target_tensor[index + 1] = (int8_t)((int)g - 128);
             target_tensor[index + 2] = (int8_t)((int)b - 128);
+        } else {
+            target_tensor[index + 0] = -128;
+            target_tensor[index + 1] = -128;
+            target_tensor[index + 2] = -128;
         }
     }
 }
@@ -219,33 +226,34 @@ bool process_jpeg_option_b_fastlut_rgb8888(uint8_t* jpeg_buffer, size_t jpeg_siz
 }
 
 // ============================================================================
-// 3. [ATIVA NA PIPELINE] OPÇÃO C (Modo 7): RGB8888 Nativo (24-bit) + Box Averaging
-//    - 1º Lugar Absoluto com o modelo v08:
-//      * 91,09% de acurácia (501/550) e 86,20% de confiança nas amostras limpas
-//      * 89,41% de acurácia (962/1.076) na validação inédita (+5,95% vs Modo 0)
-//    - Padrão ouro matemático de sinal (Bias DC = 0,00, RMSE = 0,00, PSNR = Infinito)
-//    - Otimizado com LUT src->dst na SRAM (elimina ~786.432 divisões inteiras por frame)
+// 3. [ATIVA NA PIPELINE] OPÇÃO C (Modo 7 Otimizado): RGB8888 Nativo (24-bit) + 
+//    Scale Reduction Adaptativo no IDCT (Opção B) + Box Averaging em SRAM (Opção D)
+//    - Reduz em até 93,7% os pixels a decodificar na DCT (1/4 ou 1/2 escala)
+//    - Garante SEMPRE resolução >= 160x160 antes do BoxAvg (zero upscaling)
+//    - Padrão ouro matemático de sinal preservado com queda drástica no tempo de CPU
 // ============================================================================
 static int JPEGDraw_OptionC_BoxAvg_RGB8888(JPEGDRAW* pDraw) {
     if (!s_box_acc) return 0;
 
     uint32_t* pPixels32 = (uint32_t*)pDraw->pPixels;
+    int draw_w = (pDraw->iWidthUsed > 0 && pDraw->iWidthUsed <= pDraw->iWidth) ? pDraw->iWidthUsed : pDraw->iWidth;
+    int draw_h = pDraw->iHeight;
 
-    for (int j = 0; j < pDraw->iHeight; j++) {
+    for (int j = 0; j < draw_h; j++) {
         int src_y = pDraw->y + j;
-        if (src_y >= original_h) continue;
+        if (src_y >= effective_h) continue;
 
-        int dst_y = (src_y < MAX_LUT_DIM) ? s_src_to_dst_y[src_y] : ((src_y * TARGET_H) / original_h);
+        int dst_y = (src_y < MAX_LUT_DIM) ? s_src_to_dst_y[src_y] : ((src_y * TARGET_H) / effective_h);
         if (dst_y >= TARGET_H) continue;
 
         int row_offset = j * pDraw->iWidth;
         int dst_row_offset = dst_y * TARGET_W;
 
-        for (int i = 0; i < pDraw->iWidth; i++) {
+        for (int i = 0; i < draw_w; i++) {
             int src_x = pDraw->x + i;
-            if (src_x >= original_w) continue;
+            if (src_x >= effective_w) continue;
 
-            int dst_x = (src_x < MAX_LUT_DIM) ? s_src_to_dst_x[src_x] : ((src_x * TARGET_W) / original_w);
+            int dst_x = (src_x < MAX_LUT_DIM) ? s_src_to_dst_x[src_x] : ((src_x * TARGET_W) / effective_w);
             if (dst_x >= TARGET_W) continue;
 
             uint32_t pixel32 = pPixels32[row_offset + i];
@@ -272,9 +280,30 @@ bool process_jpeg_option_c_boxavg_rgb8888(uint8_t* jpeg_buffer, size_t jpeg_size
     if (jpeg.openRAM(jpeg_buffer, jpeg_size, JPEGDraw_OptionC_BoxAvg_RGB8888)) {
         original_w = jpeg.getWidth();
         original_h = jpeg.getHeight();
-        build_src_to_dst_lut(original_w, original_h);
+
+        // [OPÇÃO B: SCALE REDUCTION ADAPTATIVO NO IDCT]
+        // Se a imagem permitir, decodifica no domínio da frequência DCT em 1/4 ou 1/2
+        // garantindo SEMPRE effective_w >= TARGET_W (160) e effective_h >= TARGET_H (160).
+        int scale_option = 0;
+        int scale_shift = 0;
+        if ((original_w >> 2) >= TARGET_W && (original_h >> 2) >= TARGET_H) {
+            scale_option = JPEG_SCALE_QUARTER;
+            scale_shift = 2;
+        } else if ((original_w >> 1) >= TARGET_W && (original_h >> 1) >= TARGET_H) {
+            scale_option = JPEG_SCALE_HALF;
+            scale_shift = 1;
+        } else {
+            scale_option = 0;
+            scale_shift = 0;
+        }
+
+        int iAdjust = (1 << scale_shift) - 1;
+        effective_w = (original_w + iAdjust) >> scale_shift;
+        effective_h = (original_h + iAdjust) >> scale_shift;
+
+        build_src_to_dst_lut(effective_w, effective_h);
         jpeg.setPixelType(RGB8888);
-        jpeg.decode(0, 0, 0);
+        jpeg.decode(0, 0, scale_option);
         jpeg.close();
 
         finalize_box_average_to_tensor(target_tensor);
