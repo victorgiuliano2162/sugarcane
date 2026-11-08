@@ -359,28 +359,40 @@ $$\text{score}_i = \text{clip}\Big( (\text{output\_int8}_i - (-128)) \times 0,00
 
 ---
 
-## 7. Subsistema de Rede e Protocolo WebSocket Binário Assíncrono
+## 7. Subsistema de Rede, Servidor Web SPA e Protocolo WebSocket Assíncrono
 
-A comunicação entre o ESP32-S3 e clientes externos (scripts de lote em Python, interface web HTML5 ou Postman) é gerenciada pelos módulos [`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp) e [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp).
+A comunicação entre o ESP32-S3 e clientes externos (scripts de lote em Python, Dashboard Web SPA em Vue.js 3, QGIS ou Postman) é gerenciada pelos módulos [`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp) e [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp).
 
-### 7.1. Conectividade Wi-Fi Resiliente Orientada a Eventos ([`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp))
-* **Sincronização no Boot:** A função [`wifi_init_sta()`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp#L35-L57) utiliza um `EventGroupHandle_t` (`xEventGroupWaitBits(..., WIFI_CONNECTED_BIT, ..., portMAX_DELAY)`) para garantir que o servidor WebSocket e as filas de inferência só iniciem após a pilha TCP/IP (`esp_netif`) ter recebido um endereço IPv4 válido (`IP_EVENT_STA_GOT_IP`).
-* **Auto-Reconexão:** Caso o sinal Wi-Fi oscile em ambiente agrícola/laboratorial (`WIFI_EVENT_STA_DISCONNECTED`), o [`event_handler()`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp#L21-L23) invoca `esp_wifi_connect()` automaticamente em segundo plano sem reiniciar o dispositivo ou perder o estado da rede neural.
+### 7.1. Conectividade Híbrida Resiliente: Station (STA), SoftAP e Resolução mDNS ([`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp))
+* **Boot Dual-Mode com Fallback:** A função [`wifi_init_auto()`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp#L114) tenta associar-se à rede Station por até 5 segundos via `xEventGroupWaitBits`. Em caso de sucesso (`IP_EVENT_STA_GOT_IP`), opera no IP da rede local. Em caso de timeout (operação remota em canavial sem roteador), ativa instantaneamente o Ponto de Acesso autônomo **`Sugarcane-AI-AP`** com IP fixo `192.168.4.1`.
+* **Resolução mDNS Local:** O serviço mDNS é registrado sob o domínio **`http://sugarcane.local`**, eliminando a necessidade de memorizar endereços IP dinâmicos em laboratório ou campo.
+* **Auto-Reconexão Contínua:** No modo STA, quedas de sinal (`WIFI_EVENT_STA_DISCONNECTED`) acionam reconexão automática em segundo plano sem travar a fila de inferência neural.
 
-### 7.2. Por que WebSocket Binário (`/ws`) em vez de HTTP POST (`multipart/form-data` ou Base64)?
+### 7.2. Servidor Web Integrado e SPA Vue.js 3 Comprimida em Gzip ([`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp))
+* **Streaming Direto da Partição LittleFS:** O servidor HTTP (`esp_http_server`) entrega os arquivos estáticos compilados do dashboard Vue 3 diretamente de `/storage/www/` com cabeçalho `Content-Encoding: gzip`, reduzindo o consumo de banda em mais de **70%** (HTML: ~570 bytes; JS: ~80 KB; CSS: ~9 KB).
+* **Endpoints REST Especializados:**
+  * `GET /api/status`: Retorna JSON com estado da placa, memória PSRAM/SRAM livre, modo Wi-Fi e RSSI.
+  * `GET /api/export-csv`: Realiza streaming sob demanda em blocos de 2 KB do arquivo de auditoria `/storage/inspections.csv`, permitindo importação imediata em softwares SIG (QGIS) e planilhas.
+* **Isolamento de Prioridade:** A tarefa do servidor HTTP opera com **prioridade 2 no Core 0** e reciclagem automática de conexões inativas (`lru_purge_enable = true`), blindando o pipeline de inferência neural (prioridade 5 no Core 1).
 
-Em [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp), o servidor registra um único endpoint WebSocket na rota `/ws` (`is_websocket = true`). Essa escolha técnica justifica-se por quatro fatores cruciais de desempenho:
+### 7.3. Por que WebSocket Binário (`/ws`) em vez de HTTP POST (`multipart/form-data` ou Base64)?
+
+Em [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp), o servidor registra o endpoint WebSocket na rota `/ws` (`is_websocket = true`). Essa escolha técnica justifica-se por quatro fatores cruciais de desempenho:
 
 1. **Conexão Persistente Full-Duplex (Zero Overhead de Handshake TCP):**
    Em uma requisição HTTP POST tradicional, cada imagem enviada exigiria um *3-way handshake* TCP (`SYN`, `SYN-ACK`, `ACK`), parsing de cabeçalhos HTTP verbosos e fechamento de socket (`FIN`), adicionando 50 ms a 150 ms de latência ociosa por foto. No WebSocket, a conexão TCP permanece aberta: um lote de 550 fotos reutiliza o **mesmo descritor de socket (`ws_fd`)**.
 2. **Suporte Nativo a *Streaming Pipelined* (Janela Deslizante):**
    Como o WebSocket é *full-duplex*, o cliente pode enviar a **Foto $N+1$** pelo canal de subida no exato instante em que o ESP32-S3 está processando a **Foto $N$**, alimentando a `inference_queue` sem esperar o retorno da resposta anterior.
 3. **Transferência Binária Pura (Zero Overhead de Base64):**
-   Codificar o JPEG em Base64 dentro de um JSON aumentaria o tráfego de rede Wi-Fi em **+33%** e consumiria RAM e ciclos de CPU adicionais para decodificar a string ASCII. O [`ws_handler()`](file:///home/victor/projects/sugarcane/src/web_server.cpp#L12-L36) recebe frames do tipo `HTTPD_WS_TYPE_BINARY` em duas chamadas enxutas:
+   Codificar o JPEG em Base64 dentro de um JSON aumentaria o tráfego de rede Wi-Fi em **+33%** e consumiria RAM e ciclos de CPU adicionais para decodificar a string ASCII. O [`ws_handler()`](file:///home/victor/projects/sugarcane/src/web_server.cpp#L182-L229) recebe frames do tipo `HTTPD_WS_TYPE_BINARY` em duas chamadas enxutas:
    * `httpd_ws_recv_frame(req, &ws_pkt, 0)`: obtém apenas o cabeçalho do frame WebSocket para descobrir `ws_pkt.len`.
    * `heap_caps_malloc(ws_pkt.len, MALLOC_CAP_SPIRAM)` + `httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len)`: transfere os bytes brutos do socket diretamente para o buffer na Octal PSRAM.
-4. **Envio Assíncrono Não-Bloqueante (`httpd_ws_send_frame_async`):**
-   Quando a `inference_task` (no Core 1) conclui a classificação, ela invoca [`web_server_send_ws_text(job.ws_fd, classifier_get_json_results())`](file:///home/victor/projects/sugarcane/src/web_server.cpp#L52-L60), que enfileira o pacote de resposta de forma assíncrona no servidor HTTPD, liberando o Core 1 imediatamente para a próxima inferência.
+4. **Envio Assíncrono Não-Bloqueante e Broadcast Simultâneo:**
+   A API oferece tanto [`web_server_send_ws_text()`](file:///home/victor/projects/sugarcane/src/web_server.cpp#L296) (resposta unívoca ao cliente originador) quanto [`web_server_broadcast_ws_text()`](file:///home/victor/projects/sugarcane/src/web_server.cpp#L306) (difusão de telemetria a 1 Hz e alertas de diagnóstico para múltiplos navegadores simultâneos).
+
+### 7.4. Telemetria Contínua e Registro Histórico de Missão em CSV ([`src/main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp))
+* **Tarefa de Telemetria Periódica:** Executada a cada 1 segundo no Core 0 (`telemetry_task`), empacota uptime, temperatura do chip obtida via sensor térmico de silício (`temperature_sensor`), memória livre e telemetria GPS estimada.
+* **Auditoria Fitopatológica:** A função `log_inspection()` persiste continuamente no LittleFS (`/storage/inspections.csv`) o registro com índice sequencial, timestamp epoch, coordenadas de latitude/longitude, altitude, classe detectada, nível de certeza, temperatura interna e tempos de decodificação e inferência.
 
 ---
 
