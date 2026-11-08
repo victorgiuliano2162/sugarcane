@@ -264,3 +264,26 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 - **Compilação da Monografia:**
   - Arquivo [`tcc/main_standalone.pdf`](file:///home/victor/projects/sugarcane/tcc/main_standalone.pdf) compilado com sucesso com 35 páginas estruturadas em LaTeX.
 
+---
+
+## 🌐 11. Dashboard Web Vue.js 3 Embarcado, Telemetria Assíncrona e Persistência Flash (Fase 2)
+
+*Referência documental principal:* [`docs/RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md`](file:///home/victor/projects/sugarcane/docs/RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md) e [`docs/ESPECIFICACAO_DASHBOARD_WEB_VUE_E_TELEMETRIA_ESP32S3.md`](file:///home/victor/projects/sugarcane/docs/ESPECIFICACAO_DASHBOARD_WEB_VUE_E_TELEMETRIA_ESP32S3.md)  
+*Módulos e diretórios:* [`frontend/`](file:///home/victor/projects/sugarcane/frontend/), [`scripts/build_and_compress_frontend.py`](file:///home/victor/projects/sugarcane/scripts/build_and_compress_frontend.py), [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp), [`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp) e [`src/main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp)
+
+- **Single Page Application (SPA) Reativa em Vue.js 3 e Leaflet:**
+  - Interface moderna e responsiva hospedada diretamente na memória Flash do ESP32-S3, dispensando servidores externos, conexão com a internet ou aplicativos dedicados no celular/notebook.
+  - Cartografia interativa com camadas Leaflet e Leaflet.heat, indexando cada diagnóstico neural a coordenadas espaciais `(lat, lon, alt)`.
+  - Histórico tabular com paginação, alerta visual para diagnósticos fitopatológicos positivos e botão de download direto para `/api/export-csv`.
+- **Pipeline de Otimização e Compressão Gzip (Nível 9):**
+  - Script Python [`scripts/build_and_compress_frontend.py`](file:///home/victor/projects/sugarcane/scripts/build_and_compress_frontend.py) para automatizar o bundle do Vite e a compactação Gzip.
+  - Redução de tamanho de 271,4 KB para **89,1 KB** (-67,2% em Flash LittleFS e largura de banda de rede).
+- **Redundância de Rede Híbrida e Resolução de Nomes Local (mDNS):**
+  - Fallback automático entre modo Station (STA) e Ponto de Acesso autônomo (**SoftAP `Sugarcane-AI-AP`** com IP fixo `192.168.4.1`).
+  - Anúncio de serviço mDNS sob o domínio unificado **`http://sugarcane.local`**.
+- **Telemetria de Silício em Tempo Real (1 Hz) e Thread-Safety:**
+  - Monitoramento do sensor térmico interno do chip (`driver/temperature_sensor.h`), memória livre em Octal PSRAM/SRAM e RSSI.
+  - Concorrência blindada por **Mutex FreeRTOS (`s_ws_mutex`)**, eliminando race conditions entre a tarefa de telemetria (1 Hz, Core 0) e as respostas da inferência neural (Core 1).
+- **Validação Empírica em Silício Físico:**
+  - 5,81 MB de Octal PSRAM livre, temperatura estável em ~56,8 °C e latência mantida em 283 ms para inferência e 86 ms para decodificação JPEG.
+
