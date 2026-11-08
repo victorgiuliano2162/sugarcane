@@ -136,9 +136,12 @@ async def run_benchmark(ws_url, samples_per_class, csv_path, report_path, use_cl
             try:
                 t_sent = time.time()
                 await ws.send(img_bytes)
-                raw_resp = await asyncio.wait_for(ws.recv(), timeout=20)
+                while True:
+                    raw_resp = await asyncio.wait_for(ws.recv(), timeout=20)
+                    resp = json.loads(raw_resp)
+                    if resp.get("status") == "sucesso" or "resultados" in resp or resp.get("status") == "erro":
+                        break
                 t_recv = time.time()
-                resp = json.loads(raw_resp)
                 break
             except Exception as e:
                 print(f" [Aviso] Falha de comunicação na amostra {processed_count} (tentativa {attempt}/5): {e}")
