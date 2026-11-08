@@ -225,3 +225,42 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 | **Divisões Inteiras na Decodificação** | 786.432 divisões/foto | 786.432 divisões/foto | **1.792 divisões/foto (via LUT)** | **Eliminação de 99,77% das divisões** |
 | **Execução de Convolução em SRAM Interna** | 0% (Alocado na PSRAM) | 0% (Alocado na PSRAM) | **100% das 52 camadas (48 KB SRAM)** | **Zero contenção de barramento externo** |
 | **Tamanho do Binário do Modelo Neural** | ~2,5 MB (Float32 estimado) | 624 KB (INT8 v07) | **624 KB (INT8 v08)** | **Redução de 4× em Flash e RAM** |
+
+---
+
+## 🛰️ 9. Bancada de Co-Simulação Hardware-in-the-Loop (HIL) MAVLink e Mapas de Calor (Fase 3)
+
+*Scripts e ferramentas:* [`scripts/hil_mavlink_simulator.py`](file:///home/victor/projects/sugarcane/scripts/hil_mavlink_simulator.py), [`scripts/generate_infestation_heatmaps.py`](file:///home/victor/projects/sugarcane/scripts/generate_infestation_heatmaps.py), [`docs/CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md`](file:///home/victor/projects/sugarcane/docs/CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md) e diretório [`docs/heatmaps/`](file:///home/victor/projects/sugarcane/docs/heatmaps/)
+
+- **Simulador HIL MAVLink v2 ([`scripts/hil_mavlink_simulator.py`](file:///home/victor/projects/sugarcane/scripts/hil_mavlink_simulator.py)):**
+  - Implementa a dinâmica de voo tridimensional de um quadricóptero simulado (ArduPilot SITL / GCS) executando plano de voo agrícola em grade regular sobre o Talhão 04 (Ribeirão Preto/SP, Lat `-21.177500`, Lon `-47.810300`, $15\text{ m}$ AGL, $5,0\text{ m/s}$).
+  - Emite telemetria padrão MAVLink (`HEARTBEAT` a 1 Hz, `GLOBAL_POSITION_INT` a 10 Hz, `ATTITUDE` a 10 Hz) pela porta UDP `14550`, permitindo acompanhamento simultâneo em estações de controle de solo (QGroundControl / Mission Planner).
+  - Executa a máquina de estados **Pause-and-Classify**: desaceleração (<0,1 m/s), amortecimento aerodinâmico contra *motion blur* (500 ms), injeção da foto da folha via WebSocket na placa física ESP32-S3, obtenção dos tempos on-chip e retomada de voo.
+  - Resultados da missão com 55 waypoints:
+    - **Deslocamento linear:** $1.000,0\text{ metros}$ em $78,2\text{ segundos}$ ($1,30\text{ min}$).
+    - **Confiabilidade de enlace:** $100,0\%$ ($55/55$ quadros entregues com sucesso, zero quedas).
+    - **Decodificação JPEG no ESP32:** $94,2\text{ ms}$.
+    - **Inferência SIMD INT8 no ESP32:** $283,3\text{ ms}$.
+    - **Tempo médio total de retenção (*Cycle Time*):** **$1.130,1\text{ ms}$** (38,9% abaixo do teto de projeto de $1.850\text{ ms}$).
+    - **Autonomia projetada:** Até **$1.320$ pontos inspecionados** por bateria LiPo padrão (25 min).
+
+- **Gerador Cartográfico de Mapas de Calor e Camadas SIG ([`scripts/generate_infestation_heatmaps.py`](file:///home/victor/projects/sugarcane/scripts/generate_infestation_heatmaps.py)):**
+  - **Camada Vetorial GeoJSON ([`docs/heatmaps/infestacao_talhao.geojson`](file:///home/victor/projects/sugarcane/docs/heatmaps/infestacao_talhao.geojson)):** Padrão RFC 7946 / EPSG:4326 com 55 pontos tridimensionais e atributos para importação direta no QGIS, ArcGIS e Google Earth.
+  - **Dashboard Web GIS Interativo ([`docs/heatmaps/mapa_calor_interativo.html`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_calor_interativo.html)):** Desenvolvido em Leaflet / Folium com satélite Esri de alta resolução, polígono do talhão, trajetória de voo, marcadores categorizados por patologia, régua de medição e três camadas de mapa de calor dinâmico (*Leaflet.heat*).
+  - **Painéis Cartográficos Estáticos em Alta Resolução (Matplotlib PNG):**
+    - [`docs/heatmaps/mapa_infestacao_talhao_2d.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_infestacao_talhao_2d.png): Painel com disposição espacial, interpolação contínua (KDE 2D), perfil de latência por ponto e histograma de classes.
+    - [`docs/heatmaps/mapa_foco_carvao_smut.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_foco_carvao_smut.png): Mapa isolando o foco epidêmico de Carvão (*Sporisorium scitamineum*).
+    - [`docs/heatmaps/mapa_foco_ferrugem_brownrust.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_foco_ferrugem_brownrust.png): Mapa isolando o foco epidêmico de Ferrugem Marrom (*Puccinia melanocephala*).
+
+---
+
+## 🎓 10. Atualização e Compilação da Monografia do TCC
+
+- **Capítulo 4 (Resultados e Discussões):**
+  - Seção 4.6 atualizada com a validação empírica da co-simulação HIL e inserção da Tabela de decomposição temporal dos 55 waypoints.
+  - Documentação da bateria completa de 9.269 imagens (6.748 primárias + 2.521 do arquivo) com detalhamento da acurácia por classe e diagnóstico do Deslocamento de Domínio (*Domain Shift*).
+- **Capítulo 5 (Conclusão e Trabalhos Futuros):**
+  - Registro formal da frente de Transfer Learning, Adaptação Adversarial de Domínio (DANN) e expansão da arquitetura neural para inclusão da 12ª classe (*RedRot*).
+- **Compilação da Monografia:**
+  - Arquivo [`tcc/main_standalone.pdf`](file:///home/victor/projects/sugarcane/tcc/main_standalone.pdf) compilado com sucesso com 35 páginas estruturadas em LaTeX.
+
