@@ -5,6 +5,9 @@ bool classifier_init();
 bool classifier_run(uint32_t decode_time_ms);
 int8_t* classifier_get_input_ptr();
 const char* classifier_get_json_results();
+const char* classifier_get_top_label();
+float classifier_get_top_score();
+uint32_t classifier_get_last_inference_ms();
 
 // ============================================================================
 // [IMPLEMENTAÇÃO: OTIMIZAÇÃO SRAM INTERNA + FORK-JOIN DUAL-CORE ESP-NN (v08)]
@@ -13,3 +16,4 @@ const char* classifier_get_json_results();
 // (Core 1), para que o esp-nn fixe o worker auxiliar no núcleo oposto (Core 0).
 // ============================================================================
 void classifier_enable_dual_core();
+

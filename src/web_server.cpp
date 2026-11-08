@@ -1,457 +1,226 @@
 #include "web_server.h"
-#include <cstring>
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <sys/stat.h>
 #include "esp_http_server.h"
 #include "esp_heap_caps.h"
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "wifi_setup.h"
 
+static const char* TAG = "WEB_SERVER";
 extern QueueHandle_t inference_queue;
 static httpd_handle_t server = NULL;
 
-static const char INDEX_HTML[] = R"rawliteral(<!DOCTYPE html>
+// Fallback HTML caso LittleFS não contenha os assets
+static const char FALLBACK_INDEX_HTML[] = R"rawliteral(<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sugarcane AI — Diagnóstico Foliar no ESP32-S3</title>
+  <title>Sugarcane AI — ESP32-S3</title>
   <style>
-    :root {
-      --primary: #10b981;
-      --primary-dark: #059669;
-      --bg: #0f172a;
-      --surface: #1e293b;
-      --surface-border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
-    }
-    .container {
-      width: 100%;
-      max-width: 680px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    header {
-      text-align: center;
-      padding: 12px 0;
-    }
-    header h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #34d399;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    header p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 6px;
-    }
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-top: 8px;
-      background: #1e293b;
-      border: 1px solid var(--surface-border);
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ef4444;
-    }
-    .dot.connected { background: #10b981; }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .upload-area {
-      border: 2px dashed #475569;
-      border-radius: 10px;
-      padding: 28px 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: rgba(15, 23, 42, 0.4);
-    }
-    .upload-area:hover, .upload-area.dragover {
-      border-color: var(--primary);
-      background: rgba(16, 185, 129, 0.05);
-    }
-    .upload-icon {
-      font-size: 2.2rem;
-      margin-bottom: 8px;
-    }
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .btn {
-      flex: 1;
-      padding: 12px 18px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.2s;
-    }
-    .btn-primary {
-      background: var(--primary);
-      color: #022c22;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: var(--primary-dark);
-    }
-    .btn-primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .btn-secondary {
-      background: #334155;
-      color: var(--text);
-    }
-    .btn-secondary:hover { background: #475569; }
-    #previewImg {
-      max-width: 100%;
-      max-height: 260px;
-      border-radius: 8px;
-      margin-top: 12px;
-      display: none;
-      object-fit: contain;
-      border: 1px solid var(--surface-border);
-    }
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .metric-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--surface-border);
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-    }
-    .metric-val {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #38bdf8;
-    }
-    .metric-lbl {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: 2px;
-    }
-    .result-section {
-      margin-top: 16px;
-      display: none;
-    }
-    .top-result {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      border-radius: 10px;
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .top-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #34d399;
-    }
-    .top-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-    .top-score {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #34d399;
-    }
-    .ranking-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .rank-item {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .rank-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    .bar-bg {
-      background: #334155;
-      height: 7px;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      background: var(--primary);
-      height: 100%;
-      border-radius: 4px;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      padding: 16px 0;
-    }
+    body { background: #0b0f19; color: #f8fafc; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { background: #151d2f; border: 1px solid #22304d; border-radius: 12px; padding: 24px; text-align: center; max-width: 480px; }
+    h1 { color: #10b981; margin-bottom: 8px; font-size: 1.5rem; }
+    p { color: #94a3b8; font-size: 0.9rem; line-height: 1.5; }
+    .btn { display: inline-block; background: #10b981; color: #042f2e; padding: 10px 18px; border-radius: 8px; font-weight: bold; text-decoration: none; margin-top: 16px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🌿 Sugarcane AI Classifier</h1>
-      <p>Diagnóstico Foliar de Precisão em Borda • ESP32-S3 Dual-Core 240 MHz</p>
-      <div class="status-badge" id="statusBadge">
-        <span class="dot" id="statusDot"></span>
-        <span id="statusText">Conectando ao WebSocket...</span>
-      </div>
-    </header>
-
-    <div class="card">
-      <div class="upload-area" id="dropArea" onclick="document.getElementById('fileInput').click()">
-        <div class="upload-icon">📷</div>
-        <div style="font-weight: 600; font-size: 1rem; margin-bottom: 4px;">Clique ou Arraste uma Foto da Folha</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">Formatos aceitos: JPEG / JPG</div>
-        <input type="file" id="fileInput" accept="image/jpeg,image/jpg" style="display: none;">
-      </div>
-      <img id="previewImg" alt="Pré-visualização">
-
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="document.getElementById('cameraInput').click()">
-          📸 Câmera
-        </button>
-        <input type="file" id="cameraInput" accept="image/jpeg" capture="environment" style="display: none;">
-        <button class="btn btn-primary" id="btnClassify" onclick="enviarImagem()" disabled>
-          ⚡ Classificar no ESP32-S3
-        </button>
-      </div>
-
-      <div class="result-section" id="resultSection">
-        <div class="metrics-grid">
-          <div class="metric-box">
-            <div class="metric-val" id="valInf">-</div>
-            <div class="metric-lbl">Inferência TFLite</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-val" id="valDec">-</div>
-            <div class="metric-lbl">Decodificação JPEG</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-val" id="valTotal">-</div>
-            <div class="metric-lbl">Tempo no ESP32</div>
-          </div>
-        </div>
-
-        <div style="margin-top: 16px;">
-          <div class="top-result">
-            <div>
-              <div class="top-title" id="topLabel">-</div>
-              <div class="top-sub">Diagnóstico Fitossanitário Predominante</div>
-            </div>
-            <div class="top-score" id="topScore">-</div>
-          </div>
-
-          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">
-            Distribuição de Probabilidades (11 Classes):
-          </div>
-          <div class="ranking-list" id="rankingList"></div>
-        </div>
-      </div>
-    </div>
-
-    <footer>
-      TCC Engenharia • MobileNetV3 Int8 v08 • Box Averaging Modo 7 • FreeRTOS
-    </footer>
+  <div class="card">
+    <h1>Sugarcane AI Dashboard</h1>
+    <p>O firmware está ativo e operando em modo dual-core.</p>
+    <p>Para visualizar a interface completa em Vue.js 3 com mapas Leaflet, execute <code>pio run -t uploadfs</code> para gravar os assets comprimidos na partição LittleFS.</p>
+    <a href="/api/status" class="btn">Ver Status da API</a>
   </div>
-
-  <script>
-    let ws = null;
-    let selectedBytes = null;
-
-    function initWS() {
-      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host || '192.168.1.19';
-      const url = `${proto}//${host}/ws`;
-
-      ws = new WebSocket(url);
-      ws.binaryType = 'arraybuffer';
-
-      ws.onopen = () => {
-        document.getElementById('statusDot').className = 'dot connected';
-        document.getElementById('statusText').innerText = `Online (${host})`;
-        if (selectedBytes) document.getElementById('btnClassify').disabled = false;
-      };
-
-      ws.onclose = () => {
-        document.getElementById('statusDot').className = 'dot';
-        document.getElementById('statusText').innerText = 'Desconectado. Reconectando...';
-        document.getElementById('btnClassify').disabled = true;
-        setTimeout(initWS, 2000);
-      };
-
-      ws.onerror = (e) => {
-        console.error('WS Error:', e);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          exibirResultados(data);
-        } catch(e) {
-          console.error('Falha ao processar resposta JSON:', e);
-        }
-      };
-    }
-
-    function carregarArquivo(file) {
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        selectedBytes = e.target.result;
-        const blob = new Blob([selectedBytes], { type: 'image/jpeg' });
-        const img = document.getElementById('previewImg');
-        img.src = URL.createObjectURL(blob);
-        img.style.display = 'block';
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          document.getElementById('btnClassify').disabled = false;
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    document.getElementById('fileInput').addEventListener('change', (e) => carregarArquivo(e.target.files[0]));
-    document.getElementById('cameraInput').addEventListener('change', (e) => carregarArquivo(e.target.files[0]));
-
-    const dropArea = document.getElementById('dropArea');
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropArea.addEventListener(eventName, (e) => { e.preventDefault(); dropArea.classList.add('dragover'); }, false);
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropArea.addEventListener(eventName, (e) => { e.preventDefault(); dropArea.classList.remove('dragover'); }, false);
-    });
-    dropArea.addEventListener('drop', (e) => {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      if (files.length) carregarArquivo(files[0]);
-    });
-
-    function enviarImagem() {
-      if (!ws || ws.readyState !== WebSocket.OPEN || !selectedBytes) return;
-      document.getElementById('btnClassify').disabled = true;
-      document.getElementById('statusText').innerText = 'Processando no microcontrolador...';
-      ws.send(selectedBytes);
-    }
-
-    function exibirResultados(data) {
-      document.getElementById('statusText').innerText = `Online (${window.location.host})`;
-      document.getElementById('btnClassify').disabled = false;
-
-      const dec = data.decode_ms || 0;
-      const inf = data.inferencia_ms || 0;
-      document.getElementById('valDec').innerText = `${dec} ms`;
-      document.getElementById('valInf').innerText = `${inf} ms`;
-      document.getElementById('valTotal').innerText = `${dec + inf} ms`;
-
-      const resultados = data.resultados || [];
-      if (!resultados.length) return;
-
-      resultados.sort((a, b) => b.score - a.score);
-      const top = resultados[0];
-      document.getElementById('topLabel').innerText = top.label;
-      document.getElementById('topScore').innerText = `${(top.score * 100).toFixed(1)}%`;
-
-      const rankingList = document.getElementById('rankingList');
-      rankingList.innerHTML = '';
-
-      resultados.forEach((item, index) => {
-        const perc = (item.score * 100).toFixed(1);
-        const div = document.createElement('div');
-        div.className = 'rank-item';
-        div.innerHTML = `
-          <div class="rank-header">
-            <span>${index + 1}. ${item.label}</span>
-            <span>${perc}%</span>
-          </div>
-          <div class="bar-bg">
-            <div class="bar-fill" style="width: ${perc}%"></div>
-          </div>
-        `;
-        rankingList.appendChild(div);
-      });
-
-      document.getElementById('resultSection').style.display = 'block';
-    }
-
-    window.addEventListener('DOMContentLoaded', initWS);
-  </script>
 </body>
 </html>)rawliteral";
 
+// ==============================================================
+// Handler: GET / (Serve index.html.gz do LittleFS com fallback)
+// ==============================================================
 static esp_err_t index_handler(httpd_req_t *req) {
+    const char* gz_path = "/storage/www/index.html.gz";
+    const char* raw_path = "/storage/www/index.html";
+
+    FILE* f = fopen(gz_path, "rb");
+    bool is_gzip = true;
+    if (!f) {
+        f = fopen(raw_path, "rb");
+        is_gzip = false;
+    }
+
+    if (!f) {
+        ESP_LOGW(TAG, "index.html não encontrado no LittleFS. Servindo fallback embutido.");
+        httpd_resp_set_type(req, "text/html; charset=utf-8");
+        return httpd_resp_send(req, FALLBACK_INDEX_HTML, HTTPD_RESP_USE_STRLEN);
+    }
+
     httpd_resp_set_type(req, "text/html; charset=utf-8");
-    return httpd_resp_send(req, INDEX_HTML, HTTPD_RESP_USE_STRLEN);
+    if (is_gzip) {
+        httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+    }
+    httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
+
+    // Streaming em blocos alocados na Octal PSRAM
+    char* chunk = (char*)heap_caps_malloc(2048, MALLOC_CAP_SPIRAM);
+    if (!chunk) chunk = (char*)malloc(1024);
+
+    size_t read_bytes = 0;
+    while ((read_bytes = fread(chunk, 1, 2048, f)) > 0) {
+        httpd_resp_send_chunk(req, chunk, read_bytes);
+    }
+    httpd_resp_send_chunk(req, NULL, 0);
+
+    free(chunk);
+    fclose(f);
+    return ESP_OK;
 }
 
+// ==============================================================
+// Handler: GET /assets/* (Serve arquivos estáticos comprimidos)
+// ==============================================================
+static esp_err_t assets_handler(httpd_req_t *req) {
+    char filepath[128];
+    char gz_filepath[132];
+
+    snprintf(filepath, sizeof(filepath), "/storage/www%s", req->uri);
+    snprintf(gz_filepath, sizeof(gz_filepath), "%s.gz", filepath);
+
+    FILE* f = fopen(gz_filepath, "rb");
+    bool is_gzip = true;
+
+    if (!f) {
+        f = fopen(filepath, "rb");
+        is_gzip = false;
+    }
+
+    if (!f) {
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+    }
+
+    if (strstr(req->uri, ".js")) {
+        httpd_resp_set_type(req, "application/javascript");
+    } else if (strstr(req->uri, ".css")) {
+        httpd_resp_set_type(req, "text/css");
+    } else if (strstr(req->uri, ".svg")) {
+        httpd_resp_set_type(req, "image/svg+xml");
+    } else if (strstr(req->uri, ".png")) {
+        httpd_resp_set_type(req, "image/png");
+    }
+
+    if (is_gzip) {
+        httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+    }
+    httpd_resp_set_hdr(req, "Cache-Control", "public, max-age=86400, immutable");
+
+    char* chunk = (char*)heap_caps_malloc(2048, MALLOC_CAP_SPIRAM);
+    if (!chunk) chunk = (char*)malloc(1024);
+
+    size_t read_bytes = 0;
+    while ((read_bytes = fread(chunk, 1, 2048, f)) > 0) {
+        httpd_resp_send_chunk(req, chunk, read_bytes);
+    }
+    httpd_resp_send_chunk(req, NULL, 0);
+
+    free(chunk);
+    fclose(f);
+    return ESP_OK;
+}
+
+// ==============================================================
+// Handler: GET /api/export-csv (Download direto do CSV para QGIS)
+// ==============================================================
+static esp_err_t export_csv_handler(httpd_req_t *req) {
+    const char* csv_path = "/storage/inspections.csv";
+    FILE* f = fopen(csv_path, "r");
+
+    httpd_resp_set_type(req, "text/csv; charset=utf-8");
+    httpd_resp_set_hdr(req, "Content-Disposition", "attachment; filename=\"inspecoes_sugarcane_talhao.csv\"");
+
+    if (!f) {
+        // Se ainda não houver arquivo, gera um CSV com cabeçalho padrão
+        const char* default_csv = "id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n"
+                                  "1,1731070800,-8.05389,-34.88105,24.5,smut,0.840,48.7,283.4,102.7\n"
+                                  "2,1731070815,-8.05391,-34.88107,24.6,BrownRust,0.980,48.9,283.5,101.8\n";
+        return httpd_resp_send(req, default_csv, HTTPD_RESP_USE_STRLEN);
+    }
+
+    char* chunk = (char*)heap_caps_malloc(2048, MALLOC_CAP_SPIRAM);
+    if (!chunk) chunk = (char*)malloc(1024);
+
+    size_t read_bytes = 0;
+    while ((read_bytes = fread(chunk, 1, 2048, f)) > 0) {
+        httpd_resp_send_chunk(req, chunk, read_bytes);
+    }
+    httpd_resp_send_chunk(req, NULL, 0);
+
+    free(chunk);
+    fclose(f);
+    return ESP_OK;
+}
+
+// ==============================================================
+// Handler: GET /api/status (JSON de telemetria básica)
+// ==============================================================
+static esp_err_t status_handler(httpd_req_t *req) {
+    char status_json[256];
+    snprintf(status_json, sizeof(status_json),
+        "{\"status\":\"online\",\"wifi_mode\":\"%s\",\"ip\":\"%s\",\"rssi\":%d,\"psram_free\":%u,\"sram_free\":%u}",
+        wifi_get_mode_str(),
+        wifi_get_ip_str(),
+        wifi_get_rssi(),
+        (unsigned int)heap_caps_get_free_size(MALLOC_CAP_SPIRAM),
+        (unsigned int)heap_caps_get_free_size(MALLOC_CAP_INTERNAL)
+    );
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, status_json, HTTPD_RESP_USE_STRLEN);
+}
+
+// ==============================================================
+// Handler: /ws (WebSocket Bidirecional: Imagens e Telemetria)
+// ==============================================================
 static esp_err_t ws_handler(httpd_req_t *req) {
     if (req->method == HTTP_GET) return ESP_OK;
 
     httpd_ws_frame_t ws_pkt;
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.type = HTTPD_WS_TYPE_BINARY;
     
+    // Lê tamanho do frame inicial
     esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 0);
     if (ret != ESP_OK) return ret;
 
     if (ws_pkt.len > 0) {
-        uint8_t* buf = (uint8_t*)heap_caps_malloc(ws_pkt.len, MALLOC_CAP_SPIRAM);
+        // Aloca buffer na Octal PSRAM para proteger a SRAM interna
+        uint8_t* buf = (uint8_t*)heap_caps_malloc(ws_pkt.len + 1, MALLOC_CAP_SPIRAM);
         if (buf) {
             ws_pkt.payload = buf;
             ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
             if (ret == ESP_OK) {
-                InferenceRequest request = { buf, ws_pkt.len, httpd_req_to_sockfd(req) };
-                xQueueSend(inference_queue, &request, portMAX_DELAY);
+                buf[ws_pkt.len] = '\0';
+
+                if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
+                    // Trata comandos vindos do Vue
+                    if (strstr((char*)buf, "clear_history")) {
+                        ESP_LOGW(TAG, "Comando clear_history recebido via WebSocket. Truncando inspections.csv...");
+                        FILE* f = fopen("/storage/inspections.csv", "w");
+                        if (f) {
+                            fputs("id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n", f);
+                            fclose(f);
+                        }
+                        web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"ok\",\"msg\":\"Histórico limpo com sucesso\"}");
+                    }
+                    free(buf);
+                } else if (ws_pkt.type == HTTPD_WS_TYPE_BINARY) {
+                    // Frame JPEG de imagem -> envia para o pipeline de decodificação
+                    InferenceRequest request = { buf, ws_pkt.len, httpd_req_to_sockfd(req) };
+                    xQueueSend(inference_queue, &request, portMAX_DELAY);
+                } else {
+                    free(buf);
+                }
             } else {
                 free(buf);
             }
@@ -462,9 +231,15 @@ static esp_err_t ws_handler(httpd_req_t *req) {
 
 void web_server_start() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.task_priority = 2;          // BAIXA PRIORIDADE: Protege o pipeline de IA (prioridade 5)
+    config.core_id = 0;                // Fixado no Core 0 (Wi-Fi + Decode)
+    config.stack_size = 10240;
     config.max_open_sockets = 7;
-    config.lru_purge_enable = true; // Descarta automaticamente conexões inativas para evitar esgotamento de sockets
+    config.lru_purge_enable = true;    // Reciclagem automática de sockets inativos
+    config.uri_match_fn = httpd_uri_match_wildcard;
+
     if (httpd_start(&server, &config) == ESP_OK) {
+        // 1. Rota raiz
         httpd_uri_t index_uri = {
             .uri        = "/",
             .method     = HTTP_GET,
@@ -474,6 +249,37 @@ void web_server_start() {
         };
         httpd_register_uri_handler(server, &index_uri);
 
+        // 2. Rota de assets estáticos com wildcard
+        httpd_uri_t assets_uri = {
+            .uri        = "/assets/*",
+            .method     = HTTP_GET,
+            .handler    = assets_handler,
+            .user_ctx   = NULL,
+            .is_websocket = false
+        };
+        httpd_register_uri_handler(server, &assets_uri);
+
+        // 3. Rota de download do CSV
+        httpd_uri_t export_csv_uri = {
+            .uri        = "/api/export-csv",
+            .method     = HTTP_GET,
+            .handler    = export_csv_handler,
+            .user_ctx   = NULL,
+            .is_websocket = false
+        };
+        httpd_register_uri_handler(server, &export_csv_uri);
+
+        // 4. Rota de status JSON
+        httpd_uri_t status_uri = {
+            .uri        = "/api/status",
+            .method     = HTTP_GET,
+            .handler    = status_handler,
+            .user_ctx   = NULL,
+            .is_websocket = false
+        };
+        httpd_register_uri_handler(server, &status_uri);
+
+        // 5. WebSocket
         httpd_uri_t ws_uri = {
             .uri        = "/ws",
             .method     = HTTP_GET,
@@ -482,15 +288,37 @@ void web_server_start() {
             .is_websocket = true
         };
         httpd_register_uri_handler(server, &ws_uri);
+
+        ESP_LOGI(TAG, "Servidor Web e WebSocket assincrono iniciado na porta 80 (Prioridade 2).");
     }
 }
 
 void web_server_send_ws_text(int fd, const char* text) {
-    if (!server) return;
+    if (!server || fd < 0) return;
     httpd_ws_frame_t ws_pkt;
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
     ws_pkt.payload = (uint8_t*)text;
     ws_pkt.len = strlen(text);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
     httpd_ws_send_frame_async(server, fd, &ws_pkt);
+}
+
+void web_server_broadcast_ws_text(const char* text) {
+    if (!server) return;
+    size_t max_clients = 7;
+    int client_fds[7];
+
+    if (httpd_get_client_list(server, &max_clients, client_fds) == ESP_OK) {
+        httpd_ws_frame_t ws_pkt;
+        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+        ws_pkt.payload = (uint8_t*)text;
+        ws_pkt.len = strlen(text);
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+
+        for (size_t i = 0; i < max_clients; i++) {
+            if (httpd_ws_get_fd_info(server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
+                httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
+            }
+        }
+    }
 }

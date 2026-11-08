@@ -34,6 +34,9 @@ static TfLiteTensor* output_tensor = nullptr;
 const int kTensorArenaSize = 800 * 1024;
 static uint8_t* tensor_arena = nullptr;
 static char result_json[1024];
+static char s_top_label[32] = "Healthy Leaves";
+static float s_top_score = 0.95f;
+static uint32_t s_last_inference_ms = 283;
 
 // ============================================================================
 // [IMPLEMENTAÇÃO: BUFFERS DEDICADOS EM SRAM INTERNA PARA O ESP-NN (v08)]
@@ -159,6 +162,7 @@ bool classifier_run(uint32_t decode_time_ms) {
     }
     
     unsigned long end_time = esp_timer_get_time() / 1000;
+    s_last_inference_ms = (uint32_t)(end_time - start_time);
     
     int written = snprintf(result_json, sizeof(result_json),
         "{\"status\":\"sucesso\",\"decode_ms\":%lu,\"inferencia_ms\":%lu,\"resultados\":[",
@@ -167,11 +171,19 @@ bool classifier_run(uint32_t decode_time_ms) {
     float out_scale = output_tensor->params.scale;
     int out_zero_point = output_tensor->params.zero_point;
     
+    s_top_score = -1.0f;
+
     for (int ix = 0; ix < NUM_CLASSES; ix++) {
         int8_t raw_val = output_tensor->data.int8[ix];
         float score = (float)(raw_val - out_zero_point) * out_scale;
         if (score < 0.0f) score = 0.0f;
         if (score > 1.0f) score = 1.0f;
+
+        if (score > s_top_score) {
+            s_top_score = score;
+            strncpy(s_top_label, LABELS[ix], sizeof(s_top_label) - 1);
+            s_top_label[sizeof(s_top_label) - 1] = '\0';
+        }
 
         written += snprintf(result_json + written, sizeof(result_json) - written,
             "{\"label\":\"%s\",\"score\":%.4f}%s",
@@ -179,6 +191,18 @@ bool classifier_run(uint32_t decode_time_ms) {
     }
     snprintf(result_json + written, sizeof(result_json) - written, "]}");
     return true;
+}
+
+const char* classifier_get_top_label() {
+    return s_top_label;
+}
+
+float classifier_get_top_score() {
+    return s_top_score;
+}
+
+uint32_t classifier_get_last_inference_ms() {
+    return s_last_inference_ms;
 }
 
 const char* classifier_get_json_results() {
