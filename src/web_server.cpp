@@ -8,11 +8,13 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "freertos/semphr.h"
 #include "wifi_setup.h"
 
 static const char* TAG = "WEB_SERVER";
 extern QueueHandle_t inference_queue;
 static httpd_handle_t server = NULL;
+static SemaphoreHandle_t s_ws_mutex = NULL;
 
 // Fallback HTML caso LittleFS não contenha os assets
 static const char FALLBACK_INDEX_HTML[] = R"rawliteral(<!DOCTYPE html>
@@ -230,6 +232,9 @@ static esp_err_t ws_handler(httpd_req_t *req) {
 }
 
 void web_server_start() {
+    if (!s_ws_mutex) {
+        s_ws_mutex = xSemaphoreCreateMutex();
+    }
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.task_priority = 2;          // BAIXA PRIORIDADE: Protege o pipeline de IA (prioridade 5)
     config.core_id = 0;                // Fixado no Core 0 (Wi-Fi + Decode)
@@ -294,31 +299,43 @@ void web_server_start() {
 }
 
 void web_server_send_ws_text(int fd, const char* text) {
-    if (!server || fd < 0) return;
-    httpd_ws_frame_t ws_pkt;
-    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.payload = (uint8_t*)text;
-    ws_pkt.len = strlen(text);
-    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-    httpd_ws_send_frame_async(server, fd, &ws_pkt);
-}
-
-void web_server_broadcast_ws_text(const char* text) {
-    if (!server) return;
-    size_t max_clients = 7;
-    int client_fds[7];
-
-    if (httpd_get_client_list(server, &max_clients, client_fds) == ESP_OK) {
+    if (!server || fd < 0 || !text) return;
+    if (!s_ws_mutex) {
+        s_ws_mutex = xSemaphoreCreateMutex();
+    }
+    if (xSemaphoreTake(s_ws_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
         httpd_ws_frame_t ws_pkt;
         memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
         ws_pkt.payload = (uint8_t*)text;
         ws_pkt.len = strlen(text);
         ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+        httpd_ws_send_frame_async(server, fd, &ws_pkt);
+        xSemaphoreGive(s_ws_mutex);
+    }
+}
 
-        for (size_t i = 0; i < max_clients; i++) {
-            if (httpd_ws_get_fd_info(server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
-                httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
+void web_server_broadcast_ws_text(const char* text) {
+    if (!server || !text) return;
+    if (!s_ws_mutex) {
+        s_ws_mutex = xSemaphoreCreateMutex();
+    }
+    if (xSemaphoreTake(s_ws_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
+        size_t max_clients = 7;
+        int client_fds[7];
+
+        if (httpd_get_client_list(server, &max_clients, client_fds) == ESP_OK) {
+            httpd_ws_frame_t ws_pkt;
+            memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+            ws_pkt.payload = (uint8_t*)text;
+            ws_pkt.len = strlen(text);
+            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+
+            for (size_t i = 0; i < max_clients; i++) {
+                if (httpd_ws_get_fd_info(server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
+                    httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
+                }
             }
         }
+        xSemaphoreGive(s_ws_mutex);
     }
 }
