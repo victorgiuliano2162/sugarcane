@@ -1,0 +1,230 @@
+\chapter{Metodologia}
+\label{cap:metodologia}
+
+Este capítulo descreve a metodologia de engenharia aplicada no desenvolvimento do sistema, abrangendo a curadoria criptográfica do dataset, o pipeline de treinamento da rede neural quantizada (v08), a teoria e implementação do pré-processamento de imagens no firmware C++, a hierarquia de memória e acelerações SIMD no microcontrolador ESP32-S3, a arquitetura de concorrência FreeRTOS e a integração de controle autônomo de voo via protocolo MAVLink em bancada de co-simulação \textit{Hardware-in-the-Loop} (HIL).
+
+\section{Curadoria Criptográfica e Descontaminação do Dataset (MD5)}
+\label{sec:auditoria_md5}
+
+O ponto de partida do trabalho envolveu o \textit{Sugarcane Leaf Image Dataset}, um conjunto público contendo 6.748 imagens em formato JPEG com resoluções típicas de $768 \times 1024$ pixels, catalogadas originalmente nas 11 classes patológicas descritas na Seção 2.1.
+
+\subsection{Identificação de Contaminação Cruzada e Duplicação Interna}
+
+Durante as primeiras rodadas experimentais com o modelo de linha de base (\texttt{v07}), observou-se que a classe \textit{smut} (Carvão) apresentava taxa de acerto inferior a 6,0\%, com confusão sistemática de predição em relação à classe \textit{Pokkah Boeng}. Para investigar a causa raiz do problema, desenvolveu-se um script de auditoria em Python que calculou o hash criptográfico MD5 (\textit{Message Digest Algorithm 5}) para todos os 6.748 arquivos binários da base.
+
+A varredura exaustiva revelou duas anomalias estruturais severas no dataset original:
+\begin{enumerate}
+    \item \textbf{Duplicação Interna (*Data Leakage* — 747 arquivos):} Presença de centenas de fotos idênticas repetidas dentro da mesma pasta de classe (com destaque para 288 duplicatas em \textit{Brown Spot} e 276 em \textit{Yellow Leaf}). Em uma divisão aleatória convencional de dados (\texttt{validation\_split=0.20}), réplicas exatas da mesma folha caíam simultaneamente nos conjuntos de treino e teste, mascarando o sobreajuste (*overfitting*).
+    \item \textbf{Contaminação Cruzada de Rótulos (*Cross-Class Label Collision* — 614 arquivos / 306 pares):} Descoberta de 306 pares de imagens binariamente idênticas (mesmo hash MD5, byte a byte) arquivadas simultaneamente sob pastas de patologias distintas e incompatíveis. O caso mais crítico concentrou-se entre as classes \textit{Pokkah Boeng} e \textit{smut}, com \textbf{110 arquivos idênticos} rotulados com ambas as doenças.
+\end{enumerate}
+
+\subsection{Modelagem Matemática do Colapso da Função de Perda}
+
+A presença de dados idênticos com rótulos contraditórios afeta negativamente o treinamento por gradiente descendente. Sejam duas classes conflitantes $A$ (\textit{Pokkah Boeng}) e $B$ (\textit{smut}). Durante o treinamento supervisionado, a mesma imagem de entrada $x$ é apresentada à rede associada ao vetor *one-hot* $y_A = [1, 0]^T$ sob um peso de classe $w_A = 1,44$, e em outro instante associada a $y_B = [0, 1]^T$ sob peso $w_B = 1,39$.
+
+A função de perda por Entropia Cruzada Categórica ponderada sobre essa amostra $x$ é expressa por:
+\begin{equation}
+\mathcal{L}(x) = - w_A \log p_A(x) - w_B \log p_B(x)
+\label{eq:cross_entropy_conflito}
+\end{equation}
+Como a camada final Softmax impõe a restrição $p_A(x) + p_B(x) = 1$ (assumindo probabilidade desprezível para as demais classes), pode-se reescrever a Equação \ref{eq:cross_entropy_conflito} como uma função univariada de $p_A$:
+\begin{equation}
+\mathcal{L}(p_A) = - w_A \log p_A - w_B \log (1 - p_A)
+\end{equation}
+
+Para encontrar o ponto de convergência ótimo do otimizador, calcula-se a primeira derivada e iguala-se a zero:
+\begin{equation}
+\frac{d\mathcal{L}}{dp_A} = -\frac{w_A}{p_A} + \frac{w_B}{1 - p_A} = 0 \implies w_A (1 - p_A) = w_B p_A
+\end{equation}
+Isolando $p_A^*$:
+\begin{equation}
+p_A^* = \frac{w_A}{w_A + w_B}
+\label{eq:ponto_otimo_conflito}
+\end{equation}
+
+Substituindo os pesos empíricos do treinamento ($w_A = 1,44$ e $w_B = 1,39$):
+\begin{equation}
+p_{\text{Pokkah}}^* = \frac{1,44}{1,44 + 1,39} = \mathbf{50,88\%}, \quad p_{\text{smut}}^* = \frac{1,39}{1,44 + 1,39} = \mathbf{49,12\%}
+\end{equation}
+
+Essa dedução matemática comprova analiticamente por que o modelo \texttt{v07} estabilizava sua confiança média em torno de $\approx 53\%$ e errava sistematicamente a classe \textit{smut}: como a probabilidade ótima de \textit{Pokkah Boeng} era ligeiramente superior ($50,88\% > 49,12\%$), a função argmax predizia \textit{Pokkah Boeng} em todas as folhas de teste onde a contaminação estava presente.
+
+\subsection{Algoritmo de Descontaminação e Particionamento Físico}
+
+Para erradicar o problema, implementou-se a rotina automatizada \texttt{construir\_dataset\_limpo\_estratificado()} na Célula 5 do notebook \texttt{notebooks/cane\_disease\_esp32s3\_v08.ipynb}. O algoritmo opera em três etapas:
+\begin{enumerate}
+    \item Calcula o hash MD5 de todas as 6.748 imagens e constrói um índice invertido \texttt{hash -> lista\_de\_caminhos};
+    \item Identifica e expurga as 747 duplicatas internas e os 614 arquivos envolvidos em colisões cruzadas, preservando exatamente \textbf{5.389 imagens 100\% únicas e consistentes};
+    \item Constrói árvores de diretórios físicos no disco (\texttt{train/} e \texttt{val/}) através de links simbólicos (\textit{symlinks}), aplicando partição estratificada de \textbf{80\% para treino (4.313 imagens)} e \textbf{20\% para validação (1.076 imagens)} com preservação rigorosa da proporção de classes.
+\end{enumerate}
+
+\section{Arquitetura Neural e Pipeline de Treinamento Otimizado (\texttt{v08})}
+
+A concepção da rede neural no notebook \texttt{v08} baseou-se na arquitetura MobileNetV2 ($\alpha = 0,35$, resolução de entrada $160 \times 160 \times 3$) adaptada para atender às restrições estritas de alocação de memória do microcontrolador.
+
+\subsection{Construção de Grafo Flat para Quantization-Aware Training (QAT)}
+
+No framework Keras tradicional, instanciar um modelo pré-treinado através de chamadas funcionais aninhadas (\texttt{base\_model(inputs)}) encapsula o grafo interno, impedindo que o módulo de quantização oficial \texttt{tensorflow\_model\_optimization} (TFMOT) insira emuladores de quantização (\textit{FakeQuant}) nas camadas intermediárias. 
+
+Para sanar essa limitação, a arquitetura foi montada explicitamente como um \textbf{Grafo Plano} (\textit{Flat Graph}):
+\begin{lstlisting}[language=Python]
+inputs = layers.Input(shape=(160, 160, 3), name="input_tensor")
+base_model = tf.keras.applications.MobileNetV2(
+    input_tensor=inputs,
+    alpha=0.35,
+    include_top=False,
+    weights="imagenet"
+)
+\end{lstlisting}
+Essa formulação expõe todos os nós convolucionais diretamente no grafo raiz, permitindo que a função \texttt{tfmot.quantization.keras.quantize\_model()} insira operadores \textit{FakeQuant} em \textbf{100\% das 52 camadas convolucionais} da rede.
+
+\subsection{Normalização Externa no Pipeline \texttt{tf.data}}
+
+A inclusão de camadas de reescalonamento (\texttt{layers.Rescaling(1./127.5, offset=-1)}) dentro do modelo Keras frequentemente induz o conversor TFLite a inserir nós desnecessários de conversão de tipos (\texttt{DEQUANTIZE} e \texttt{QUANTIZE}) na entrada da rede. No ESP32-S3, essa conversão intermediária em ponto flutuante exigiria um buffer temporário de $160 \times 160 \times 3 \times 4\text{ bytes} = \mathbf{307,2\text{ KB}}$ na memória RAM.
+
+A normalização foi transferida integralmente para a camada externa de dados do \texttt{tf.data}:
+\begin{equation}
+x_{\text{norm}} = \frac{x_{\text{uint8}}}{127,5} - 1,0
+\end{equation}
+Com isso, o modelo TFLite exportado opera com entrada nativa puramente inteira \texttt{int8\_t} com parâmetros $S = \frac{1}{127,5} \approx 0,007843138$ e $Z = 0$, casando perfeitamente com a subtração direta \texttt{pixel\_u8 - 128} implementada em C++ no microcontrolador.
+
+\subsection{Cabeça de Classificação com Dual-Pooling}
+
+Em patologias foliares de cana-de-açúcar, algumas doenças caracterizam-se por manchas necróticas puntiformes e concentradas (\textit{Brown Spot}), enquanto outras provocam clorose ampla e homogênea (\textit{Banded Chlorosis}). O uso isolado de \texttt{GlobalAveragePooling2D} tende a suavizar e diluir feições pequenas, enquanto o \texttt{GlobalMaxPooling2D} ignora o contexto global da folha.
+
+A cabeça de classificação foi projetada combinando ambas as operações em paralelo (*Dual-Pooling*):
+\begin{lstlisting}[language=Python]
+avg_pool = layers.GlobalAveragePooling2D(name="avg_pool")(x)
+max_pool = layers.GlobalMaxPooling2D(name="max_pool")(x)
+concat = layers.Concatenate(name="dual_pool")([avg_pool, max_pool])
+dropout = layers.Dropout(0.30, name="top_dropout")(concat)
+outputs = layers.Dense(11, activation="softmax", name="predictions")(dropout)
+\end{lstlisting}
+
+\subsection{Função de Perda Focal e Treinamento em Três Fases}
+
+Para balancear a dificuldade de separação entre classes com sintomas visuais parecidos, adotou-se a função de perda *Categorical Focal Crossentropy* \cite{lin2017focal} com parâmetro modulador de foco $\gamma = 2,0$, suavização de rótulos (\textit{label smoothing}) de $0,02$ e pesos de classe atenuados por potência de três quartos:
+\begin{equation}
+w_c = \left( \frac{N_{\text{total}}}{11 \cdot N_c} \right)^{0,75}
+\label{eq:pesos_suavizados}
+\end{equation}
+
+O regime de treinamento foi executado em três fases complementares:
+\begin{itemize}
+    \item \textbf{Fase 1 (Aquecimento do Head):} 15 épocas com o backbone congelado utilizando otimizador Adam com taxa de aprendizado inicial $\eta = 10^{-3}$;
+    \item \textbf{Fase 2 (Fine-Tuning com BatchNorm Congelado):} Descongelamento dos pesos convolucionais com $\eta = 5 \times 10^{-5}$, forçando explicitamente \texttt{layer.trainable = False} para todas as camadas de \texttt{BatchNormalization}. Isso evitou a corrupção das médias e variâncias móveis acumuladas do ImageNet durante a retropropagação;
+    \item \textbf{Fase 3 (QAT com Calibração Protegida):} Aplicação de \texttt{quantize\_model()} com $\eta = 10^{-5}$ e \texttt{EarlyStopping(monitor='val\_loss', patience=6, start\_from\_epoch=4)}. A restrição \texttt{start\_from\_epoch=4} impediu que o mecanismo de parada antecipada abortasse o treinamento durante as flutuações iniciais das faixas dinâmicas de 8 bits.
+\end{itemize}
+
+O modelo quantizado final foi exportado no arquivo \texttt{data/model\_mbnet\_int8.tflite}, ocupando apenas \textbf{639.272 bytes} (~624 KB).
+
+\section{Engenharia de Processamento de Imagens e Decodificação no ESP32-S3}
+\label{sec:processamento_imagens}
+
+A decodificação JPEG e a redução espacial para o tensor $160 \times 160 \times 3$ foram implementadas no módulo \texttt{src/image\_processor.cpp}. 
+
+\subsection{Decodificação por Blocos MCU via \texttt{JPEGDEC}}
+
+Descomprimir previamente a foto bruta de $768 \times 1024$ em um framebuffer RGB888 intermediário exigiria $768 \times 1024 \times 3 = \mathbf{2,35\text{ MB}}$ de memória RAM contígua. Como a SRAM interna do ESP32-S3 dispõe de ~309 KB livres e a PSRAM opera sob barramento compartilhado, essa abordagem inviabilizaria o sistema.
+
+Utilizou-se a biblioteca \texttt{JPEGDEC}, que decodifica o fluxo JPEG linha a linha em blocos MCU (*Minimum Coded Units*, tipicamente $16 \times 16$ pixels) mantendo um buffer estático interno de apenas \textbf{4 KB} (2.048 palavras de 16 bits). A cada bloco decodificado, a biblioteca aciona o callback de desenho customizado \texttt{JPEGDraw(JPEGDRAW *pDraw)}.
+
+\subsection{Implementação da Opção C: RGB8888 Nativo + Box Averaging + LUTs em SRAM}
+
+Para solucionar simultaneamente o viés DC de escurecimento (-2,90 LSB) comprovado na Seção 2.4.1 e o aliasing espacial decorrente da decimação pontual, o firmware implementou a \textbf{Opção C (Modo 7)}, estruturada em três pilares de engenharia:
+
+\begin{enumerate}
+    \item \textbf{Extração Direta em 24 bits (\texttt{RGB8888}):} Configuração de \texttt{jpeg.setPixelType(RGB8888)}, ativando a rotina interna \texttt{JPEGPixel2RGB()} que converte o domínio YCbCr diretamente para amostras de 32 bits Little Endian (\texttt{0xFFBBGGRR}, 8 bits puros por canal), sem jamais degradar a representação cromática para 16 bits (\texttt{RGB565});
+    \item \textbf{Pré-cálculo de LUTs Espaciais em SRAM Interna:} Para converter coordenadas da imagem de entrada $(src\_x, src\_y)$ para as coordenadas do tensor $(dst\_x, dst\_y)$, uma rotina ingênua executaria duas divisões inteiras por pixel:
+    \begin{equation}
+    dst\_x = \frac{src\_x \cdot 160}{W_{orig}}, \quad dst\_y = \frac{src\_y \cdot 160}{H_{orig}}
+    \end{equation}
+    Em uma imagem de $768 \times 1024$, isso representaria $786.432 \times 2 = 1.572.864$ operações de divisão por quadro. A função \texttt{build\_src\_to\_dst\_lut()} pré-computa dois vetores estáticos em SRAM interna (\texttt{s\_src\_to\_dst\_x[1024]} e \texttt{s\_src\_to\_dst\_y[1024]}), reduzindo o custo de mapeamento de $1,57$ milhão de divisões para apenas \textbf{1.792 divisões de inicialização por foto}, transformando o loop interno em acessos de vetor de 1 ciclo de clock;
+    \item \textbf{Acumulador Espacial Alinhado e Média Aritmética:} Alocou-se na Octal PSRAM uma matriz contígua alinhada em 16 bytes de estruturas \texttt{BoxAccumulator} com $160 \times 160 = 25.600$ células:
+    \begin{lstlisting}[language=C++]
+    struct alignas(16) BoxAccumulator {
+        uint32_t sum_r;
+        uint32_t sum_g;
+        uint32_t sum_b;
+        uint16_t count;
+    };
+    \end{lstlisting}
+    A cada pixel processado, o callback acumula os componentes de 8 bits e incrementa o contador. Na finalização do frame, a função \texttt{finalize\_box\_average\_to\_tensor()} calcula a média aritmética simetricamente arredondada ao inteiro mais próximo e aplica a quantização afim:
+    \begin{align}
+    r &= \left\lfloor \frac{\text{sum\_r} + (\text{count} \gg 1)}{\text{count}} \right\rfloor \\
+    \text{tensor}[i] &= \text{int8\_t}(r - 128)
+    \end{align}
+\end{enumerate}
+
+\section{Otimizações de Baixo Nível, Hierarquia de Memória e SIMD}
+\label{sec:otimizacoes_baixo_nivel}
+
+A execução eficiente da rede neural quantizada no ESP32-S3 dependeu de intervenções específicas na arquitetura de memória e nos kernels vetoriais da biblioteca \texttt{esp-nn} \cite{espressif2023espnn}.
+
+\subsection{Alocação Híbrida de Memória e Preferred Scratch Buffers em SRAM}
+
+Inspecionando os tensores da MobileNetV2 quantizada, constatou-se que o pico de consumo de mapas de ativação intermediários (*ping-pong*) nas camadas convolucionais iniciais atinge \textbf{~409 KB} (Tensor 13 de 300 KB somado ao Tensor 10 de 100 KB). Esse volume excede a SRAM interna livre do microcontrolador (~309 KB no boot).
+
+Portanto, a \texttt{tensor\_arena} de 800 KB e o buffer do modelo FlatBuffer (624 KB) foram obrigatoriamente alocados na Octal PSRAM externa via \texttt{heap\_caps\_malloc(..., MALLOC\_CAP\_SPIRAM)}.
+
+Todavia, identificou-se que a alocação dos *workspaces* temporários de convolução (\textit{im2col}, transposição e alinhamento SIMD) na PSRAM externa degradava o desempenho por contenção no barramento Octal SPI. Para resolver esse gargalo:
+\begin{enumerate}
+    \item Alocou-se estaticamente no boot um buffer contíguo de \textbf{48 KB} (\texttt{s\_sram\_scratch\_buf}) na \textbf{SRAM Interna rápida com suporte a DMA} (\texttt{MALLOC\_CAP\_INTERNAL | MALLOC\_CAP\_DMA}, alinhado em 16 bytes);
+    \item Registrou-se esse ponteiro através das chamadas de API da Espressif \texttt{esp\_nn\_set\_conv\_preferred\_scratch\_buf\_esp32s3()} e \texttt{esp\_nn\_set\_depthwise\_conv\_preferred\_scratch\_buf\_esp32s3()};
+    \item Aplicou-se um patch cirúrgico no arquivo \texttt{esp\_nn\_conv\_esp32s3.c} da biblioteca oficial, estendendo o uso do buffer interno também para a camada de entrada ($3\times3$ Stem \texttt{160x160x3 -> 80x80x16}), garantindo que \textbf{100\% das 52 camadas convolucionais operem seus dados temporários na SRAM interna de ciclo único}.
+\end{enumerate}
+
+\subsection{Requantização Rápida em Assembly SIMD (\texttt{CONFIG\_NN\_SKIP\_NUDGE=y})}
+
+Na rotina de requantização de inteiros em Assembly Xtensa LX7 (\texttt{esp\_nn\_multiply\_by\_quantized\_mult\_esp32s3.S}), a soma da constante de arredondamento de 64 bits padrão do TFLite (*nudge* = $1 \ll 30$) exigia 13 instruções escalares extras com propagação manual de *carry* a cada 4 canais.
+
+Habilitando a diretiva \texttt{CONFIG\_NN\_SKIP\_NUDGE=y} e \texttt{-D SKIP\_NUDGE=1} no arquivo de compilação \texttt{platformio.ini}, o montador omitiu esse bloco de instruções, conferindo um \textbf{ganho de ~20\% na etapa de requantização} sem impacto observável na acurácia preditiva.
+
+\section{Arquitetura de Concorrência em Dois Níveis no FreeRTOS}
+
+Para explorar a totalidade do poder computacional do processador Dual-Core Xtensa LX7, o sistema opera sob uma arquitetura de paralelismo híbrida estruturada em dois níveis concorrentes: macro-pipeline assíncrono inter-quadros (Nível 1) e paralelismo de dados intra-inferência com divisão cooperativa de canais convolucionais (Nível 2).
+
+\subsection{Nível 1: Macro-Pipeline Assíncrono com Double Buffering}
+
+Em uma abordagem sequencial tradicional em núcleo único, a CPU alternaria entre receber a imagem pela rede, decodificar o JPEG e invocar a rede neural, mantendo o motor de inferência inativo durante toda a descompressão.
+
+No arquivo \texttt{src/main.cpp}, implementou-se um pipeline produtor-consumidor:
+\begin{itemize}
+    \item \textbf{Core 0 (PRO\_CPU):} Executa a pilha Wi-Fi LwIP, o servidor WebSocket assíncrono e a tarefa \texttt{decode\_task} (prioridade 5);
+    \item \textbf{Core 1 (APP\_CPU):} Executa a tarefa de inferência neural \texttt{inference\_task} (prioridade 5);
+    \item Três filas FreeRTOS gerenciam o fluxo: \texttt{inference\_queue} (requisições recebidas da rede), \texttt{free\_tensor\_queue} (pool de dois buffers de $76,8\text{ KB}$ alocados na Octal PSRAM) e \texttt{decoded\_queue} (tensores prontos para classificação).
+\end{itemize}
+
+Um detalhe crítico implementado foi a \textbf{devolução antecipada do buffer}: logo após a \texttt{inference\_task} transferir o tensor de entrada para a \texttt{tensor\_arena} via \texttt{memcpy} (<1 ms), o ponteiro do buffer na PSRAM é imediatamente devolvido à \texttt{free\_tensor\_queue} antes da chamada \texttt{classifier\_run()}. Com isso, o Core 0 é liberado imediatamente para decodificar o quadro subsequente em paralelo enquanto o Core 1 executa o grafo neural.
+
+\subsection{Nível 2: Paralelismo de Dados Intra-Inferência (Fork-Join no \texttt{esp-nn})}
+
+Quando o sistema opera no modo interativo (amostra por amostra), o Core 0 ficaria ocioso após concluir a decodificação JPEG. Para evitar esse desperdício de ciclos, ativou-se o motor multi-core nativo da biblioteca \texttt{esp-nn} (\texttt{esp\_nn\_multicore.c}).
+
+Para evitar a falha de projeto onde chamar \texttt{esp\_nn\_dual\_core\_enable()} a partir da função \texttt{app\_main()} (Core 0) fixava a tarefa trabalhadora no Core 1 (núcleo da própria inferência), a função \texttt{classifier\_enable\_dual\_core()} foi invocada explicitamente dentro da \texttt{inference\_task} no \textbf{Core 1}. Com isso, o worker \texttt{esp\_nn\_worker} foi fixado no \textbf{Core 0}, auxiliado por um buffer dedicado de 25 KB alocado na SRAM interna (\texttt{worker\_sram}). Durante cada camada convolucional pesada, Core 1 e Core 0 processam fatias complementares de canais e linhas simultaneamente.
+
+\section{Arquitetura do Payload Embarcado e Integração MAVLink com o VANT}
+
+\subsection{Estratégia de Parada Amostral Sistemática (Pause-and-Classify)}
+
+Em sobrevoos contínuos de lavouras de cana-de-açúcar, vibrações mecânicas da aeronave e a velocidade de translação provocam borrão de movimento em câmeras dotadas de obturador eletrônico por rolamento (*rolling shutter*, presente nos sensores OV2640/OV5640). Para contornar essa limitação física, concebeu-se a estratégia de controle **Parada Amostral Sistemática (*Pause-and-Classify*)**.
+
+O plano de voo agrícola é estruturado em uma grade regular de pontos amostrais distribuídos ao longo das linhas do canavial. O fluxo operacional da máquina de estados do payload obedece aos seguintes passos:
+\begin{enumerate}
+    \item O drone navega de forma autônoma entre os waypoints pré-programados;
+    \item A cada posição de amostragem alcançada, o microcontrolador ESP32-S3 emite o comando MAVLink \texttt{MAV\_CMD\_DO\_PAUSE\_CONTINUE} (ou comuta para modo \texttt{LOITER} / \texttt{HOLD}), forçando a aeronave a pairar estaticamente;
+    \item Após estabilização aerodinâmica (~500 ms), o sensor de imagem adquire o quadro foliar em alta resolução ($768 \times 1024$);
+    \item O pipeline Dual-Core processa a imagem (decodificação Modo 7 + inferência INT8) em aproximadamente 1,04 segundo;
+    \item O resultado (classe diagnosticada, escore de confiança e vetor de probabilidades) é associado aos dados de telemetria recebidos via mensagem \texttt{GLOBAL\_POSITION\_INT} (Latitude, Longitude, Altitude e Timestamp) e gravado em formato CSV no sistema de arquivos local;
+    \item O ESP32-S3 envia o comando MAVLink liberando o piloto automático para prosseguir ao próximo waypoint da grade.
+\end{enumerate}
+
+\subsection{Bancada Experimental de Co-Simulação Hardware-in-the-Loop (HIL)}
+
+Para validar a integridade da comunicação MAVLink e a capacidade de tomada de decisão do payload sem a necessidade de voos físicos prematuros de alto risco, montou-se uma bancada de \textbf{Co-Simulação Hardware-in-the-Loop (HIL)}:
+\begin{itemize}
+    \item \textbf{Estação de Simulação (PC Host):} Executa o ambiente \textbf{ArduPilot SITL} (\textit{Software In The Loop}) simulando a dinâmica de voo tridimensional de um quadricóptero em um talhão georreferenciado real de cana-de-açúcar no estado de São Paulo;
+    \item \textbf{Módulo Físico Embarcado:} A placa física ESP32-S3 conecta-se ao computador via enlace serial UART operando a 115.200 baud para tráfego bidirecional de mensagens MAVLink;
+    \item \textbf{Injeção de Imagens por WebSocket:} Um script de orquestração em Python atua como ponte no host, lendo as coordenadas do drone simulado no SITL, recuperando a foto real correspondente do dataset e transmitindo o JPEG binário para o servidor WebSocket da ESP32-S3;
+    \item \textbf{Fechamento de Malha:} A placa física processa o JPEG em seu hardware real, registra a telemetria e transmite os comandos de hovering e liberação via MAVLink de volta para o simulador.
+\end{itemize}

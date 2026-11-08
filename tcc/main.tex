@@ -1,0 +1,124 @@
+\documentclass[
+    12pt,
+    openright,
+    oneside,
+    a4paper,
+    chapter=TITLE,
+    section=TITLE,
+    english,
+    brazil
+]{abntex2}
+
+% Inclusão do arquivo de configurações
+\input{config}
+
+% ==============================================================================
+% INFORMAÇÕES DO TRABALHO
+% ==============================================================================
+\titulo{SISTEMA INTELIGENTE EMBARCADO EM DRONE PARA AVALIAÇÃO FITOSSANITÁRIA DA CANA-DE-AÇÚCAR UTILIZANDO TINYML E MAVLINK}
+\autor{Victor}
+\local{Brasil}
+\data{2026}
+\instituicao{
+    UNIVERSIDADE / FACULDADE DE ENGENHARIA\\
+    CURSO DE ENGENHARIA DE COMPUTAÇÃO / CONTROLE E AUTOMAÇÃO
+}
+\tipotrabalho{Trabalho de Conclusão de Curso (Graduação)}
+\preambulo{Trabalho de Conclusão de Curso apresentado ao Departamento de Engenharia como requisito parcial para a obtenção do título de Bacharel em Engenharia.}
+
+% ==============================================================================
+% INÍCIO DO DOCUMENTO
+% ==============================================================================
+\begin{document}
+
+\frenchspacing
+
+% ------------------------------------------------------------------------------
+% ELEMENTOS PRÉ-TEXTUAIS
+% ------------------------------------------------------------------------------
+\imprimircapa
+\imprimirfolhaderosto
+
+% Resumo em Português
+\begin{resumo}
+O monitoramento da sanidade foliar na cultura da cana-de-açúcar (\textit{Saccharum officinarum}) é um fator crítico para a produtividade do setor sucroenergético brasileiro. Inspeções manuais em campo são lentas, custosas e limitadas espacialmente, enquanto abordagens de Inteligência Artificial baseadas em nuvem enfrentam a ausência de conectividade de alta velocidade em ambientes rurais remotos. Este trabalho apresenta o projeto, implementação e avaliação experimental de um sistema de sensoriamento fitossanitário autônomo baseado em \textit{TinyML} embarcado em microcontrolador ESP32-S3 e integrado a Veículos Aéreos Não Tripulados (VANTs) via protocolo MAVLink. O núcleo de processamento emprega uma arquitetura MobileNet quantizada em inteiros de 8 bits (\textit{INT8}) treinada sobre 11 classes patológicas da cana-de-açúcar. Uma rigorosa auditoria criptográfica baseada em hashes MD5 eliminou 614 imagens com colisões cruzadas entre patologias e 747 duplicatas internas no dataset original, erradicando a convergência espúria na função de perda que degradava patologias críticas como o Carvão (\textit{smut}). No firmware embarcado, o pré-processamento de imagens em blocos MCU implementou a decodificação RGB8888 nativa combinada a um filtro anti-aliasing por média de caixa (\textit{Box Averaging}) e Look-Up Tables (LUTs) em SRAM interna, eliminando o viés DC de escurecimento (-2,90 LSB) e preservando lesões milimétricas. Para a inferência, um macro-pipeline assíncrono FreeRTOS com alocação híbrida de memória e aceleração vetorial SIMD Xtensa PIE atinge cadência de 1.045 ms por folha. O controle de missão opera sob o paradigma de Parada Amostral Sistemática (\textit{Pause-and-Classify}), no qual a placa comanda o drone via MAVLink para pairar (\textit{hovering}) nos pontos amostrais da grade, capturar o quadro sem borrão de movimento e gerar registros georreferenciados para composição de mapas de calor pós-voo. A validação experimental em bancada \textit{Hardware-in-the-Loop} (HIL) com simulador ArduPilot SITL confirmou a viabilidade técnica e a alta robustez da solução, atingindo 91,09\% de acurácia global e 89,41\% de generalização em validação inédita.
+
+\textbf{Palavras-chave:} TinyML. ESP32-S3. Cana-de-Açúcar. Visão Computacional Embarcada. MAVLink. VANT. Agricultura de Precisão.
+\end{resumo}
+
+% Abstract em Inglês
+\begin{resumo}[Abstract]
+\begin{otherlanguage*}{english}
+Monitoring leaf health in sugarcane crops (\textit{Saccharum officinarum}) is a critical factor for the productivity of the agro-industrial sugarcane sector. Manual field scouting is laborious, expensive, and spatially constrained, whereas cloud-based Artificial Intelligence frameworks are hindered by the lack of high-speed connectivity in remote rural fields. This study presents the design, implementation, and experimental evaluation of an autonomous phytosanitary sensing payload based on \textit{TinyML} deployed on an ESP32-S3 microcontroller and interfaced with Unmanned Aerial Vehicles (UAVs) via the MAVLink protocol. The core inference pipeline utilizes an 8-bit integer quantized (\textit{INT8}) MobileNet architecture trained across 11 sugarcane pathological classes. A rigorous MD5 cryptographic audit purged 614 cross-class conflicting images and 747 internal duplicates from the raw dataset, eliminating spurious loss convergence that previously collapsed critical classes such as sugarcane smut. Within the embedded firmware, the image pre-processing subsystem implements native 24-bit RGB8888 decoding paired with an area-based box averaging anti-aliasing filter and internal SRAM Look-Up Tables (LUTs), neutralizing systematic DC brightness attenuation (-2.90 LSB) and preserving millimeter-scale necrotic lesions. Neural inference relies on a dual-core asynchronous FreeRTOS macro-pipeline coupled with Xtensa PIE 128-bit SIMD vectorization, achieving an inter-frame cadence of 1,045 ms. Mission autonomy operates under a Systematic Pause-and-Classify scheme, whereby the payload commands the UAV via MAVLink to hover over predefined sampling grid points, capturing blur-free imagery and logging georeferenced disease diagnoses for post-mission heatmap synthesis. Hardware-in-the-Loop (HIL) validation using the ArduPilot SITL simulator verified the end-to-end operational feasibility, securing 91.09\% overall accuracy and 89.41\% generalization on unseen validation data.
+
+\textbf{Keywords:} TinyML. ESP32-S3. Sugarcane. Embedded Computer Vision. MAVLink. UAV. Precision Agriculture.
+\end{otherlanguage*}
+\end{resumo}
+
+% Listas
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
+
+\pdfbookmark[0]{\listtablename}{lot}
+\listoftables*
+\cleardoublepage
+
+% Lista de Abreviaturas e Siglas
+\begin{siglas}
+    \item[API] \textit{Application Programming Interface}
+    \item[BN] \textit{Batch Normalization}
+    \item[CNN] \textit{Convolutional Neural Network}
+    \item[DMA] \textit{Direct Memory Access}
+    \item[ESP-IDF] \textit{Espressif IoT Development Framework}
+    \item[FoV] \textit{Field of View}
+    \item[FreeRTOS] \textit{Real-Time Operating System}
+    \item[GPS] \textit{Global Positioning System}
+    \item[HIL] \textit{Hardware-in-the-Loop}
+    \item[INT8] Inteiro de 8 bits com sinal
+    \item[JPEG] \textit{Joint Photographic Experts Group}
+    \item[LSB] \textit{Least Significant Bit}
+    \item[LUT] \textit{Look-Up Table}
+    \item[MAE] \textit{Mean Absolute Error}
+    \item[MAVLink] \textit{Micro Air Vehicle Link}
+    \item[MCU] \textit{Minimum Coded Unit}
+    \item[MD5] \textit{Message Digest Algorithm 5}
+    \item[MMU] \textit{Memory Management Unit}
+    \item[PIE] \textit{Processor Instruction Extensions}
+    \item[PSNR] \textit{Peak Signal-to-Noise Ratio}
+    \item[PSRAM] \textit{Pseudo Static Random Access Memory}
+    \item[QAT] \textit{Quantization-Aware Training}
+    \item[RMSE] \textit{Root Mean Square Error}
+    \item[SIMD] \textit{Single Instruction, Multiple Data}
+    \item[SITL] \textit{Software In The Loop}
+    \item[SRAM] \textit{Static Random Access Memory}
+    \item[TCP/IP] \textit{Transmission Control Protocol / Internet Protocol}
+    \item[TFLite Micro] \textit{TensorFlow Lite for Microcontrollers}
+    \item[TinyML] \textit{Tiny Machine Learning}
+    \item[UART] \textit{Universal Asynchronous Receiver-Transmitter}
+    \item[VANT] Veículo Aéreo Não Tripulado
+    \item[WS] \textit{WebSocket}
+\end{siglas}
+
+\tableofcontents*
+\cleardoublepage
+
+% ------------------------------------------------------------------------------
+% ELEMENTOS TEXTUAIS
+% ------------------------------------------------------------------------------
+\textual
+
+\include{capitulos/01_introducao}
+\include{capitulos/02_fundamentacao_teorica}
+\include{capitulos/03_metodologia}
+\include{capitulos/04_resultados_e_discussoes}
+\include{capitulos/05_conclusao}
+
+% ------------------------------------------------------------------------------
+% ELEMENTOS PÓS-TEXTUAIS
+% ------------------------------------------------------------------------------
+\postextual
+
+\bibliography{referencias}
+
+\end{document}

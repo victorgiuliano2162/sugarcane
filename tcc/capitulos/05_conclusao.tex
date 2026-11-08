@@ -1,0 +1,36 @@
+\chapter{Conclusão}
+\label{cap:conclusao}
+
+Este trabalho apresentou o projeto, implementação física e validação experimental de um sistema inteligente e de baixo custo para avaliação fitossanitária autônoma da cana-de-açúcar, combinando técnicas avançadas de \textit{TinyML} em microcontrolador ESP32-S3 com navegação robótica em Veículos Aéreos Não Tripulados (VANTs) via protocolo aeroespacial MAVLink.
+
+\section{Síntese das Contribuições}
+
+As principais contribuições científicas e tecnológicas alcançadas ao longo do desenvolvimento deste trabalho incluem:
+\begin{enumerate}
+    \item \textbf{Curadoria Criptográfica e Resolução Teórica de Colisão de Rótulos:} A auditoria por hash MD5 nas 6.748 imagens do dataset identificou e expurgou 747 duplicatas internas e 614 imagens envolvidas em colisões cruzadas de rótulos (com destaque para 110 pares idênticos entre \textit{Pokkah Boeng} e \textit{smut}). A dedução analítica do comportamento assintótico da função de perda por entropia cruzada demonstrou matematicamente a causa do colapso da classe \textit{smut} na literatura prévia, e a sua remoção elevou a acurácia da referida doença de 4,0\% para \textbf{84,0\% em amostras limpas e 85,7\% em validação inédita}, com 100\% de eliminação das confusões cruzadas;
+    \item \textbf{Engenharia de Sinais no Pré-Processamento Embarcado:} A prova matemática do viés DC de escurecimento (-2,90 LSB) decorrente do preenchimento de zeros em conversões RGB565 e do aliasing espacial por decimação ingênua fundamentou a implementação da \textbf{Opção C (Modo 7: RGB8888 Nativo 24-bit + Box Averaging)} no firmware C++. A pré-computação de Look-Up Tables (LUTs) em SRAM interna reduziu o custo computacional em 99,77\% (de 1,57 milhão para 1.792 divisões por foto), alcançando fidelidade física de sinal perfeita ($\text{PSNR} = \infty\text{ dB}$) com apenas +5,6\% de sobrecarga temporal sobre a decimação ingênua;
+    \item \textbf{Co-Design de Hardware e Otimizações SIMD em Borda:} A alocação estratégica de scratch buffers de 48 KB e 25 KB na SRAM interna rápida com DMA evitou contenção no barramento da Octal PSRAM externa, permitindo que todas as 52 camadas convolucionais da rede neural executassem seus painéis vetoriais em instruções SIMD Xtensa PIE de 128 bits de ciclo único. A otimização em Assembly da rotina de requantização acelerou essa etapa em ~20\%, viabilizando a inferência completa em modelo quantizado INT8 de apenas 624 KB;
+    \item \textbf{Arquitetura Concorrente Dual-Core no FreeRTOS:} O Macro-Pipeline assíncrono entre núcleos com devolução antecipada de buffers na PSRAM e otimização do barramento a 80 MHz reduziu o tempo total de processamento para \textbf{386,1 ms no chip}, elevando a taxa de transferência para \textbf{1,77 imagens por segundo} de forma bit a bit idêntica ao modo sequencial;
+    \item \textbf{Autonomia de Voo Ativa via MAVLink (Pause-and-Classify):} A integração do microcontrolador como computador de bordo secundário (*Companion Computer*) permitiu comandar o pairamento (*hovering*) estável da aeronave sobre os pontos amostrais da lavoura, neutralizando o borrão de movimento e gerando logs georreferenciados para composição automática de mapas de infestação em SIG/QGIS;
+    \item \textbf{Validação em Bancada HIL e Escala Massiva:} A co-simulação \textit{Hardware-in-the-Loop} interconectando o microcontrolador físico ao simulador ArduPilot SITL validou a malha fechada de controle com ciclo médio de parada de $1.130,1\text{ ms}$ (38,9\% abaixo da meta de projeto). Além disso, a avaliação massiva de \textbf{9.269 imagens} diretamente na placa física atingiu \textbf{89,82\% de acurácia} no lote limpo e \textbf{89,41\% de generalização} no conjunto de validação de 1.076 imagens nunca vistas durante o treinamento.
+\end{enumerate}
+
+\section{Limitações do Trabalho}
+
+Não obstante os resultados positivos, identificam-se as seguintes limitações no escopo atual:
+\begin{itemize}
+    \item \textbf{Condições de Iluminação em Campo Aberto:} O modelo foi avaliado sob fotografias em luz natural diurna, podendo apresentar variações de confiança sob incidência solar direta extrema com saturação de reflexo especular na cutícula da folha ou sob baixa luminosidade ao entardecer;
+    \item \textbf{Validação em Voo Físico Real:} Embora a bancada HIL tenha validado a física de voo e a latência de troca de mensagens MAVLink com alta fidelidade, os testes em aeronave física com o sensor CMOS real (OV5640) acoplado em ambiente agrícola real estão sujeitos a intempéries de vento turbilhonado gerado pelo fluxo descendente dos rotores (*propeller downwash*);
+    \item \textbf{Classificação Monoclasse por Imagem:} A arquitetura atual classifica a folha inteira na doença predominante, não executando a segmentação semântica ou detecção de caixas delimitadoras (*bounding boxes*) de infecções secundárias concomitantes no mesmo limbo foliar.
+\end{itemize}
+
+\section{Trabalhos Futuros}
+
+Como desdobramentos desta pesquisa, propõem-se as seguintes frentes de continuidade:
+\begin{enumerate}
+    \item \textbf{Adaptação de Domínio e Expansão Multidataset (\textit{Transfer Learning \& Out-of-Distribution Mitigation}):} Investigar técnicas de alinhamento de distribuição latente (como \textit{Domain Adversarial Training} e normalização por instâncias) para incorporar repositórios externos capturados sob diferentes sensores ópticos, iluminações de estúdio e relações de aspecto (como o dataset \textit{archive} de 2.521 amostras avaliado em bancada) e integrar patologias adicionais não contempladas no escopo atual, notadamente a Podridão Vermelha (\textit{Red Rot} — \textit{Colletotrichum falcatum}), expandindo a taxonomia diagnóstica da rede neural para além das 11 classes primárias;
+    \item \textbf{Ensaios de Campo em Voo Real:} Montar o payload físico definitivo em um drone comercial ou quadricóptero experimental dotado de controladora Pixhawk/ArduPilot, realizando campanhas de mapeamento fitossanitário em talhões comerciais de usinas de açúcar e álcool;
+    \item \textbf{Detecção Multiobjeto Leve (Tiny Object Detection):} Explorar a adaptação e quantização de modelos de detecção como YOLOv8-Nano ou EdgeNeXt para delimitar múltiplas lesões foliares simultâneas e estimar o percentual de severidade de desfolha;
+    \item \textbf{Fusão Sensorial com Câmeras Multiespectrais:} Integrar sensores ópticos de baixo custo com filtros de infravermelho próximo (NIR) para calcular índices de vegetação (NDVI/SAVI) em conjunto com o diagnóstico visual do TinyML, combinando o vigor vegetativo geral à patologia específica;
+    \item \textbf{Enlace de Telemetria Longo Alcance (LoRaWAN):} Implementar um módulo de rádio LoRaWAN de 915 MHz para transmitir alertas instantâneos de coordenadas geográficas de focos graves (como Carvão) diretamente para o smartphone do gestor agrícola, mesmo quando o drone estiver sobrevoando a quilômetros de distância da sede da fazenda.
+\end{enumerate}

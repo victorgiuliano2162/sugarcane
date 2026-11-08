@@ -1,0 +1,175 @@
+\chapter{Fundamentação Teórica}
+\label{cap:fundamentacao}
+
+Este capítulo estabelece os alicerces teóricos e matemáticos que sustentam a presente pesquisa, cobrindo a fitopatologia da cana-de-açúcar, arquiteturas convolucionais eficientes, a teoria de quantização afim em inteiros de 8 bits, o processamento de sinais e amostragem na conversão de imagens, a arquitetura de hardware do processador ESP32-S3 e o protocolo aeroespacial MAVLink.
+
+\section{Fitopatologia da Cana-de-Açúcar}
+
+A cana-de-açúcar (\textit{Saccharum officinarum}) é suscetível a uma vasta gama de infecções que afetam a estrutura morfológica e a taxa fotossintética do dossel vegetativo. A caracterização botânica e sintomatológica das 11 classes avaliadas neste trabalho é descrita a seguir:
+
+\begin{enumerate}
+    \item \textbf{Carvão da Cana (\textit{smut} — \textit{Sporisorium scitamineum}):} Uma das doenças fúngicas mais graves do mundo. O sintoma patognomônico é a emergência de uma estrutura cilíndrica e chicoteada na gema apical da planta (o ``chicote''), recoberta inicialmente por uma membrana prateada que se rompe liberando bilhões de teliósporos marrom-escuros. Causa deformação total das folhas, afinamento dos colmos e perdas de até 100\% em variedades suscetíveis.
+    \item \textbf{Pokkah Boeng (\textit{Fusarium moniliforme} / \textit{Gibberella fujikuroi}):} Patologia caracterizada pelo enrugamento, clorose basal e deformação retorcida das folhas apicais jovens (efeito ``folha amassada''). Em estágios avançados, o fungo penetra o meristema terminal provocando a podridão do topo da planta e morte do colmo.
+    \item \textbf{Ferrugem Marrom (\textit{BrownRust} — \textit{Puccinia melanocephala}):} Manifesta-se inicialmente por pequenas pontuações cloróticas amareladas visíveis em ambas as faces da folha, que evoluem para pústulas alongadas de coloração marrom-avermelhada paralelas às nervuras. O rompimento da epiderme foliar acelera a dessecação e desfolha precoce.
+    \item \textbf{Mancha Parda (\textit{Brown Spot} — \textit{Cercospora longipes}):} Lesões circulares a ovais de bordas bem delimitadas marrom-escuras com centro avermelhado ou cinza, amplamente disseminadas nas folhas medianas e velhas sob condições de alta umidade.
+    \item \textbf{Clorose Zonada (\textit{Banded Chlorosis}):} Distúrbio fisiológico induzido por estresses térmicos bruscos (ondas repentinas de frio no início do desenvolvimento), caracterizado por faixas horizontais esbranquiçadas ou cloróticas transversais ao longo de todo o limbo foliar.
+    \item \textbf{Síndrome da Folha Amarela (\textit{Yellow Leaf} — \textit{Sugarcane Yellow Leaf Virus} - SCYLV):} Vírus transmitido por pulgões que induz amarelecimento intenso e progressivo da nervura central das folhas intermediárias em direção às margens, inibindo o acúmulo de sacarose e reduzindo o peso do colmo.
+    \item \textbf{Viroses Foliares (\textit{Viral Disease} — Mosaico / \textit{Sugarcane Mosaic Virus}):} Induzem a formação de manchas cloróticas irregulares dispersas em padrão de ilhas verdes escuras contra fundo verde-claro no tecido foliar jovem.
+    \item \textbf{Brotamento Graminoso (\textit{Grassy shoot} — Fitoplasma):} Proliferação desordenada e hipertrofiada de perfilhos finos, cloróticos e desprovidos de colmo aproveitável na base da touceira, conferindo à planta aspecto cespitoso semelhante a uma gramínea.
+    \item \textbf{Podridão Abacaxi do Colmo (\textit{Sett Rot} — \textit{Ceratocystis paradoxa}):} Infecção que acomete prioritariamente os toletes de plantio e a base dos colmos, provocando avermelhamento interno do parênquima com odor aromático frutado característico de ésteres de abacaxi, culminando na podridão negra dos tecidos.
+    \item \textbf{Folhas Secas (\textit{Dried Leaves}):} Senescência avançada e perda completa de turgor celular associada a estresse hídrico severo ou ataques fúngicos terminais.
+    \item \textbf{Folhas Sadias (\textit{Healthy Leaves}):} Tecido foliar íntegro, com pigmentação verde homogênea e ausência de lesões necróticas ou cloróticas.
+\end{enumerate}
+
+\section{Redes Convolucionais e Arquiteturas Leves (MobileNets)}
+
+As Redes Neurais Convolucionais tradicionais processam tensores tridimensionais de entrada $X \in \mathbb{R}^{H \times W \times C_{in}}$ através de camadas convolucionais densas compostas por $C_{out}$ filtros de dimensões $K \times K \times C_{in}$. O custo computacional medido em operações de multiplicação e acumulação (\textit{Multiply-Accumulate} - MACs) de uma convolução padrão é expresso por:
+\begin{equation}
+\text{Custo}_{\text{Padrão}} = H \cdot W \cdot C_{in} \cdot C_{out} \cdot K^2
+\label{eq:custo_conv_padrao}
+\end{equation}
+
+Para microcontroladores de borda dotados de pouca memória e sem aceleradores gráficos, esse custo computacional é proibitivo. A família de arquiteturas MobileNet \cite{howard2017mobilenets, sandler2018mobilenetv2} solucionou esse gargalo fatorando a convolução padrão em duas operações especializadas: a \textbf{Convolução em Profundidade} (\textit{Depthwise Convolution}) e a \textbf{Convolução Pontual} (\textit{Pointwise Convolution $1\times1$}), denominadas conjuntamente como \textbf{Convoluções Separáveis em Profundidade} (\textit{Depthwise Separable Convolutions}):
+
+\begin{enumerate}
+    \item \textbf{Depthwise Convolution ($K \times K$):} Aplica um filtro espacial bidimensional independente a cada canal de entrada, gerando $C_{in}$ mapas intermediários:
+    \begin{equation}
+    \text{Custo}_{\text{Depthwise}} = H \cdot W \cdot C_{in} \cdot K^2
+    \end{equation}
+    \item \textbf{Pointwise Convolution ($1 \times 1$):} Realiza uma combinação linear estritamente entre canais ao longo de cada posição espacial para sintetizar as $C_{out}$ características de saída:
+    \begin{equation}
+    \text{Custo}_{\text{Pointwise}} = H \cdot W \cdot C_{in} \cdot C_{out} \cdot 1^2
+    \end{equation}
+\end{enumerate}
+
+A soma dessas duas etapas define o custo total da convolução separável:
+\begin{equation}
+\text{Custo}_{\text{Separável}} = H \cdot W \cdot C_{in} \cdot K^2 + H \cdot W \cdot C_{in} \cdot C_{out}
+\label{eq:custo_separavel}
+\end{equation}
+
+Dividindo a Equação \ref{eq:custo_separavel} pela Equação \ref{eq:custo_conv_padrao}, obtém-se a razão exata de redução de esforço computacional:
+\begin{equation}
+\frac{\text{Custo}_{\text{Separável}}}{\text{Custo}_{\text{Padrão}}} = \frac{H \cdot W \cdot C_{in} \cdot (K^2 + C_{out})}{H \cdot W \cdot C_{in} \cdot C_{out} \cdot K^2} = \frac{1}{C_{out}} + \frac{1}{K^2}
+\label{eq:razao_mobilenet}
+\end{equation}
+Para um filtro convencional de $K = 3$ e camadas típicas onde $C_{out} \gg 9$, a razão aproxima-se de $\frac{1}{9} \approx 0,111$. Isso representa uma \textbf{redução de cerca de 88\% a 90\% no volume de cálculos}, tornando a execução viável em frequências de clock de microcontroladores.
+
+A versão MobileNetV2 introduziu ainda os blocos de \textbf{Resíduos Invertidos com Gargalos Lineares} (\textit{Inverted Residuals with Linear Bottlenecks}) \cite{sandler2018mobilenetv2}. Diferente das redes ResNet clássicas que comprimem os canais antes da convolução espacial, os blocos invertidos expandem as características para uma dimensão intermediária maior via projeção $1\times1$, executam a convolução espacial leve em profundidade e projetam novamente para um gargalo linear estrito de baixa dimensão sem ativação não-linear no ponto de soma residual, preservando a variedade geométrica (\textit{manifold}) das características latentes.
+
+\section{Teoria da Quantização Afim Inteira (INT8)}
+\label{sec:quantizacao_int8}
+
+A representação de pesos e ativações em precisão de ponto flutuante de 32 bits (\textit{float32}) exige 4 bytes por parâmetro e demanda unidades de ponto flutuante (FPUs) pesadas. A quantização uniforme afim \cite{jacob2018quantization} mapeia tensores contínuos reais $r \in [\alpha, \beta]$ para inteiros com sinal de 8 bits $q \in [-128, 127]$ através da transformação matemática:
+\begin{equation}
+q = \text{clip}\left( \text{round}\left( \frac{r}{S} \right) + Z,\; q_{\min},\; q_{\max} \right)
+\label{eq:quantizacao_direta}
+\end{equation}
+onde:
+\begin{itemize}
+    \item $S \in \mathbb{R}^+$ representa o fator de escala (\textit{scale factor}), que indica o valor real representado por uma unidade do inteiro quantizado;
+    \item $Z \in \mathbb{Z}$ é o ponto zero (\textit{zero-point}), inteiro exato que mapeia o zero real ($r = 0.0$), garantindo que paddings nulos não sofram distorção numérica;
+    \item $q_{\min} = -128$ e $q_{\max} = 127$ são os limites numéricos do tipo \texttt{int8\_t}.
+\end{itemize}
+
+A reconstrução aproximada (desquantização) do número real original é dada por:
+\begin{equation}
+r \approx S \cdot (q - Z)
+\label{eq:desquantizacao}
+\end{equation}
+
+Em uma camada convolucional totalmente quantizada onde as ativações de entrada são denotadas por $q_1$, os pesos do filtro por $q_2$ e a saída por $q_3$, a multiplicação tensorial no domínio real $r_3 = r_1 \cdot r_2$ é transcrita para o domínio inteiro como:
+\begin{equation}
+S_3 \cdot (q_3 - Z_3) = \sum_{k} \Big[ S_1 \cdot (q_1^{(k)} - Z_1) \Big] \cdot \Big[ S_2^{(k)} \cdot (q_2^{(k)} - Z_2) \Big]
+\end{equation}
+Isolando a saída quantizada $q_3$:
+\begin{equation}
+q_3 = Z_3 + \left( \frac{S_1 \cdot S_2}{S_3} \right) \cdot \sum_{k} (q_1^{(k)} - Z_1)(q_2^{(k)} - Z_2)
+\label{eq:matriz_quantizada}
+\end{equation}
+
+A constante de escala composta $M = \frac{S_1 \cdot S_2}{S_3} \in (0, 1)$ é decomposta computacionalmente em uma multiplicação inteira de 32 bits com multiplicador normalizado $M_0 \in [0.5, 1.0)$ e um deslocamento de bits à direita (*bit-shift*):
+\begin{equation}
+M = 2^{-n} \cdot M_0
+\end{equation}
+
+Essa propriedade formalizada por Jacob et al. \cite{jacob2018quantization} garante que \textbf{100\% do laço interno de convolução e acumulação matricial seja executado utilizando exclusivamente acumuladores inteiros de 32 bits e registradores de 8 bits}, sem invocar nenhuma instrução de ponto flutuante em tempo de execução.
+
+\section{Processamento Digital de Sinais e Teoria de Amostragem na Decodificação de Imagem}
+
+\subsection{Espaços de Cor e Viés DC na Conversão RGB565}
+
+Em sistemas embarcados convencionais dotados de decodificadores JPEG, o bitstream Huffman YCbCr é frequentemente convertido para o espaço de cor reduzido \textbf{RGB565} (16 bits por pixel: 5 bits para Vermelho, 6 bits para Verde e 5 bits para Azul), visando economizar largura de banda para displays LCD. Para alimentar redes neurais que operam com 8 bits por canal ($[0, 255]$), os programadores comumente aplicam um preenchimento por zeros à direita (*Zero-Fill*):
+\begin{align}
+r_8 &= r_5 \ll 3 = r_5 \times 8 \label{eq:zerofill_r} \\
+g_8 &= g_6 \ll 2 = g_6 \times 4 \label{eq:zerofill_g} \\
+b_8 &= b_5 \ll 3 = b_5 \times 8 \label{eq:zerofill_b}
+\end{align}
+
+Demonstra-se matematicamente que esse procedimento introduz duas distorções severas:
+\begin{enumerate}
+    \item \textbf{Perda de Alcance Dinâmico:} O valor máximo alcançável para $r_8$ e $b_8$ é $31 \times 8 = 248$, enquanto para $g_8$ é $63 \times 4 = 252$. O branco puro ($255$) torna-se fisicamente inatingível.
+    \item \textbf{Viés DC Negativo Sistemático (*Brightness Bias*):} Sob a hipótese de distribuição uniforme dos bits menos significativos truncados $k \in \{0, \dots, 2^{8-B}-1\}$, o erro esperado de amostragem é dado por:
+    \begin{equation}
+    E[\epsilon] = -\frac{1}{2^{8-B}} \sum_{k=0}^{2^{8-B}-1} k = -\frac{2^{8-B}-1}{2}
+    \label{eq:bias_teorico}
+    \end{equation}
+    Para os canais de 5 bits ($B=5$, $2^{8-5}-1 = 7$):
+    \begin{equation}
+    \text{Bias}_{R} = \text{Bias}_{B} = -\frac{7}{2} = -3,50\text{ LSB}
+    \end{equation}
+    Para o canal de 6 bits ($B=6$, $2^{8-6}-1 = 3$):
+    \begin{equation}
+    \text{Bias}_{G} = -\frac{3}{2} = -1,50\text{ LSB}
+    \end{equation}
+    O viés DC médio esperado para imagens RGB é:
+    \begin{equation}
+    \text{Bias}_{\text{médio}} = \frac{-3,50 + (-1,50) + (-3,50)}{3} = -\mathbf{2,833\text{ LSB}}
+    \end{equation}
+    Esse deslocamento negativo atenua sistematicamente os pixels de toda a imagem, escurecendo folhas verdes e degradando padrões de contraste foliar.
+\end{enumerate}
+
+\subsection{Teorema de Nyquist-Shannon e Aliasing Espacial}
+
+O Teorema da Amostragem de Nyquist-Shannon \cite{nyquist1928certain, shannon1949communication} estabelece que um sinal bidimensional contínuo $f(x, y)$ com frequência espacial máxima $(u_{\max}, v_{\max})$ só pode ser perfeitamente reconstruído sem distorção se a frequência de amostragem satisfizer:
+\begin{equation}
+f_{s, x} \ge 2 u_{\max}, \quad f_{s, y} \ge 2 v_{\max}
+\end{equation}
+
+Ao reduzir a resolução espacial de uma imagem de entrada de dimensões $W_{orig} \times H_{orig}$ ($768 \times 1024$) para o tensor de entrada da CNN de dimensões $W_{dst} \times H_{dst}$ ($160 \times 160$), a taxa de decimação é de aproximadamente $4,8 \times 6,4 \approx 30,72$ pixels por elemento de destino. 
+
+Se o processo de subamostragem for implementado por decimação ingênua (amostragem pontual por sobrescrita ou vizinho mais próximo), as frequências espaciais superiores à frequência de Nyquist da grade de destino sofrem rebatimento espectral (*aliasing*), projetando componentes espaciais de alta frequência sobre as baixas frequências \cite{gonzalez2018digital}. Fisicamente, lesões finas de esporos fúngicos com espessura de 1 a 3 pixels na imagem original desaparecem ou assumem formatos geométricos artificiais.
+
+Para cumprir o critério de Nyquist, deve-se aplicar previamente um filtro passa-baixas anti-aliasing sobre cada bloco de decimação antes de realizar a amostragem. No contexto computacional discreto de imagens, o integrador ideal de área é a Média de Caixa (*Box Averaging*):
+\begin{equation}
+I_{dst}(x', y') = \frac{1}{|\Omega(x', y')|} \sum_{(x, y) \in \Omega(x', y')} I_{orig}(x, y)
+\label{eq:box_averaging}
+\end{equation}
+onde $\Omega(x', y')$ representa o conjunto de coordenadas espaciais da imagem de alta resolução que mapeiam geometricamente para a célula discreta $(x', y')$ do tensor de entrada.
+
+\section{Arquitetura Computacional do ESP32-S3 e Acelerações SIMD}
+
+O microcontrolador Espressif ESP32-S3 incorpora dois núcleos de 32 bits baseados na arquitetura Xtensa LX7 operando em frequência de clock de até 240 MHz \cite{espressif2023esp32s3}. Para cargas de trabalho de Inteligência Artificial, o chip inclui a extensão proprietária \textbf{PIE} (\textit{Processor Instruction Extensions}), dotada de 8 registradores vetoriais dedicados de 128 bits (\texttt{q0} a \texttt{q7}) e acumuladores de 160 bits (\texttt{accx}, \texttt{qacc}).
+
+Através das instruções SIMD vetoriais, como \texttt{ee.vld.128.ip} (carga alinhada de 16 bytes com auto-incremento de ponteiro) e \texttt{ee.vmulas.s8.accx} (multiplicação-acumulação vetorial saturada), o processador é capaz de executar \textbf{16 operações MAC inteiras de 8 bits em um único ciclo de máquina}.
+
+Em termos de hierarquia de memória, o microcontrolador organiza-se em dois domínios principais:
+\begin{itemize}
+    \item \textbf{SRAM Interna (512 KB totais, ~309 KB dinâmicos livres no boot):} Opera na mesma frequência da CPU com zero estados de espera (*zero wait-states*), oferecendo acesso contíguo de 128 bits para o motor vetorial SIMD e canais DMA;
+    \item \textbf{Octal PSRAM Externa (8 MB):} Memória estática externa acoplada por barramento serial síncrono Octal SPI a 40/80 MHz. Embora ofereça ampla capacidade de armazenamento, compartilha a cache L1 de dados (DCache), sofrendo penalidades de latência de barramento sempre que ocorrem falhas de cache (*cache misses*).
+\end{itemize}
+
+O gerenciamento multitarefa do firmware é provido pelo sistema operacional de tempo real FreeRTOS, permitindo a fixação de tarefas por afinidade de núcleo (\textit{Task Pinning}) e comunicação assíncrona orientada a eventos através de semáforos e filas de mensagens (\textit{Queues}).
+
+\section{Veículos Aéreos Não Tripulados e Protocolo MAVLink}
+
+O protocolo MAVLink (\textit{Micro Air Vehicle Link}) \cite{koubaa2019mavlink} é uma especificação padrão de comunicação serial binária ultraleve amplamente utilizada no ecossistema aeroespacial de drones autônomos de código aberto (projetos ArduPilot e PX4). 
+
+O pacote básico do MAVLink versão 2.0 possui sobrecarga (\textit{overhead}) de apenas 14 a 27 bytes, incluindo delimitador de início (\texttt{STX = 0xFD}), tamanho do payload, flags de compatibilidade, contadores de sequência, ID do sistema (\texttt{sysid}), ID do componente (\texttt{compid}), ID da mensagem (24 bits), carga útil de dados e soma de verificação ciclíca de redundância CRC-16.
+
+Dentre os principais modos de voo autônomos suportados pelos pilotos automáticos, o modo \textbf{GUIDED} (Guiado) permite que um computador de bordo secundário (\textit{Companion Computer}) assuma o controle da rota dinâmica do veículo sem intervenção humana, emitindo comandos de navegação tridimensionais via porta serial UART:
+\begin{itemize}
+    \item \texttt{SET\_POSITION\_TARGET\_GLOBAL\_INT}: Comanda o deslocamento do drone para coordenadas geográficas arbitrárias (Latitude, Longitude e Altitude) com controle estrito de velocidade e aceleração;
+    \item \texttt{MAV\_CMD\_DO\_PAUSE\_CONTINUE}: Permite pausar momentaneamente a execução de um plano de voo autônomo, forçando o drone a manter estabilização estática de pairamento (*hovering* / \texttt{LOITER}) contra ventos externos;
+    \item \texttt{GLOBAL\_POSITION\_INT}: Mensagem de telemetria transmitida periodicamente pelo drone a frequências entre 4 Hz e 10 Hz, contendo coordenadas GPS filtradas por fusão sensorial (Filtro de Kalman Estendido - EKF), altitude barométrica e velocidades relativas nos eixos norte, leste e descida.
+\end{itemize}

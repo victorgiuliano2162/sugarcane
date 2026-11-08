@@ -1,0 +1,230 @@
+% MODELO PARA DESPÓSITO NO REPOSITÓRIO DO IFPE
+% INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE PERNAMBUCO
+% DESENVOLVIDO POR YGO NETO BATISTA
+% IFPE CAMPUS PESQUEIRA
+% Versão 2, de 07/03/2024
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesClass{ArtigoIFPE}[2024/03/07 Classe para Artigos IFPE]
+
+\usepackage[portuguese]{babel}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{tikz}
+\usepackage{indentfirst} % Linhas após títulos com tabulação
+\usepackage{microtype} % Melhora alinhamento justificado
+\usepackage{fancyhdr} % Cabeçalhos e rodapés
+\usepackage[fleqn]{amsmath}
+\usepackage{float}
+\usepackage{ragged2e}
+\usepackage{caption}
+\usepackage[style=abnt]{biblatex}
+\addbibresource{bibliografia.bib} 
+\usepackage{csquotes}
+\usepackage{booktabs}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{soul}
+\usepackage{amsmath}
+\usepackage{verbatim}
+\usepackage{titlesec}
+
+\widowpenalty=10000 %controle de viúvas
+\clubpenalty=10000 %controle de orfaos
+
+% Adicionado por estudantes para formatar tabelas:
+%\usepackage{multirow} % Create tabular cells spanning multiple rows
+%\usepackage{multicol} % Intermix single and multiple columns
+%\usepackage{makecell} % Tabular column heads and multilined cells
+%\usepackage{array} % Extending the array and tabular environments
+%\usepackage{longtable} % Longtable allows you to write tables that continue to the next page.
+%\usepackage{setspace} % Set space between lines (apresentou warning na compilação)
+%\usepackage{colortbl} % Add colour to LATEX tables
+
+%Para inserir códigos fonte:
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=t,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+\renewcommand\lstlistingname{Programa}
+
+
+
+
+\captionsetup{justification=centering,singlelinecheck=false,labelsep=endash}
+
+% FONTE PADRÃO
+% A Fonte deve ser ARIAL. Deve-se usar o XeLaTeX
+\usepackage{fontspec}
+\setmainfont{Arial}
+\newcommand{\XPT}{\@setfontsize\xpt{10}{14}} %fonte 10pt
+\newcommand{\XIPT}{\@setfontsize\xipt{11}{15}} %fonte 11pt
+\newcommand{\XIVPT}{\@setfontsize\xivpt{14}{18}} %fonte 14pt
+\newcommand{\XVIPT}{\@setfontsize\xvipt{16}{20}} %fonte 16pt
+
+% LAYOUT DA PÁGINA
+\parindent 0.7cm
+\parskip 5pt
+
+\paperheight = 297mm
+\paperwidth = 210mm
+\voffset = 0mm
+\topmargin = -12.4mm
+\headheight = 5.6mm
+\headsep = 12mm
+\textheight = 240.5mm
+\footskip = 9mm
+\hoffset = 0mm
+\oddsidemargin = 4.3mm
+\textwidth = 160mm
+
+% CABEÇALHO E RODAPÉ
+%\setlength{\headheight}{16pt} %VERIFICAR ESSE NÚMERO!!!!
+\fancyhf{} % limpa os cabecalhos e rodapés
+\fancyhead[R]{\thepage} % define o cabeçalho personalizado
+\fancyfoot[L]{\XPT Instituto Federal de Pernambuco. Campus \@campus . Curso \@curso . \@data .}
+\renewcommand{\headrulewidth}{0pt}
+\pagestyle{fancy}
+
+\fancypagestyle{plain}{% CONFIGURAÇÃO DA PRIMEIRA PÁGINA
+\fancyhf{}% clear all header and footer fields
+\fancyfoot[L]{\XPT Instituto Federal de Pernambuco. Campus \@campus . Curso \@curso . \@data .}
+}
+
+% TÍTULO E AUTORES
+\def\titleEng#1{\gdef\@titleEng{#1}}
+\def\autora#1{\gdef\@autora{#1}}
+\def\emaila#1{\gdef\@emaila{#1}}
+\def\autorb#1{\gdef\@autorb{#1}}
+\def\emailb#1{\gdef\@emailb{#1}}
+\def\autorc#1{\gdef\@autorc{#1}}
+\def\emailc#1{\gdef\@emailc{#1}}
+\def\autord#1{\gdef\@autord{#1}}
+\def\emaild#1{\gdef\@emaild{#1}}
+\def\autore#1{\gdef\@autore{#1}}
+\def\emaile#1{\gdef\@emaile{#1}}
+\def\autorf#1{\gdef\@autorf{#1}}
+\def\emailf#1{\gdef\@emailf{#1}}
+\def\orientador#1{\gdef\@orientador{#1}}
+\def\emailOrientador#1{\gdef\@emailOrientador{#1}}
+
+\def\campus#1{\gdef\@campus{#1}}
+\def\curso#1{\gdef\@curso{#1}}
+\def\data#1{\gdef\@data{#1}}
+
+\def\@maketitle{
+\emergencystretch 3em
+\begin{tikzpicture}[overlay, remember picture]
+  \node[xshift=-20.8mm,yshift=-17mm] at (current page.north east) {\includegraphics[width=21.6mm,height=26mm]{logo-ifpe.png}};
+\end{tikzpicture}\par
+\parindent 0cm
+{\XVIPT\bf\@title\par}
+{\XIVPT\@titleEng\par}
+\begin{flushright}
+{\bf\@autora\par}\@emaila\par
+\ifdefined\@autorb {\bf\@autorb\par} \@emailb\par \fi
+\ifdefined\@autorc {\bf\@autorc\par} \@emailc\par \fi
+\ifdefined\@autord {\bf\@autord\par} \@emaild\par \fi
+\ifdefined\@autore {\bf\@autore\par} \@emaile\par \fi
+\ifdefined\@autorf {\bf\@autorf\par} \@emailf\par \fi
+{\bf\@orientador\par} \@emailOrientador\par
+\end{flushright}
+\vspace*{15pt}
+\hrule height 1.5pt
+\vspace*{1pt}
+}
+
+%
+
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+      {-3ex \@plus -1ex \@minus -0.2ex}%
+      {0.5ex \@plus.2ex}%
+      {\normalfont\normalsize\bf\uppercase}}
+
+\renewcommand\subsection{\@startsection {subsection}{1}{\z@}%
+      {-3ex \@plus -1ex \@minus -0.2ex}%
+      {0.5ex \@plus.2ex}%
+      {\normalfont\normalsize\bf}}
+
+\renewcommand\subsubsection{\@startsection {subsubsection}{1}{\z@}%
+      {-3ex \@plus -1ex \@minus -0.2ex}%
+      {0.5ex \@plus.2ex}%
+      {\normalfont\normalsize\bf}}
+
+\newcommand{\palavraschave}[1]{\vspace*{12pt} {\parindent 0cm Palavras-chave: #1}}
+
+\newcommand{\keywords}[1]{\vspace*{12pt} {\parindent 0cm Keywords: #1}}
+
+\newcommand{\reiniciaAlfa}{
+\setcounter{section}{0}
+\counterwithin{lstlisting}{section}
+\counterwithin{mapa}{section}
+\counterwithin{diagrama}{section}
+\counterwithin{fluxograma}{section}
+\counterwithin{figura}{section}
+\counterwithin{quadro}{section}
+\counterwithin{grafico}{section}
+\counterwithin{tabela}{section}
+\counterwithin{programa}{section}}
+
+\newcommand{\apendice}[1]{
+\clearpage
+\renewcommand{\thesection}{APÊNDICE \Alph{section}}
+\section{#1}
+\renewcommand{\thesection}{\Alph{section}}}
+
+\newcommand{\anexo}[1]{
+\clearpage
+\renewcommand{\thesection}{ANEXO \Alph{section}}
+\section{#1}
+\renewcommand{\thesection}{\Alph{section}}}
+
+
+\newenvironment{citacao}{
+\vspace*{8mm} \setlength{\parindent}{0cm}
+\hfill \begin{minipage}{140mm}
+\XIPT 
+}{
+\vspace*{8mm} \end{minipage}
+}
+
+\floatstyle{plaintop}
+\newfloat{mapa}{htbp}{mapa}\floatname{mapa}{Mapa}
+\newcommand{\mapaautorefname}{Mapa}
+\newfloat{diagrama}{htbp}{diagrama}\floatname{diagrama}{Diagrama}
+\newcommand{\diagramaautorefname}{Diagrama}
+\newfloat{fluxograma}{htbp}{fluxograma}\floatname{fluxograma}{Fluxograma}
+\newcommand*{\fluxogramaautorefname}{Fluxograma}
+\newfloat{figura}{htbp}{figura}\floatname{figura}{Figura}
+\newcommand{\figuraautorefname}{Figura}
+\newfloat{quadro}{htbp}{quadro}\floatname{quadro}{Quadro}
+\newcommand{\quadroautorefname}{Quadro}
+\newfloat{grafico}{htbp}{grafico}\floatname{grafico}{Gráfico}
+\newcommand{\graficoautorefname}{Gráfico}
+\newfloat{tabela}{h!btp}{tabela}\floatname{tabela}{Tabela}
+\newcommand{\tabelaautorefname}{Tabela}
+\newfloat{programa}{h!btp}{programa}\floatname{programa}{Programa}
+\newcommand{\programaautorefname}{Programa}

@@ -1,0 +1,61 @@
+\chapter{Introdução}
+\label{cap:introducao}
+
+\section{Contextualização Histórica, Socioeconômica e Relevância Agronômica}
+
+A cultura da cana-de-açúcar (\textit{Saccharum officinarum} L.) constitui um dos pilares históricos, econômicos e socioculturais mais profundos do Brasil e, em particular, do estado de Pernambuco. Desde o período colonial, com a implantação dos primeiros engenhos nas Capitanias Hereditárias no século XVI, a capitania de Pernambuco destacou-se como o polo açucareiro mais próspero da colônia, impulsionando a ocupação demográfica e territorial do litoral e da Zona da Mata nordestina \cite{freyre2004}. Conforme documentado pela historiografia clássica brasileira \cite{freyre2004,mello2007}, a economia canavieira forjou a estrutura social, a dinâmica política e a fisionomia agrária regional por mais de quatro séculos.
+
+Na contemporaneidade, a despeito da industrialização e diversificação econômica do estado, a cana-de-açúcar preserva centralidade vital na matriz produtiva regional. Dados consolidados da Companhia Nacional de Abastecimento \cite{conab2024cana,conab2025} e do Sindicato da Indústria do Açúcar e do Álcool no Estado de Pernambuco \cite{sindacucar2024} atestam que o estado processou aproximadamente 11,6 milhões de toneladas de cana na safra recente, respondendo por parcela substancial do Produto Interno Bruto (PIB) agropecuário nordestino, fornecendo matéria-prima para a produção de açúcar, etanol carburante e bioeletricidade limpa, além de sustentar cerca de 70 mil empregos diretos \cite{santos2023}. Ademais, a cadeia produtiva da cana em Pernambuco abrange milhares de pequenos fornecedores e famílias assentadas na Zona da Mata que dependem economicamente da sanidade de seus canaviais, configurando um ecossistema com forte relevância para a agricultura familiar \cite{oliveira2024}.
+
+Entretanto, a rentabilidade do setor sucroenergético e a subsistência do pequeno produtor enfrentam contínuas perdas agronômicas decorrentes de pragas e fitopatologias foliares de alta transmissibilidade \cite{mariano2023}. Dentre os patógenos mais devastadores que acometem os canaviais tropicais, destacam-se o Carvão (\textit{Sporisorium scitamineum}), a Ferrugem Marrom (\textit{Puccinia melanocephala}), o Complexo de \textit{Fusarium} (\textit{Pokkah Boeng}), a Mancha Parda (\textit{Cercospora longipes}), a Podridão de Toletes (\textit{Ceratocystis paradoxa}), a Podridão Vermelha (\textit{Colletotrichum falcatum}) e viroses sistêmicas como a Síndrome da Folha Amarela (SCYLV) e o Mosaico \cite{barbedo2019review}. Essas enfermidades induzem clorose, necroses vasculares nos colmos e quebra drástica no rendimento de sacarose, provocando perdas produtivas de 20\% a 50\% quando não identificadas precocemente \cite{mariano2023,conab2025}.
+
+A contenção fitossanitária eficaz repousa na intervenção localizada (*Precision Spraying*) antes da dispersão das teliósporos e conídios. Contudo, o método tradicional dominante ainda consiste no caminhamento técnico pedestre por pragueiros (*scouting* manual). Diante do porte denso e cortante da cana adulta (frequentemente superando três metros de altura) e de talhões que ultrapassam centenas de hectares contínuos, a inspeção manual é morosa, excessivamente onerosa, subjetiva e incapaz de monitorar a totalidade das lavouras em tempo hábil \cite{radoglou2020compilation}.
+
+\section{A Problemática Tecnológica: Conectividade Rural vs. IA em Nuvem}
+
+O recente avanço do Aprendizado Profundo (*Deep Learning*) e das Redes Neurais Convolucionais (*Convolutional Neural Networks* -- CNNs) viabilizou o diagnóstico automatizado de patologias vegetais a partir de fotos RGB com alta sensibilidade \cite{krizhevsky2012,lu2022}. Todavia, a esmagadora maioria das abordagens disponíveis na literatura acadêmica baseia-se no paradigma da Computação em Nuvem (*Cloud Computing*), no qual imagens adquiridas em campo são enviadas continuamente para servidores remotos providos de placas gráficas de alto custo (GPUs) \cite{xu2023,rodriguez2021sugarcane}.
+
+No contexto da agricultura brasileira e, em particular, na Zona da Mata pernambucana, a dependência da nuvem esbarra em barreiras intransponíveis:
+\begin{enumerate}
+    \item \textbf{Ausência de Conectividade Rural:} Grandes porções das zonas rurais sofrem com sombra de sinal de telefonia celular 3G/4G, inviabilizando o upload contínuo de fluxos de vídeo ou pacotes massivos de fotos de alta resolução durante a jornada de inspeção \cite{he2023};
+    \item \textbf{Latência de Enlace e Incerteza Operacional:} A oscilação dos enlaces sem fio rurais impõe latências imprevisíveis de vários segundos por foto, inviabilizando tomadas de decisão imediatas em controle de voo ou prescrição em tempo real;
+    \item \textbf{Custo de Aceleradores Dedicados:} Computadores de bordo industriais baseados em GPU (como a família NVIDIA Jetson) apresentam custo elevado, peso excessivo e consumo energético incompatível com a realidade orçamentária da agricultura familiar e com aeronaves não tripuladas leves \cite{oliveira2024}.
+\end{enumerate}
+
+Como alternativa, a disciplina de *Tiny Machine Learning* (*TinyML*) \cite{warden2019,moons2020} viabilizou a execução de redes neurais profundas inteiramente quantizadas diretamente em microcontroladores de baixo custo ($< \text{US\$} 5$) e consumo na faixa de miliwatts, como o SoC Espressif ESP32-S3 \cite{esp32s3}. Ao transferir a inferência matemática para a borda extrema (*Extreme Edge*), elimina-se integralmente a dependência de conectividade externa, garantindo autonomia, determinismo temporal e preservação dos dados.
+
+\section{A Integração de TinyML com Veículos Aéreos Não Tripulados via MAVLink}
+
+Paralelamente, o emprego de Veículos Aéreos Não Tripulados (VANTs), ou drones, revolucionou o sensoriamento remoto agrícola ao conferir elevada mobilidade espacial para inspeção sobre a copa dos canaviais \cite{radoglou2020compilation}.
+
+Entretanto, as abordagens convencionais com drones limitam-se ao processamento estático pós-voo: o VANT sobrevoa a plantação registrando fotos indiscriminadamente em cartões de memória para posterior fotogrametria manual em escritório, horas após o pouso. Ademais, aeronaves em voo contínuo acopladas a sensores ópticos de baixo custo com obturador eletrônico por rolamento (*rolling shutter*) sofrem severo borrão de movimento (*motion blur*) decorrente da velocidade de translação e das vibrações mecânicas, degradando as feições microscópicas das lesões foliares.
+
+Nesse contexto, surge a oportunidade científica de integrar o microcontrolador ESP32-S3 como um computador de bordo inteligente (*Companion Payload*) acoplado ao piloto automático do drone via protocolo aeroespacial padrão **MAVLink v2** \cite{koubaa2019mavlink}. Em vez de atuar como mero espectador passivo, o microcontrolador executa uma máquina de estados autônoma de **Parada Amostral Sistemática (*Pause-and-Classify*)**: comanda a aeronave a pairar (*hover*) nos waypoints da grade de plantio, aguarda a dissipação de vibrações ($500\text{ ms}$), captura e processa a imagem foliar on-chip em alta resolução, registra a predição sincronizada com a telemetria GPS e libera o voo para o próximo ponto, sintetizando mapas de calor pós-missão para Sistemas de Informação Geográfica (SIG).
+
+\section{Objetivos}
+
+\subsection{Objetivo Geral}
+
+O objetivo geral deste trabalho é projetar, implementar, otimizar e validar experimentalmente um sistema inteligente, autônomo e de baixo custo para avaliação fitossanitária de 11 classes foliares de cana-de-açúcar, composto por uma rede neural convolucional quantizada em inteiros de 8 bits (\textit{INT8}) embarcada no microcontrolador dual-core ESP32-S3, integrada a uma estratégia de controle de VANT via protocolo MAVLink sob o paradigma de Parada Amostral Sistemática (\textit{Pause-and-Classify}).
+
+\subsection{Objetivos Específicos}
+
+Para consecução do objetivo geral, estabelecem-se os seguintes objetivos específicos:
+\begin{enumerate}
+    \item Executar uma auditoria forense criptográfica rigorosa baseada em hashes MD5 sobre as 6.748 imagens do *Sugarcane Leaf Image Dataset*, identificando e expurgando duplicatas internas e 614 arquivos envolvidos em colisões cruzadas de rótulos entre classes incompatíveis (notadamente entre *smut* e *Pokkah Boeng*);
+    \item Desenvolver e treinar o modelo neural MobileNetV2 ($\alpha=0,75$, entrada $160 \times 160$) com Perda Focal Categórica e quantização inteira completa INT8 (\texttt{v08}), superando o colapso diagnóstico da classe Carvão;
+    \item Formular, modelar matematicamente e implementar no firmware C++ o algoritmo de pré-processamento **Modo 7 (RGB8888 + Box-Averaging com LUT Q16 e escala IDCT)**, eliminando o viés DC de escurecimento e garantindo paridade radiométrica exata ($\text{PSNR} = \infty\text{ dB}$);
+    \item Projetar uma arquitetura de paralelismo híbrido em dois níveis no FreeRTOS (pipeline assíncrono inter-quadros e *Fork-Join* intra-inferência com alocação de $48\text{ KB}$ de *scratch buffer* na SRAM interna), mitigando a contenção na Octal PSRAM e acelerando as convoluções via instruções vetoriais SIMD Xtensa LX7;
+    \item Avaliar exaustivamente o sistema no hardware físico sobre **9.269 imagens**, mensurando latência, vazão e diagnosticando empiricamente o fenômeno de Deslocamento de Domínio (*Domain Shift*) frente a sensores heterogêneos;
+    \item Construir e validar a bancada de Co-Simulação *Hardware-in-the-Loop* (HIL) MAVLink em malha fechada sobre um talhão agrícola de 55 waypoints, sintetizando automaticamente camadas vetoriais GeoJSON (RFC 7946) e mapas de calor de focos epidêmicos compatíveis com QGIS.
+\end{enumerate}
+
+\section{Estrutura do Trabalho}
+
+Esta monografia está estruturada em cinco capítulos:
+\begin{itemize}
+    \item \textbf{Capítulo \ref{cap:fundamentacao}}: Apresenta a fundamentação teórica sobre fitopatologia da cana, redes convolucionais leves (MobileNetV2), quantização inteira simétrica INT8, extensões vetoriais SIMD no ESP32-S3, teoria de amostragem de Nyquist-Shannon e protocolo MAVLink;
+    \item \textbf{Capítulo \ref{cap:metodologia}}: Descreve a metodologia de engenharia, compreendendo a auditoria MD5 do dataset, o algoritmo de pré-processamento Modo 7, a arquitetura paralela FreeRTOS e a bancada HIL MAVLink;
+    \item \textbf{Capítulo \ref{cap:resultados}}: Expõe e discute os resultados experimentais obtidos diretamente no hardware físico, incluindo benchmarks radiométricos, desempenho multinúcleo, avaliação massiva de 9.269 amostras com análise de *Domain Shift* e a missão HIL georreferenciada;
+    \item \textbf{Capítulo \ref{cap:conclusao}}: Sintetiza as conclusões, avalia o impacto na agricultura familiar e delineia os trabalhos futuros.
+\end{itemize}

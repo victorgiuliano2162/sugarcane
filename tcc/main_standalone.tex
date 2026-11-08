@@ -1,0 +1,75 @@
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{microtype}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage[margin=2.5cm]{geometry}
+
+% Inclusão do arquivo de configurações
+\input{config}
+
+\graphicspath{{Imagens/}}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{0.5cm}
+    {\large \textbf{INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DE PERNAMBUCO}}\\[0.2cm]
+    {\large \textbf{CAMPUS PAULISTA}}\\[0.2cm]
+    {\large \textbf{CURSO SUPERIOR DE TECNOLOGIA EM ANÁLISE E DESENVOLVIMENTO DE SISTEMAS}}\\[3.0cm]
+    
+    {\Large \textbf{VICTOR GIULIANO DE FREITAS SILVA}}\\[2.5cm]
+    
+    {\LARGE \textbf{DIAGNÓSTICO FITOSSANITÁRIO EM FOLHAS DE CANA-DE-AÇÚCAR VIA CNN EMBARCADA COM TINYML, PIPELINE ASSÍNCRONO DUAL-CORE NO ESP32-S3 E CO-SIMULAÇÃO HIL COM VANT}}\\[3.0cm]
+    
+    \vfill
+    {\large Paulista -- PE\\2026}
+\end{titlepage}
+
+% Folha de Rosto
+\newpage
+\thispagestyle{empty}
+\begin{center}
+    \vspace*{0.5cm}
+    {\Large \textbf{VICTOR GIULIANO DE FREITAS SILVA}}\\[3.5cm]
+    
+    {\LARGE \textbf{DIAGNÓSTICO FITOSSANITÁRIO EM FOLHAS DE CANA-DE-AÇÚCAR VIA CNN EMBARCADA COM TINYML, PIPELINE ASSÍNCRONO DUAL-CORE NO ESP32-S3 E CO-SIMULAÇÃO HIL COM VANT}}\\[3.0cm]
+    
+    \hspace{.45\textwidth}
+    \begin{minipage}{.5\textwidth}
+        \small
+        Trabalho de Conclusão de Curso apresentado ao Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas do Instituto Federal de Educação, Ciência e Tecnologia de Pernambuco -- Campus Paulista, como requisito parcial para obtenção do título de Tecnólogo em Análise e Desenvolvimento de Sistemas.\\[0.8cm]
+        \textbf{Orientador(a):} Prof(a). [Nome do Orientador]
+    \end{minipage}
+    
+    \vfill
+    {\large Paulista -- PE\\2026}
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+
+\include{capitulos/01_introducao}
+\include{capitulos/02_fundamentacao_teorica}
+\include{capitulos/03_metodologia}
+\include{capitulos/04_resultados_e_discussoes}
+\include{capitulos/05_conclusao}
+
+\bibliographystyle{plain}
+\bibliography{referencias}
+
+\end{document}

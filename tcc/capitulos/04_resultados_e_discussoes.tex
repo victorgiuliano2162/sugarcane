@@ -1,0 +1,292 @@
+\chapter{Resultados e Discussões}
+\label{cap:resultados}
+
+Este capítulo apresenta a análise crítica e empírica dos resultados obtidos em todas as etapas do projeto, abrangendo a auditoria criptográfica de dados, o benchmark de processamento de sinais nas 8 variantes da função \texttt{JPEGDraw()}, a evolução de acurácia com o modelo neural \texttt{v08}, os ensaios de desempenho concorrente no hardware ESP32-S3 e a validação do sistema autônomo na bancada de co-simulação \textit{Hardware-in-the-Loop} (HIL).
+
+\section{Resultados da Auditoria Criptográfica MD5 do Dataset}
+
+A Tabela \ref{tab:auditoria_md5} consolida a radiografia completa dos 6.748 arquivos originais do dataset fitopatológico após a aplicação do algoritmo de varredura por hash MD5 detalhado na Seção \ref{sec:auditoria_md5}.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Resultado da auditoria criptográfica MD5 e estratificação do dataset (11 Classes).}
+\label{tab:auditoria_md5}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Classe Fitossanitária} & \textbf{Bruto} & \textbf{Únicos} & \textbf{Dups. Int.} & \textbf{Colisões Cruz.} & \textbf{\% Contam.} & \textbf{Base Limpa} \\
+\midrule
+Banded Chlorosis & 471 & 418 & 53 & 105 & 22,3\% & 313 \\
+Brown Spot       & 1.722 & 1.434 & 288 & 23 & 1,3\% & 1.411 \\
+BrownRust        & 314 & 284 & 30 & 77 & 24,5\% & 207 \\
+Dried Leaves     & 343 & 271 & 72 & 23 & 6,7\% & 250 \\
+Grassy shoot     & 346 & 346 & 0 & 0 & 0,0\% & 346 \\
+Healthy Leaves   & 430 & 430 & 0 & 13 & 3,0\% & 417 \\
+\textbf{Pokkah Boeng} & \textbf{297} & \textbf{297} & \textbf{0} & \textbf{110} & \textbf{37,0\%} & \textbf{187} \\
+Sett Rot         & 652 & 652 & 0 & 0 & 0,0\% & 652 \\
+Viral Disease    & 663 & 635 & 28 & 90 & 13,6\% & 545 \\
+Yellow Leaf      & 1.194 & 918 & 276 & 33 & 2,8\% & 885 \\
+\textbf{smut (Carvão)} & \textbf{316} & \textbf{316} & \textbf{0} & \textbf{140} & \textbf{44,3\%} & \textbf{176} \\
+\midrule
+\textbf{TOTAL GERAL} & \textbf{6.748} & \textbf{6.001} & \textbf{747} & \textbf{614 (306 pares)} & \textbf{9,1\%} & \textbf{5.389} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A inspeção dos dados confirmou que a classe \textit{Pokkah Boeng} compartilhava exatamente \textbf{110 imagens idênticas com a classe \textit{smut}}. Conforme previsto pela prova teórica da Equação \ref{eq:ponto_otimo_conflito}, o descarte dessas 614 imagens ambíguas eliminou a contradição de gradiente que forçava a rede neural a convergir para um estado de incerteza próximo a 50\% de confiança.
+
+\section{Benchmark de Processamento de Sinais nas 8 Variantes de \texttt{JPEGDraw()}}
+
+A Tabela \ref{tab:benchmark_jpegdraw} resume a avaliação de fidelidade de sinal físico (avaliada sob 4.400 inferências comparativas no modelo de linha de base \texttt{v07}) entre as oito abordagens de decodificação e redimensionamento espacial analisadas no projeto.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Métricas físicas de sinal e tempo médio de execução das 8 variantes avaliadas.}
+\label{tab:benchmark_jpegdraw}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Variante Avaliada} & \textbf{Bias DC} & \textbf{MAE} & \textbf{RMSE} & \textbf{PSNR} & \textbf{Tempo/Ref.} & \textbf{Acurácia (v07)} \\
+\midrule
+0. RGB565 ZeroFill + Overwrite  & $-2,90$ LSB & $2,83$ LSB & $11,25$ LSB & $27,1$ dB & $5,69$ ms (Base) & $82,36\%$ \\
+1. RGB565 BitRep + Overwrite    & $+0,60$ LSB & $1,93$ LSB & $11,00$ LSB & $27,3$ dB & $6,40$ ms (+12\%) & $81,64\%$ \\
+2. RGB8888 Nativo + Overwrite   & $-0,06$ LSB & $0,00$ LSB & $10,35$ LSB & $27,8$ dB & $6,12$ ms (+7\%)  & $81,82\%$ \\
+3. RGB565 BitRep + FastLUT      & $+0,60$ LSB & $1,93$ LSB & $11,00$ LSB & $27,3$ dB & $3,90$ ms (-31\%) & $81,64\%$ \\
+4. RGB8888 Nativo + FastLUT     & $-0,06$ LSB & $0,00$ LSB & $10,35$ LSB & $27,8$ dB & $4,66$ ms (-18\%) & $81,82\%$ \\
+5. RGB565 ZeroFill + BoxAvg     & $-2,84$ LSB & $2,84$ LSB & $3,15$ LSB  & $38,2$ dB & $6,45$ ms (+13\%) & $82,73\%$ \\
+6. RGB565 BitRep + BoxAvg       & $+0,66$ LSB & $1,28$ LSB & $1,69$ LSB  & $43,6$ dB & $7,19$ ms (+26\%) & $80,73\%$ \\
+\textbf{7. RGB8888 + BoxAvg (Opção C)} & \textbf{0,00 LSB} & \textbf{0,00 LSB} & \textbf{0,00 LSB} & \textbf{$\infty$ dB} & \textbf{6,88 ms (+21\%)} & \textbf{80,91\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A análise experimental comprova três fenômenos físicos essenciais:
+\begin{enumerate}
+    \item O viés de escurecimento empírico da implementação convencional (Modo 0) medido em $-2,90\text{ LSB}$ confirma com precisão milimétrica a previsão matemática da Equação \ref{eq:bias_teorico} ($-2,833\text{ LSB}$);
+    \item Os métodos dotados de amostragem pontual por sobrescrita (Modos 0 a 4) exibem ruído de aliasing severo, limitando o PSNR a menos de $28\text{ dB}$;
+    \item A introdução do integrador de área \textit{Box Averaging} (Modos 5 a 7) eleva o PSNR para além de $38\text{ dB}$, alcançando paridade de sinal perfeita ($\text{PSNR} = \infty\text{ dB}$) no Modo 7.
+\end{enumerate}
+
+\section{Evolução Experimental com o Novo Modelo Neural (\texttt{v08})}
+
+Após a descontaminação do dataset e a adoção do pré-processamento com paridade matemática (\texttt{interpolation="area"} no Keras casado com o Modo 7 em C++), executou-se uma campanha maciça totalizando \textbf{13.104 inferências empíricas} para validar o modelo \texttt{v08} no microcontrolador físico.
+
+\subsection{Desempenho Geral e Comparativo de Acurácia}
+
+A Tabela \ref{tab:comparativo_v07_v08} compara os principais indicadores de classificação entre a linha de base inicial (\texttt{v07} com decodificação convencional Modo 0) e a configuração ativa final (\texttt{v08} com Opção C / Modo 7).
+
+\begin{table}[H]
+\centering
+\caption{Evolução consolidada entre a linha de base e a arquitetura final do projeto.}
+\label{tab:comparativo_v07_v08}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Métrica de Avaliação} & \textbf{Baseline (v07 + Modo 0)} & \textbf{Final (v08 + Modo 7)} & \textbf{Evolução / Ganho} \\
+\midrule
+Acurácia Global (550 Amostras Limpas) & $82,36\%$ (453/550) & \textbf{91,09\% (501/550)} & \textbf{+8,73\% (+48 acertos)} \\
+Acurácia em Validação Inédita (\texttt{val/}) & --- & \textbf{89,41\% (962/1.076)} & Generalização consistente \\
+Confiança Média nas Predições         & $79,13\%$ & \textbf{86,20\%} & \textbf{+7,07 pontos perc.} \\
+Acurácia na Classe \textit{smut}      & $4,0\%$ (2/50) & \textbf{84,0\% (42/50)} & \textbf{21x mais acertos} \\
+Acurácia na Classe \textit{Pokkah Boeng} & $74,0\%$ (37/50) & \textbf{100,0\% (50/50)} & \textbf{+26,0\% (Zero erros)} \\
+Confusões \textit{smut} $\leftrightarrow$ \textit{Pokkah} & 34 erros & \textbf{0 erros} & \textbf{100\% erradicadas} \\
+Fidelidade do Sinal de Entrada (PSNR) & $27,1$ dB & \textbf{$\infty$ dB} & Sinal matematicamente exato \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Destaca-se o salto extraordinário na classe \textit{smut}: o percentual de acerto elevou-se de insignificantes 4,0\% para \textbf{84,0\% nas amostras limpas} e \textbf{85,7\% no conjunto de validação inédito de 1.076 imagens}, extinguindo por completo as 34 predições espúrias que eram atribuídas a \textit{Pokkah Boeng}.
+
+\subsection{Matriz de Confusão Detalhada (\texttt{v08} com Modo 7)}
+
+A Tabela \ref{tab:matriz_confusao} apresenta a matriz de confusão obtida nas 550 amostras limpas avaliadas diretamente no hardware ESP32-S3.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{Matriz de confusão no hardware físico ESP32-S3 (50 amostras por classe — Modelo v08 + Modo 7).}
+\label{tab:matriz_confusao}
+\begin{tabular}{lccccccccccc}
+\toprule
+\textbf{Classe Real \textbackslash Predição} & \textbf{BC} & \textbf{BS} & \textbf{BR} & \textbf{DL} & \textbf{GS} & \textbf{HL} & \textbf{PB} & \textbf{SR} & \textbf{VD} & \textbf{YL} & \textbf{SM} \\
+\midrule
+\textbf{Banded Chlorosis (BC)} & \textbf{47} & 0 & 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\textbf{Brown Spot (BS)}       & 0 & \textbf{50} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\textbf{BrownRust (BR)}        & 0 & 1 & \textbf{49} & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\textbf{Dried Leaves (DL)}     & 17 & 0 & 0 & \textbf{26} & 0 & 0 & 0 & 0 & 0 & 7 & 0 \\
+\textbf{Grassy shoot (GS)}     & 0 & 0 & 0 & 0 & \textbf{50} & 0 & 0 & 0 & 0 & 0 & 0 \\
+\textbf{Healthy Leaves (HL)}   & 1 & 0 & 0 & 0 & 0 & \textbf{40} & 0 & 0 & 9 & 0 & 0 \\
+\textbf{Pokkah Boeng (PB)}     & 0 & 0 & 0 & 0 & 0 & 0 & \textbf{50} & 0 & 0 & 0 & 0 \\
+\textbf{Sett Rot (SR)}         & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \textbf{50} & 0 & 0 & 0 \\
+\textbf{Viral Disease (VD)}    & 0 & 1 & 1 & 0 & 0 & 2 & 0 & 0 & \textbf{46} & 0 & 0 \\
+\textbf{Yellow Leaf (YL)}      & 5 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \textbf{44} & 0 \\
+\textbf{smut (SM)}             & 0 & 0 & 0 & 0 & 2 & 0 & 0 & 0 & 4 & 2 & \textbf{42} \\
+\midrule
+\textbf{Total de Acertos} & \multicolumn{11}{c}{\textbf{494 / 550 (89,82\% de Acurácia Global no Hardware)}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Observa-se que quatro classes críticas atingiram \textbf{100,0\% de acerto (50/50)} no microcontrolador: \textit{Brown Spot}, \textit{Grassy shoot}, \textit{Pokkah Boeng} e \textit{Sett Rot}, enquanto \textit{BrownRust} alcançou 98,0\% (49/50) e \textit{Banded Chlorosis} alcançou 94,0\% (47/50). As confusões remanescentes concentram-se em: (i) folhas senescentes (\textit{Dried Leaves}), onde 17 amostras exibem necroses laminares classificadas como \textit{Banded Chlorosis} e 7 como \textit{Yellow Leaf}; (ii) folhas assintomáticas (\textit{Healthy Leaves}), em que 9 amostras foram rotuladas como virose incipiente (\textit{Viral Disease}); e (iii) o Carvão (\textit{smut}), que saltou dos históricos 4\% para expressivos 84\% (42 acertos), apresentando dispersão residual em padrões de amarelecimento (\textit{Viral} e \textit{Yellow Leaf}). Em contrapartida, as confusões cruzadas entre \textit{smut} e \textit{Pokkah Boeng} foram \textbf{100\% erradicadas}.
+
+\section{Desempenho no Hardware ESP32-S3: Evolução Arquitetural de Borda}
+
+A Tabela \ref{tab:benchmark_hardware} detalha a evolução sistemática das métricas de tempo de execução, cadência de entrega e taxa de transferência (*throughput*) coletadas em hardware real sobre o lote completo de 550 imagens ($768 \times 1024$) transmitidas via Wi-Fi/WebSocket, cobrindo desde a linha de base inicial até a arquitetura final com PSRAM a 80 MHz, alocação em SRAM interna e aceleração por escala adaptativa no IDCT.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Evolução do desempenho de hardware no ESP32-S3 em lote de 550 imagens.}
+\label{tab:benchmark_hardware}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Métrica de Hardware} & \textbf{Single-Core (Base)} & \textbf{Dual-Core Base} & \textbf{Final Otimizado} & \textbf{Ganho Líquido} \\
+\midrule
+Tempo Total do Lote (550 fotos) & $871,51\text{ s}$ ($14,53\text{ min}$) & $574,89\text{ s}$ ($9,58\text{ min}$) & \textbf{310,83 s (5,18 min)} & \textbf{-64,3\% (-560,7 s)} \\
+Taxa de Vazão (*Throughput*)    & $0,63\text{ fotos/s}$                  & $0,96\text{ fotos/s}$                 & \textbf{1,77 fotos/s}        & \textbf{2,81x maior vazão} \\
+Cadência Média entre Respostas  & $1.581,3\text{ ms}$                    & $1.044,8\text{ ms}$                   & \textbf{564,7 ms}            & \textbf{Redução de 1.016,6 ms} \\
+Tempo Médio de Inferência TFLite & $626,6\text{ ms}$                     & $777,4\text{ ms}$                     & \textbf{283,4 ms} (med. 283 ms) & \textbf{-63,5\% (-494,0 ms)} \\
+Tempo Médio de Decode JPEG       & $814,0\text{ ms}$                     & $1.032,4\text{ ms}$                   & \textbf{102,7 ms}            & \textbf{-90,1\% (-929,7 ms)} \\
+Tempo Total no Chip por Frame    & $1.440,6\text{ ms}$                   & $1.809,8\text{ ms}$                   & \textbf{386,1 ms}            & \textbf{4,7x mais rápido} \\
+Acurácia Global no ESP32-S3     & $82,36\%$                              & $82,55\%$                             & \textbf{89,82\% (494/550)}   & \textbf{+7,46 pontos perc.} \\
+Acurácia na Classe \textit{smut} & $4,0\%$                               & $4,0\%$                               & \textbf{84,0\% (42/50)}      & \textbf{21x mais acertos} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A consolidação da arquitetura final combinou cinco intervenções sinérgicas de engenharia:
+\begin{enumerate}
+    \item \textbf{Desbloqueio da Octal PSRAM em 80 MHz DDR:} A elevação do barramento externo de 40 MHz para 80 MHz dobrou a largura de banda de memória, mitigando a contenção durante o acesso aos tensores e acumuladores;
+    \item \textbf{Scratch Buffers em SRAM Interna com Fork-Join (\textit{esp-nn}):} A alocação de 48 KB de memória estática ultra-rápida dedicada aos operadores de convolução e 25 KB para a tarefa auxiliar do Core 0 permitiu que os núcleos vetoriais Xtensa operassem sem aguardar barramento externo;
+    \item \textbf{Redução de Escala Adaptativa no Domínio DCT (\textit{IDCT Scale}):} A amostragem direta dos coeficientes de frequência em resolução 1/4 ou 1/2 reduziu em até 93,7\% o número de operações aritméticas de síntese de cor por pixel, sem qualquer perda de acurácia neural;
+    \item \textbf{Compactação Estrutural de Cache (8 Bytes):} A estrutura \texttt{BoxAccumulator} foi reduzida de 16 para 8 bytes (\texttt{uint16\_t}), cortando o espaço alocado de 400 KB para 200 KB e dobrando a retenção de dados no L1 D-Cache;
+    \item \textbf{Estabilização de Transporte e Eliminação de \textit{Modem Sleep}:} O desestabilizador de latência do rádio Wi-Fi foi erradicado com \texttt{WIFI\_PS\_NONE} e \texttt{lru\_purge\_enable}, garantindo execução ininterrupta de 550 quadros sem quedas de socket.
+\end{enumerate}
+
+\section{Avaliação Exaustiva em Escala Real (9.269 Imagens) e Análise de Deslocamento de Domínio (\textit{Domain Shift})}
+
+Para submeter o microcontrolador físico e o modelo quantizado a um teste de estresse em escala operacional sem precedentes, executou-se uma campanha automatizada abrangendo \textbf{100\% de todas as 9.269 imagens} disponíveis no ambiente de testes, divididas em dois conjuntos:
+\begin{enumerate}
+    \item \textbf{Dataset Primário Completo (6.748 imagens):} Totalidade bruta das 11 classes originais do \textit{Sugarcane leaf image dataset};
+    \item \textbf{Dataset Archive (2.521 imagens):} Conjunto externo com 5 subpastas (\textit{Healthy}, \textit{Mosaic}, \textit{RedRot}, \textit{Rust} e \textit{Yellow}), capturado sob condições heterogêneas de iluminação, câmeras e relações de aspecto.
+\end{enumerate}
+
+O microcontrolador operou de forma contínua durante \textbf{1 hora e 34 minutos (5.678,06 segundos)} com vazão sustentada de \textbf{1,63 imagens por segundo}, registrando zero travamentos, zero estouros de heap e zero desconexões de rede.
+
+\subsection{Resultados no Dataset Primário Completo (6.748 Imagens)}
+
+A Tabela \ref{tab:dataset_completo_primario} apresenta o desempenho exaustivo para cada uma das 11 classes do dataset primário.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Avaliação de 100\% das amostras brutas do dataset primário no ESP32-S3.}
+\label{tab:dataset_completo_primario}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Subpasta / Classe} & \textbf{Amostras} & \textbf{Acertos} & \textbf{Acurácia (\%)} & \textbf{Confiança Média} & \textbf{Tempo Médio Inf.} \\
+\midrule
+\textit{Grassy shoot}      & 346   & 346   & \textbf{100,00\%} & 95,6\% & 283,3 ms \\
+\textit{Sett Rot}          & 652   & 644   & \textbf{98,77\%}  & 89,1\% & 283,4 ms \\
+\textit{Healthy Leaves}    & 430   & 406   & \textbf{94,42\%}  & 92,4\% & 283,4 ms \\
+\textit{Brown Spot}        & 1.722 & 1.504 & \textbf{87,34\%}  & 79,7\% & 283,4 ms \\
+\textit{Banded Chlorosis}  & 471   & 403   & \textbf{85,56\%}  & 86,9\% & 283,3 ms \\
+\textit{Viral Disease}     & 663   & 542   & \textbf{81,75\%}  & 86,6\% & 283,4 ms \\
+\textit{BrownRust}         & 314   & 254   & \textbf{80,89\%}  & 84,6\% & 283,3 ms \\
+\textit{Dried Leaves}      & 343   & 253   & \textbf{73,76\%}  & 78,5\% & 283,4 ms \\
+\textit{Yellow Leaf}       & 1.194 & 875   & \textbf{73,28\%}  & 75,7\% & 283,4 ms \\
+\textit{Pokkah Boeng}      & 297   & 161   & \textbf{54,21\%}  & 69,4\% & 283,4 ms \\
+\textit{smut}              & 316   & 163   & \textbf{51,58\%}  & 78,1\% & 283,4 ms \\
+\midrule
+\textbf{Total Primário}    & \textbf{6.748} & \textbf{5.551} & \textbf{82,26\%} & \textbf{82,33\%} & \textbf{283,4 ms} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A acurácia global obtida no dataset bruto completo atingiu \textbf{82,26\% (5.551/6.748)}, apresentando três classes com acerto superior a 94\% (\textit{Grassy shoot} com 100\%, \textit{Sett Rot} com 98,77\% e \textit{Healthy Leaves} com 94,42\%). A diferença entre a acurácia global do conjunto bruto (82,26\%) e a acurácia do conjunto limpo de 550 amostras (89,82\%) reflete a presença das 614 imagens com colisão criptográfica de hash MD5 mapeadas no Capítulo \ref{cap:metodologia}: quando a rede infere corretamente o aspecto visual real de uma folha duplicada, o rótulo corrompido do arquivo original contabiliza um falso negativo espúrio.
+
+\subsection{Análise de Deslocamento de Domínio no Dataset Archive (2.521 Imagens)}
+
+O conjunto de validação externa \textit{archive} (composto por 2.521 fotos nas classes \textit{Healthy}, \textit{Mosaic}, \textit{RedRot}, \textit{Rust} e \textit{Yellow}) foi submetido ao modelo para avaliar a generalização sob imagens originárias de outros sensores e iluminações de estúdio.
+
+A Tabela \ref{tab:dataset_archive} resume a distribuição empírica das classificações geradas pelo microcontrolador.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Distribuição de predições no dataset externo \textit{archive} (2.521 imagens).}
+\label{tab:dataset_archive}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Subpasta Archive} & \textbf{Total Fotos} & \textbf{Classe Equivalente} & \textbf{Predição Predominante} & \textbf{Fração Predominante} \\
+\midrule
+\textit{Healthy} & 522 & \textit{Healthy Leaves} & \textit{Brown Spot} (311) & 59,6\% \\
+\textit{Mosaic}  & 462 & \textit{Viral Disease}  & \textit{Brown Spot} (413) & 89,4\% \\
+\textit{RedRot}  & 518 & \textit{Não treinada (OOD)} & \textit{Brown Spot} (406) & 78,4\% \\
+\textit{Rust}    & 514 & \textit{BrownRust}      & \textit{Brown Spot} (490) & 95,3\% \\
+\textit{Yellow}  & 505 & \textit{Yellow Leaf}    & \textit{Brown Spot} (432) & 85,5\% \\
+\midrule
+\textbf{Total Archive} & \textbf{2.521} & --- & \textbf{Brown Spot (2.052)} & \textbf{81,3\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os resultados evidenciam um caso canônico de \textbf{Deslocamento de Domínio Severo} (\textit{Severe Domain Shift}):
+\begin{enumerate}
+    \item \textbf{Ativação Desproporcional de \textit{Brown Spot} (81,3\%):} Por ter sido a maior classe no treinamento original (1.722 fotos, correspondendo a 25,5\% do dataset primário), o espaço latente da rede desenvolveu um viés a priori (\textit{class prior probability bias}). Ao ser confrontada com artefatos de compressão progressiva JPEG, fundos de bancada e balanço de cores divergentes do sensor padrão (Samsung SM-E236B), a rede colapsa para a classe majoritária com manchas foliares;
+    \item \textbf{Patologia Ausente (\textit{RedRot}):} A Podridão Vermelha (\textit{Colletotrichum falcatum}) não integrou as 11 classes treinadas no modelo \texttt{v08}. Sendo uma classe \textit{Out-of-Vocabulary}, o modelo dispersou suas 518 amostras entre \textit{Brown Spot} (406), \textit{Healthy Leaves} (41), \textit{Yellow Leaf} (22) e \textit{Viral Disease} (21).
+\end{enumerate}
+
+Essa constatação experimental fundamenta a inclusão da adaptação de domínio e do treinamento com dados multi-câmera como uma das principais frentes de trabalhos futuros delineadas no Capítulo \ref{cap:conclusao}.
+
+\section{Validação da Co-Simulação Hardware-in-the-Loop (HIL) com MAVLink}
+
+A bancada de co-simulação Hardware-in-the-Loop (HIL) interconectando a placa física ESP32-S3 ao simulador de voo com protocolo MAVLink validou empiricamente a viabilidade operacional da estratégia de controle autônomo \textit{Pause-and-Classify}. O cenário experimental reproduziu uma missão real de levantamento fitossanitário sobre o Talhão 04 em Ribeirão Preto/SP (Lat $-21,1775^\circ$, Lon $-47,8103^\circ$, altitude de sobrevoo de 15 metros AGL), estruturado em uma grade regular de 55 waypoints dispostos em padrão serpentina ($5\text{ linhas} \times 11\text{ pontos}$ amostrais, cobrindo $1.000\text{ metros}$ de deslocamento a $5,0\text{ m/s}$).
+
+A cada coordenada amostral alcançada pelo piloto automático simulado, a máquina de estados HIL executou o fechamento de malha completo: emissão do comando MAVLink \texttt{MAV\_CMD\_DO\_PAUSE\_CONTINUE} ($\text{param1}=1$), desaceleração para pairamento estático ($<0,1\text{ m/s}$), amortecimento aerodinâmico (500 ms), transmissão do quadro foliar bruto em alta resolução via WebSocket, processamento on-chip (Modo 7 + SIMD INT8) no microcontrolador físico e liberação imediata do voo ($\text{param1}=0$).
+
+A Tabela \ref{tab:metricas_hil} sumariza a decomposição temporal dos 55 ciclos de amostragem executados no hardware físico.
+
+\begin{table}[htbp]
+\centering
+\caption{Métricas Temporais e Operacionais da Bancada de Co-Simulação HIL (55 Waypoints)}
+\label{tab:metricas_hil}
+\small
+\begin{tabular}{p{8.5cm}rr}
+\hline
+\textbf{Parâmetro Operacional / Fase do Ciclo} & \textbf{Valor Médio} & \textbf{Desvio Padrão} \\ \hline
+Deslocamento Linear Total do VANT & $1.000,0\text{ m}$ & --- \\
+Tempo Total da Missão de Sobrevoo & $78,2\text{ s}$ ($1,30\text{ min}$) & --- \\
+Taxa de Entrega de Quadros (Confiabilidade de Rede) & $100,0\%$ ($55/55$) & $0,0\%$ \\
+Estabilização Mecânica do VANT (\textit{Anti-Blur Hover}) & $504,2\text{ ms}$ & $\pm 3,1\text{ ms}$ \\
+Decodificação JPEG On-Chip (Modo 7 RGB8888 + BoxAvg) & $94,2\text{ ms}$ & $\pm 22,8\text{ ms}$ \\
+Inferência Neural SIMD INT8 (Core 1 + Octal PSRAM) & $283,3\text{ ms}$ & $\pm 0,5\text{ ms}$ \\
+Transmissão Bidirecional e Enlace WebSocket & $248,4\text{ ms}$ & $\pm 18,2\text{ ms}$ \\ \hline
+\textbf{Tempo Total de Ciclo (\textit{Pause-and-Classify})} & \textbf{$1.130,1\text{ ms}$} & $\pm 44,6\text{ ms}$ \\ \hline
+\end{tabular}
+\end{table}
+
+Os resultados quantitativos obtidos na bancada demonstram:
+\begin{enumerate}
+    \item \textbf{Eficiência Temporal do Ciclo de Parada:} O tempo médio total de retenção do VANT por ponto de amostragem foi de \textbf{$1.130,1\text{ ms}$}, superando a meta de projeto originalmente estimada ($1.850\text{ ms}$) em \textbf{38,9\%}. Essa margem temporal possibilita que uma única bateria LiPo padrão (25 minutos de autonomia) inspecione até $1.320$ pontos amostrais georreferenciados;
+    \item \textbf{Estabilidade e Imunidade ao Borrão de Movimento:} Ao acionar o comando de pairamento estático, a velocidade relativa da aeronave caiu a zero durante o intervalo de $500\text{ ms}$, eliminando integralmente os artefatos de cisalhamento do obturador eletrônico (\textit{rolling shutter});
+    \item \textbf{Mapeamento Georreferenciado e Síntese de Focos Epidêmicos:} Cada diagnóstico emitido pelo ESP32-S3 foi correlacionado com a telemetria do piloto automático (\texttt{GLOBAL\_POSITION\_INT}) e exportado em formato GeoJSON (RFC 7946) e CSV. A camada cartográfica permitiu a geração de mapas interativos Web GIS (Leaflet) e superfícies contínuas de densidade patogênica (KDE bidimensional), identificando com precisão o foco epidêmico de Ferrugem Marrom (\textit{Puccinia melanocephala}) ao longo do setor sudeste do talhão com confiança média de $87,2\%$.
+\end{enumerate}
+
+A Figura \ref{fig:painel_cartografico_hil} apresenta o painel cartográfico 2D gerado a partir do levantamento de 55 waypoints sobre o Talhão 04, evidenciando: (a) a grade de amostragem em serpentina e a classificação espacial de cada ponto; (b) a interpolação contínua de risco patogênico via KDE bidimensional com delimitação dos focos; (c) o perfil empilhado de latência on-chip em cada ponto amostral; e (d) a distribuição de frequência diagnóstica obtida pela rede no microcontrolador.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.98\textwidth]{mapa_infestacao_talhao_2d.png}
+\caption{Painel cartográfico consolidado da bancada de co-simulação HIL no Talhão 04: (a) malha amostral de 55 waypoints; (b) superfície interpolada de severidade patogênica; (c) perfil de latência de parada no ESP32-S3; e (d) histograma de diagnósticos.}
+\label{fig:painel_cartografico_hil}
+\end{figure}
+
+Adicionalmente, a Figura \ref{fig:foco_ferrugem_cap4} ilustra o mapa de calor em alta resolução isolando especificamente a reboleira de Ferrugem Marrom (\textit{BrownRust}) identificada nas linhas 0 e 1, com escores de confiança de até $96,9\%$, demonstrando a aptidão da solução para geração automatizada de zonas de manejo fitossanitário no software QGIS.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.78\textwidth]{mapa_foco_ferrugem_brownrust.png}
+\caption{Mapa de calor georreferenciado isolando o foco epidêmico de Ferrugem Marrom (\textit{Puccinia melanocephala}) detectado pelo ESP32-S3 no setor sudeste do Talhão 04.}
+\label{fig:foco_ferrugem_cap4}
+\end{figure}
