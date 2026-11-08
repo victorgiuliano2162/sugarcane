@@ -19,7 +19,7 @@ import statistics
 from collections import defaultdict
 import websockets
 
-DEFAULT_ESP32_WS_URL = "ws://192.168.1.44/ws"
+DEFAULT_ESP32_WS_URL = "ws://192.168.1.19/ws"
 DATASET_BASE = "/home/victor/Documents/datasets/Sugarcane leaf image dataset-20261106T004142Z-1-001/Sugarcane leaf image dataset"
 OUTPUT_DIR = "/home/victor/projects/sugarcane/model_inference_tests"
 DEFAULT_CSV_PATH = os.path.join(OUTPUT_DIR, "resultado_inferencia_espnn_sram.csv")
@@ -49,23 +49,48 @@ async def connect_ws(ws_url, max_retries=10, retry_delay=2.0):
             await asyncio.sleep(retry_delay)
     raise ConnectionError(f"Nao foi possivel conectar ao ESP32 no endereco {ws_url}")
 
-async def run_benchmark(ws_url, samples_per_class, csv_path, report_path):
+async def run_benchmark(ws_url, samples_per_class, csv_path, report_path, use_clean=False):
     os.makedirs(os.path.dirname(os.path.abspath(csv_path)), exist_ok=True)
 
-    # 1. Montagem da lista de amostras rigorosamente idêntica às baterias anteriores
+    class_to_dir = {cls_name: cls_path for cls_name, cls_path in CLASSES}
+    clean_csv = os.path.join(OUTPUT_DIR, "resultado_comparativo_jpegdraw_limpo_v08.csv")
+
     sample_list = []
-    for cls_name, cls_path in CLASSES:
-        if not os.path.exists(cls_path):
-            print(f"ERRO: Diretorio nao encontrado: {cls_path}")
-            sys.exit(1)
-        files = sorted([f for f in os.listdir(cls_path) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
-        selected = files[:samples_per_class]
-        for f in selected:
-            sample_list.append({
-                "class_name": cls_name,
-                "file_name": f,
-                "full_path": os.path.join(cls_path, f)
-            })
+    if use_clean and os.path.exists(clean_csv):
+        print(f"[DATASET] Modo Limpo ativado: Carregando amostras sem colisão de {clean_csv}")
+        with open(clean_csv, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            counts = defaultdict(int)
+            for row in reader:
+                if not row.get("metodo", "").startswith("7"):
+                    continue
+                c = row["classe_real"]
+                if counts[c] < samples_per_class:
+                    fname = row["arquivo"]
+                    cls_dir = class_to_dir.get(c)
+                    if cls_dir:
+                        fpath = os.path.join(cls_dir, fname)
+                        if os.path.exists(fpath):
+                            sample_list.append({
+                                "class_name": c,
+                                "file_name": fname,
+                                "full_path": fpath
+                            })
+                            counts[c] += 1
+    else:
+        # 1. Montagem da lista de amostras padrão
+        for cls_name, cls_path in CLASSES:
+            if not os.path.exists(cls_path):
+                print(f"ERRO: Diretorio nao encontrado: {cls_path}")
+                sys.exit(1)
+            files = sorted([f for f in os.listdir(cls_path) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+            selected = files[:samples_per_class]
+            for f in selected:
+                sample_list.append({
+                    "class_name": cls_name,
+                    "file_name": f,
+                    "full_path": os.path.join(cls_path, f)
+                })
 
     total_samples = len(sample_list)
     print("=" * 72)
@@ -347,14 +372,15 @@ def generate_comparative_report(results, total_batch_seconds, total_batch_minute
 
 def main():
     parser = argparse.ArgumentParser(description="Benchmark de Inferencia com Otimizacoes de SRAM e Dual-Core no ESP32-S3")
-    parser.add_argument("--ip", default="192.168.1.44", help="Endereco IP do ESP32-S3 na rede Wi-Fi")
+    parser.add_argument("--ip", default="192.168.1.19", help="Endereco IP do ESP32-S3 na rede Wi-Fi (default: 192.168.1.19)")
     parser.add_argument("--samples", type=int, default=50, help="Quantidade de amostras por classe (default: 50)")
     parser.add_argument("--csv", default=DEFAULT_CSV_PATH, help="Caminho do arquivo CSV de saida")
     parser.add_argument("--report", default=DEFAULT_REPORT_PATH, help="Caminho do relatorio Markdown de saida")
+    parser.add_argument("--clean", action="store_true", help="Utilizar dataset limpo sem colisao MD5 (550 amostras)")
     args = parser.parse_args()
 
     ws_url = f"ws://{args.ip}/ws" if not args.ip.startswith("ws://") else args.ip
-    asyncio.run(run_benchmark(ws_url, args.samples, args.csv, args.report))
+    asyncio.run(run_benchmark(ws_url, args.samples, args.csv, args.report, use_clean=args.clean))
 
 if __name__ == "__main__":
     main()
