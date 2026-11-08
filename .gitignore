@@ -13,6 +13,12 @@ error.txt
 __pycache__/
 *.pyc
 
+# Node / Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+
 # LaTeX Temporary & Auxiliary Files (tcc/)
 *.aux
 *.log
