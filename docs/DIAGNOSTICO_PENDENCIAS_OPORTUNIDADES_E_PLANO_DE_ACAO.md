@@ -177,3 +177,14 @@ Abaixo está o plano de ação dividido em **4 Fases Sequenciais**, priorizadas 
 | **P2 (Médio)** | **P4:** Script de Co-Simulação HIL MAVLink + Mapa de Calor | TCC / Dev | 30 min | **Alto:** Materializa no repositório 100% dos objetivos específicos 5 e 6 descritos no TCC. |
 | **P2 (Médio)** | **O5:** Monitoramento Térmico On-Chip e Telemetria no JSON | Firmware | 15 min | **Médio/Alto:** Monitora aquecimento a 240 MHz/PSRAM 80 MHz e previne *thermal throttling* em campo. |
 | **P3 (Normal)** | **P5 + P6:** Atualizar tabelas/figuras do LaTeX (`tcc/`), UI Web `/` e Git | Doc / Produto | 25 min | **Médio:** Deixa a monografia PDF e o repositório prontos para defesa e apresentação. |
+
+---
+
+## 5. Tarefas Futuras Registradas (Roadmap de Continuidade Pós-TCC)
+
+### TF1 — Adaptação de Domínio Multidataset e Inclusão da Podridão Vermelha (*RedRot*)
+- **Contexto:** A avaliação exaustiva de 9.269 imagens no ESP32-S3 revelou que imagens de repositórios externos com diferentes sensores, iluminação de estúdio e relações de aspecto (dataset *archive* de 2.521 amostras) sofrem com *Domain Shift*, concentrando 81,3% das predições em *Brown Spot* devido ao desbalanceamento a priori de classes no treino original. Além disso, a doença *Red Rot* (*Colletotrichum falcatum*) não faz parte das 11 classes primárias do modelo atual.
+- **Ação Futura:**
+  1. Realizar *Transfer Learning* / *Domain Adversarial Training* (DANN) para alinhar as representações latentes entre diferentes sensores de câmera e condições de iluminação.
+  2. Expandir a saída da rede para 12 classes, integrando *Red Rot* ao catálogo taxonômico do classificador.
+  3. Requantizar o modelo resultante para INT8 com `interpolation="area"` e validar o novo arquivo `.tflite` no firmware ESP32-S3.

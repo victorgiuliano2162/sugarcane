@@ -1,65 +1,89 @@
-# 🌿 Relatório de Avaliação Exaustiva do Dataset Completo (6748 Imagens)
-**Data da Avaliação:** 07/11/2026 20:19:10  
-**Dispositivo:** ESP32-S3 (Xtensa Dual-Core LX7 @ 240 MHz, 512 KB SRAM, 8 MB Octal PSRAM)  
-**Modelo Neural:** `data/model_mbnet_int8.tflite` (MobileNetV3Small Int8 v08)  
-**Processamento de Imagem:** Modo 7 Otimizado (RGB8888 Nativo 24-bit + IDCT Scale Reduction + BoxAvg em SRAM)  
-**Total de Imagens Avaliadas:** **6748 imagens** (100% de todas as 11 classes)  
-**Base de Dados:** [`resultado_inferencia_dataset_completo.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dataset_completo.csv)  
+# 🌿 Relatório de Avaliação Exaustiva — Dataset Completo + Archive (9,269 Imagens)
+
+**Data da Avaliação:** 08/11/2026 08:42:57  
+**Dispositivo Físico:** ESP32-S3 DevKitM-1 (Dual-Core Xtensa LX7 @ 240 MHz, 512 KB SRAM, 8 MB Octal PSRAM @ 80 MHz DDR)  
+**Firmware:** Sugarcane Classifier v5.0 (Fork-Join esp-nn + BoxAvg RGB8888 24-bit + PSRAM 80 MHz DDR + -O2)  
+**Modelo Neural:** `data/model_mbnet_int8.tflite` (MobileNetV3Small Int8 v08, 160x160x3, 11 classes)  
+**Planilha de Dados Brutos:** [`resultado_inferencia_dataset_completo.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dataset_completo.csv)  
 
 ---
 
 ## 1. Resumo Executivo Geral
 
-| Métrica de Avaliação | Resultado Obtido |
+| Indicador Global | Resultado Medido |
 | :--- | :---: |
-| **Total de Imagens Testadas** | **6,748 imagens** |
-| **Acurácia Global no Dataset Inteiro** | **92.43%** (6,237/6,748 acertos) |
-| **Confiança Média Estatística** | **87.48%** |
-| **Tempo Total do Lote** | **4821.73 s** (80.36 min) |
-| **Taxa de Transferência (Throughput)** | **1.40 imagens/s** |
-| **Tempo Médio de Inferência Neural** | **336.1 ms** (Mediana: 336.0 ms) |
-| **Tempo Médio de Decodificação JPEG** | **148.1 ms** (Mediana: 129.0 ms) |
-| **Tempo Total Médio no Dispositivo** | **484.3 ms** |
+| **Total de Imagens Processadas** | **9,269 imagens** (6.748 primário + 2.521 archive) |
+| **Tempo Total do Lote** | **5678.06 s** (94.63 min) |
+| **Vazão Média do Sistema (Throughput)** | **1.63 imagens/s** |
+| **Tempo Médio de Inferência Neural** | **283.4 ms** (Mediana: **283.0 ms**) |
+| **Tempo Médio de Decodificação JPEG** | **92.6 ms** (Mediana: **85.0 ms**) |
+| **Tempo Total Médio no Microcontrolador** | **376.0 ms** |
+| **Acurácia Global no Dataset Primário** | **82.26%** (5,551/6,748 acertos) |
+| **Confiança Média no Dataset Primário** | **82.33%** |
+| **Acurácia Mapeada no Dataset Archive** | **3.13%** (79/2,521 acertos) |
+| **Confiança Média no Dataset Archive** | **71.30%** |
 
 ---
 
-## 2. Desempenho Detalhado por Classe Patológica
+## 2. Desempenho Detalhado por Classe no Dataset Primário (11 Classes)
 
-| Classe Patológica | Total Fotos | Acertos | Acurácia (%) | Confiança Média | Tempo Médio Inf. | Tempo Médio Dec. |
+| Subpasta / Classe | Amostras | Acertos | Acurácia (%) | Confiança Média | Tempo Médio Inf. | Tempo Médio Dec. |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Banded Chlorosis** | 471 | 391 | **83.0%** | 81.5% | 336.1 ms | 133.7 ms |
-| **Brown Spot** | 1722 | 1651 | **95.9%** | 91.1% | 336.1 ms | 139.7 ms |
-| **BrownRust** | 314 | 291 | **92.7%** | 83.9% | 336.0 ms | 136.9 ms |
-| **Dried Leaves** | 343 | 333 | **97.1%** | 89.3% | 336.1 ms | 130.8 ms |
-| **Grassy shoot** | 346 | 344 | **99.4%** | 90.2% | 336.1 ms | 209.4 ms |
-| **Healthy Leaves** | 430 | 416 | **96.7%** | 92.2% | 336.2 ms | 158.3 ms |
-| **Pokkah Boeng** | 297 | 243 | **81.8%** | 68.1% | 336.2 ms | 144.5 ms |
-| **Sett Rot** | 652 | 652 | **100.0%** | 96.5% | 336.2 ms | 181.3 ms |
-| **Viral Disease** | 663 | 579 | **87.3%** | 83.2% | 336.0 ms | 135.3 ms |
-| **Yellow Leaf** | 1194 | 1150 | **96.3%** | 88.2% | 336.1 ms | 139.5 ms |
-| **smut** | 316 | 187 | **59.2%** | 74.6% | 336.1 ms | 159.3 ms |
+| **Banded Chlorosis** | 471 | 403 | **85.56%** | 86.9% | 283.3 ms | 83.9 ms |
+| **Brown Spot** | 1,722 | 1,504 | **87.34%** | 79.7% | 283.4 ms | 89.9 ms |
+| **BrownRust** | 314 | 254 | **80.89%** | 84.6% | 283.3 ms | 87.6 ms |
+| **Dried Leaves** | 343 | 253 | **73.76%** | 78.5% | 283.4 ms | 81.7 ms |
+| **Grassy shoot** | 346 | 346 | **100.00%** | 95.6% | 283.3 ms | 157.0 ms |
+| **Healthy Leaves** | 430 | 406 | **94.42%** | 92.4% | 283.4 ms | 108.7 ms |
+| **Pokkah Boeng** | 297 | 161 | **54.21%** | 69.4% | 283.4 ms | 95.3 ms |
+| **Sett Rot** | 652 | 644 | **98.77%** | 89.1% | 283.4 ms | 131.9 ms |
+| **Viral Disease** | 663 | 542 | **81.75%** | 86.6% | 283.4 ms | 83.9 ms |
+| **Yellow Leaf** | 1,194 | 875 | **73.28%** | 75.7% | 283.4 ms | 89.6 ms |
+| **smut** | 316 | 163 | **51.58%** | 78.1% | 283.4 ms | 109.1 ms |
 
----
-
-## 3. Matriz de Confusão Completa (11x11)
+### 2.1. Matriz de Confusão do Dataset Primário (11x11)
 
 | Classe Real \ Predita | BC | BS | BR | DL | GS | HL | PB | SR | VD | YL | SM |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Banded Chlorosis (BC)** | **391** | `18` | `50` | - | - | - | - | - | - | `12` | - |
-| **Brown Spot (BS)** | `12` | **1651** | `38` | `6` | - | - | - | - | `3` | `12` | - |
-| **BrownRust (BR)** | `17` | - | **291** | - | - | - | - | - | `6` | - | - |
-| **Dried Leaves (DL)** | - | `1` | `1` | **333** | - | - | - | - | - | `8` | - |
-| **Grassy shoot (GS)** | - | - | `1` | - | **344** | - | - | - | - | `1` | - |
-| **Healthy Leaves (HL)** | - | `1` | - | - | - | **416** | - | - | `13` | - | - |
-| **Pokkah Boeng (PB)** | `1` | `25` | `1` | `3` | - | - | **243** | - | `1` | `6` | `17` |
-| **Sett Rot (SR)** | - | - | - | - | - | - | - | **652** | - | - | - |
-| **Viral Disease (VD)** | `24` | `3` | `30` | - | - | `4` | - | - | **579** | `16` | `7` |
-| **Yellow Leaf (YL)** | `15` | `4` | `4` | `16` | - | - | `1` | - | `4` | **1150** | - |
-| **smut (SM)** | `1` | `2` | `5` | `3` | `1` | - | `89` | - | `28` | - | **187** |
+| **Banded Chlorosis (BC)** | **403** | `9` | `36` | - | - | - | - | - | `9` | `14` | - |
+| **Brown Spot (BS)** | `41` | **1504** | `49` | `6` | - | `33` | `16` | - | `44` | `29` | - |
+| **BrownRust (BR)** | `36` | `6` | **254** | - | - | - | - | - | `15` | `3` | - |
+| **Dried Leaves (DL)** | `73` | - | - | **253** | `1` | - | - | - | - | `16` | - |
+| **Grassy shoot (GS)** | - | - | - | - | **346** | - | - | - | - | - | - |
+| **Healthy Leaves (HL)** | `1` | `1` | - | - | - | **406** | - | - | `22` | - | - |
+| **Pokkah Boeng (PB)** | `17` | `41` | - | `61` | `2` | `7` | **161** | - | `7` | `1` | - |
+| **Sett Rot (SR)** | - | - | - | - | `5` | - | - | **644** | - | - | `3` |
+| **Viral Disease (VD)** | `29` | `6` | `79` | - | - | `2` | - | - | **542** | `3` | `2` |
+| **Yellow Leaf (YL)** | `207` | `43` | `38` | `8` | `5` | `1` | `1` | - | `14` | **875** | `2` |
+| **smut (SM)** | `14` | `39` | `24` | `61` | `5` | - | - | `1` | `7` | `2` | **163** |
 
 ---
 
-## 4. Legenda das Abreviaturas da Matriz
+## 3. Desempenho no Dataset Archive (5 Classes de Validação Externa)
+
+Cada subpasta deste repositório representa uma classe botânica/patológica independente:
+
+| Subpasta | Amostras | Classe Equivalente no Modelo | Predições Corretas | Taxa de Concordância | Confiança Média |
+| :--- | :---: | :--- | :---: | :---: | :---: |
+| **Healthy** | 522 | `Healthy Leaves` | 10 | **1.92%** | 60.8% |
+| **Mosaic** | 462 | `Viral Disease` | 30 | **6.49%** | 77.0% |
+| **RedRot** | 518 | `RedRot` | 0 | **0.00%** | 69.1% |
+| **Rust** | 514 | `BrownRust` | 2 | **0.39%** | 80.6% |
+| **Yellow** | 505 | `Yellow Leaf` | 37 | **7.33%** | 69.7% |
+
+### 3.1. Matriz de Distribuição das Predições do Archive (5 Subpastas x 11 Classes Modelo)
+
+| Subpasta Archive \ Predição | BC | BS | BR | DL | GS | HL | PB | SR | VD | YL | SM |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Healthy** | - | `311` | - | `1` | - | **10** | `26` | `5` | `161` | `8` | - |
+| **Mosaic** | - | `413` | - | `2` | - | `7` | `5` | `2` | **30** | `2` | `1` |
+| **RedRot** | `2` | `406` | `8` | `3` | `1` | `41` | `8` | `6` | `21` | `22` | - |
+| **Rust** | - | `490` | **2** | - | `1` | `5` | - | `3` | `7` | `5` | `1` |
+| **Yellow** | - | `432` | - | `2` | `1` | `7` | `2` | `3` | `21` | **37** | - |
+
+---
+
+## 4. Legenda das Classes e Siglas
 
 - **BC**: Banded Chlorosis
 - **BS**: Brown Spot
