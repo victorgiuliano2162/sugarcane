@@ -64,6 +64,7 @@ A documentação do repositório está subdividida conforme as áreas de concent
 | **Planejamento / Roadmap**| [DIAGNOSTICO_PENDENCIAS_OPORTUNIDADES_E_PLANO_DE_ACAO.md](file:///home/victor/projects/sugarcane/docs/DIAGNOSTICO_PENDENCIAS_OPORTUNIDADES_E_PLANO_DE_ACAO.md) | Roadmap de prioridades (P1 a P4) e tarefas de continuidade (TF1). |
 | **Ciência de Dados (v09)**| [GUIA_INTERPRETACAO_GRAFICOS_V09.md](file:///home/victor/projects/sugarcane/docs/GUIA_INTERPRETACAO_GRAFICOS_V09.md) | Análise técnica dos 6 gráficos analíticos de ablação, overfitting e Pareto do v09. |
 | **Pesquisa Teórica** | [POR_QUE_A_QUANTIZACAO_MANTEM_OU_MELHORA_O_DESEMPENHO.md](file:///home/victor/projects/sugarcane/docs/POR_QUE_A_QUANTIZACAO_MANTEM_OU_MELHORA_O_DESEMPENHO.md) | Fundamentação científica com 12 referências: Flat Minima, MDL, QAT e Gargalo de Informação. |
+| **Rigor Estatístico** | [ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md](file:///home/victor/projects/sugarcane/docs/ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md) | Análise de variância estocástica, impacto de sementes e intervalo de confiança da acurácia. |
 
 ---
 
