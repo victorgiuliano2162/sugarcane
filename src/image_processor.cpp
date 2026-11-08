@@ -24,13 +24,16 @@ const int MAX_LUT_DIM = 4096;
 // Estruturas de Suporte para Box Averaging (Opções A e C) e FastLUT (Opção B)
 // ============================================================================
 
-// Estrutura alinhada em 16 bytes para acumulação eficiente na Octal PSRAM
-struct alignas(16) BoxAccumulator {
-    uint32_t sum_r;
-    uint32_t sum_g;
-    uint32_t sum_b;
+// Estrutura compacta de 8 bytes (64 bits) alinhada para acumulação na Octal PSRAM.
+// Reduz a ocupação de memória de 400 KB para 200 KB (50% de redução), duplicando a densidade
+// no cache L1 de dados da CPU e reduzindo o tempo de memset e finalização.
+// Em resoluções adaptativas (1/4 ou 1/2 IDCT), a contagem máxima por célula 160x160 é <= 40 pixels,
+// gerando somas máximas de 40 * 255 = 10.200, muito abaixo do limite de uint16_t (65.535).
+struct alignas(8) BoxAccumulator {
+    uint16_t sum_r;
+    uint16_t sum_g;
+    uint16_t sum_b;
     uint16_t count;
-    uint16_t _reserved;
 };
 
 static BoxAccumulator* s_box_acc = nullptr;
@@ -59,7 +62,7 @@ static bool ensure_box_accumulator_allocated() {
     if (s_box_acc != nullptr) {
         return true;
     }
-    size_t bytes = TOTAL_TARGET_PIXELS * sizeof(BoxAccumulator); // 409.600 bytes (~400 KB)
+    size_t bytes = TOTAL_TARGET_PIXELS * sizeof(BoxAccumulator); // 204.800 bytes (200 KB)
     s_box_acc = (BoxAccumulator*)heap_caps_malloc(bytes, MALLOC_CAP_SPIRAM);
     if (!s_box_acc) {
         s_box_acc = (BoxAccumulator*)malloc(bytes);
@@ -78,10 +81,10 @@ static void finalize_box_average_to_tensor(int8_t* target_tensor) {
         int index = k * CHANNELS;
         if (c > 0) {
             // Média aritmética com arredondamento ao inteiro mais próximo: (soma + c/2) / c
-            uint32_t half_c = c >> 1;
-            uint8_t r = (uint8_t)((s_box_acc[k].sum_r + half_c) / c);
-            uint8_t g = (uint8_t)((s_box_acc[k].sum_g + half_c) / c);
-            uint8_t b = (uint8_t)((s_box_acc[k].sum_b + half_c) / c);
+            uint16_t half_c = c >> 1;
+            uint8_t r = (uint8_t)(((uint32_t)s_box_acc[k].sum_r + half_c) / c);
+            uint8_t g = (uint8_t)(((uint32_t)s_box_acc[k].sum_g + half_c) / c);
+            uint8_t b = (uint8_t)(((uint32_t)s_box_acc[k].sum_b + half_c) / c);
 
             target_tensor[index + 0] = (int8_t)((int)r - 128);
             target_tensor[index + 1] = (int8_t)((int)g - 128);

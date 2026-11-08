@@ -37,6 +37,8 @@ static esp_err_t ws_handler(httpd_req_t *req) {
 
 void web_server_start() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.max_open_sockets = 7;
+    config.lru_purge_enable = true; // Descarta automaticamente conexões inativas para evitar esgotamento de sockets
     if (httpd_start(&server, &config) == ESP_OK) {
         httpd_uri_t ws_uri = {
             .uri        = "/ws",

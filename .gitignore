@@ -6,3 +6,4 @@ error.txt
 .vscode/launch.json
 .vscode/ipch
 tcc
+__pycache__/

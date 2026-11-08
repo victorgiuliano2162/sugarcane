@@ -53,5 +53,9 @@ void wifi_init_sta() {
     esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
     esp_wifi_start();
 
+    // Desativa Modem Sleep para evitar latências no rádio Wi-Fi e quedas de conexão TCP (Errno 104)
+    esp_wifi_set_ps(WIFI_PS_NONE);
+    ESP_LOGI(TAG, "Wi-Fi Power Save desativado (WIFI_PS_NONE) para máxima estabilidade no WebSocket.");
+
     xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
 }
