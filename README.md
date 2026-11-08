@@ -17,7 +17,7 @@ Este projeto constitui o Trabalho de Conclusão de Curso (TCC) desenvolvido por:
 * **Autor:** Victor Giuliano de Freitas Silva
 * **Curso:** Tecnologia em Análise e Desenvolvimento de Sistemas (TADS)
 * **Instituição:** Instituto Federal de Educação, Ciência e Tecnologia de Pernambuco (IFPE) — Campus Paulista
-* **Contato Institucional / Acadêmico:** [Perfil no GitHub](https://github.com/victorgiuliano2162)
+* **Contato Institucional / Acadêmico:** [email](mailto:victor.giuliano@ufpe.br)
 
 O trabalho engloba pesquisa teórica, curadoria e auditoria criptográfica de dados, treinamento e quantização de redes neurais profundas, engenharia de compiladores e otimização de baixo nível em arquitetura computacional microcontrolada.
 
