@@ -120,6 +120,7 @@ Além de sanar as pendências acima, identificamos **4 melhorias técnicas** que
 | **O2** | **Compactação de 50% da Estrutura `BoxAccumulator` (16 B $\rightarrow$ 8 B)** | Em [`src/image_processor.cpp`](file:///home/victor/projects/sugarcane/src/image_processor.cpp#L26-L32), `BoxAccumulator` usa três `uint32_t` (`sum_r`, `sum_g`, `sum_b`) e dois `uint16_t`, ocupando 16 bytes por pixel ($25.600 \times 16 = \mathbf{409,6\text{ KB}}$). | Mesmo em uma foto $1024 \times 1024$, cada célula $160 \times 160$ acumula no máximo $7 \times 7 = 49$ pixels. Logo, a soma máxima por canal é $49 \times 255 = \mathbf{12.495}$, que cabe com folga em um **`uint16_t` (máx 65.535)**! Usar `struct alignas(8) { uint16_t sum_r, sum_g, sum_b, count; }` reduz o buffer de **400 KB para 200 KB** e dobra a taxa de acerto na DCache. | **-50% de uso de PSRAM no decode e -50% no tempo de `memset` / leitura** |
 | **O3** | **Otimização do Compilador para Desempenho (`-O3` / `PERF`)** | Em [`sdkconfig.esp32-s3-devkitm-1`](file:///home/victor/projects/sugarcane/sdkconfig.esp32-s3-devkitm-1), o ESP-IDF utiliza a flag padrão de tamanho (`CONFIG_COMPILER_OPTIMIZATION_SIZE=y` / `-Os`). | Ativar `CONFIG_COMPILER_OPTIMIZATION_PERF=y` (`-O2` / `-O3`), habilitando *loop unrolling* e *inlining* agressivo no `JPEGDEC` e nos wrappers do TFLite Micro. | **Ganho de ~8% a 15% em decodificação e pós-processamento** |
 | **O4** | **Modo Configurável de Escala IDCT via WebSocket/API** | A escala IDCT (`1/4`, `1/2` ou `1/1`) está fixa no código em [`src/image_processor.cpp`](file:///home/victor/projects/sugarcane/src/image_processor.cpp#L265-L280). | Permitir selecionar entre **Modo Alta Velocidade** (IDCT $1/4$ + BoxAvg: ~122 ms decode) e **Modo Máxima Precisão** (Full IDCT $1/1$ ou $1/2$ + BoxAvg: paridade bit-a-bit com `interpolation="area"`). | **Flexibilidade total entre tempo real (<500 ms) e máxima acurácia (91,09%)** |
+| **O5** | **Monitoramento Térmico On-Chip e Telemetria no Payload (`temperature_sensor`)** | O ESP32-S3 opera a 240 MHz com Dual-Core, Octal PSRAM em 80 MHz e Wi-Fi sem monitoramento térmico. Em payload confinado no drone sob sol pleno, o superaquecimento pode degradar a estabilidade. | Ativar o sensor de temperatura interno via driver oficial ESP-IDF (`driver/temperature_sensor.h`), incluir a leitura no JSON de resposta WebSocket (`"temp_c": 54.2`), registrar temperatura nos logs georreferenciados e implementar proteção (*Thermal Throttling*) se $T > 75\,^\circ\text{C}$. | **Confiabilidade operacional em campo, prevenção de travamentos térmicos e enriquecimento de telemetria agronômica** |
 
 ---
 
@@ -145,11 +146,15 @@ Abaixo está o plano de ação dividido em **4 Fases Sequenciais**, priorizadas 
 2. **Avaliação de Sensibilidade de Escala IDCT ($1/1$ vs. $1/2$ vs. $1/4$):**
    * Medir no ESP32-S3 a relação exata entre Tempo de Decodificação e Acurácia Global nos 3 fatores de escala com o modelo `v08`.
 
-### Fase 3: Implementação da Bancada HIL, MAVLink e Mapas de Calor para o TCC *(Prioridade Alta — Aderência Acadêmica)*
+### Fase 3: Implementação da Bancada HIL, MAVLink, Telemetria Térmica e Mapas de Calor para o TCC *(Prioridade Alta — Aderência Acadêmica)*
 1. **Telemetria e Controle *Pause-and-Classify*:**
    * Adicionar suporte a mensagens/comandos de waypoint e telemetria no firmware e criar o script `scripts/run_hil_mavlink_simulation.py`.
-2. **Geração de Logs Georreferenciados e Mapas Fitossanitários:**
-   * Simular uma missão autônoma em grade sobre um talhão real de cana-de-açúcar interagindo em malha fechada com o ESP32-S3 físico, gerando o CSV georreferenciado (`latitude, longitude, altitude, classe, confianca, decode_ms, inferencia_ms`) e plotando automaticamente os mapas de calor (*heatmaps*) de infestação.
+2. **Integração do Sensor de Temperatura Interno On-Chip (`driver/temperature_sensor.h`):**
+   * Inicializar o sensor analógico de temperatura nos núcleos de silício do ESP32-S3 via `temperature_sensor_install` e `temperature_sensor_enable`.
+   * Incluir o campo `"temperatura_c": <float>` no JSON assíncrono emitido por `classifier_run()` / `web_server_send_ws_text()`.
+   * Implementar rotina de segurança com alerta preventivo (*thermal warning*) caso a temperatura ultrapasse $75\,^\circ\text{C}$ durante regimes severos de sobrevoo contínuo.
+3. **Geração de Logs Georreferenciados e Mapas Fitossanitários:**
+   * Simular uma missão autônoma em grade sobre um talhão real de cana-de-açúcar interagindo em malha fechada com o ESP32-S3 físico, gerando o CSV georreferenciado (`latitude, longitude, altitude, classe, confianca, temperatura_c, decode_ms, inferencia_ms`) e plotando automaticamente os mapas de calor (*heatmaps*) de infestação.
 
 ### Fase 4: Consolidação da Monografia (`tcc/`), Interface Web Embarcada e Fechamento Git *(Prioridade Média)*
 1. **Atualização do TCC e Figuras:**
@@ -170,4 +175,5 @@ Abaixo está o plano de ação dividido em **4 Fases Sequenciais**, priorizadas 
 | **P1 (Alto)** | **O1 + O2 + O3:** PSRAM @ 80 MHz + `BoxAccumulator` 8B + `-O2/-O3` | Otimização | 15 min | **Alto:** Reduz ainda mais a inferência (~336 ms $\rightarrow$ ~240 ms) e corta 200 KB de uso de PSRAM. |
 | **P1 (Alto)** | **P3:** Rodar Benchmark no ESP32-S3 com `v08` embarcado | Testes | 10 min | **Alto:** Comprova no hardware físico a acurácia do `v08` junto com a nova velocidade de 240 MHz. |
 | **P2 (Médio)** | **P4:** Script de Co-Simulação HIL MAVLink + Mapa de Calor | TCC / Dev | 30 min | **Alto:** Materializa no repositório 100% dos objetivos específicos 5 e 6 descritos no TCC. |
+| **P2 (Médio)** | **O5:** Monitoramento Térmico On-Chip e Telemetria no JSON | Firmware | 15 min | **Médio/Alto:** Monitora aquecimento a 240 MHz/PSRAM 80 MHz e previne *thermal throttling* em campo. |
 | **P3 (Normal)** | **P5 + P6:** Atualizar tabelas/figuras do LaTeX (`tcc/`), UI Web `/` e Git | Doc / Produto | 25 min | **Médio:** Deixa a monografia PDF e o repositório prontos para defesa e apresentação. |
