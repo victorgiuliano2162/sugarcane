@@ -206,22 +206,22 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 ## 📈 8. Tabela Consolidada de Evolução das Métricas do Projeto
 
-| Dimensão / Indicador Avaliado | Ponto de Partida Inicial (`v07` + Modo 0) | Estágio Intermediário (`v07` Dual-Core + Modo 5) | Estado Final Ativo (`v08` + Opção C Modo 7 + SIMD/Dual-Core) | Ganho Absoluto Consolidado |
+| Dimensão / Indicador Avaliado | Ponto de Partida Inicial (`v07` + Modo 0) | Estágio Intermediário (`v07` Dual-Core + Modo 5) | Estado Final Ativo (`v08` + Opção C Modo 7 + PSRAM 80MHz + -O2) | Ganho Absoluto Consolidado |
 | :--- | :---: | :---: | :---: | :---: |
-| **Acurácia Global (Amostras Limpas)** | `82,36%` (453/550) | `82,73%` (455/550) | **`91,09%` (501/550)** | **$+8,73\%$ (+48 acertos)** |
+| **Acurácia Global (Amostras Limpas)** | `82,36%` (453/550) | `82,73%` (455/550) | **`89,82%` (494/550 no ESP32)** | **$+7,46\%$ (+41 acertos)** |
 | **Acurácia em Validação Inédita (`val/`)** | Não mensurado | Não mensurado | **`89,41%` (962/1.076)** | Generalização de alta precisão |
-| **Acurácia na Classe `smut` (Carvão)** | `4,0%` (2/50) | `18,0%` (9/50) | **`84,0%` (limpo) / `85,7%` (val)** | **$21\times$ mais acertos (+80,0%)** |
-| **Acurácia na Classe `Pokkah Boeng`** | `74,0%` (37/50) | `86,0%` (43/50) | **`100,0%` (50/50 limpo) / `86,5%` (val)** | **$+26,0\%$ (100% de precisão limpa)** |
+| **Acurácia na Classe `smut` (Carvão)** | `4,0%` (2/50) | `18,0%` (9/50) | **`84,0%` (42/50 no ESP32)** | **$21\times$ mais acertos (+80,0%)** |
+| **Acurácia na Classe `Pokkah Boeng`** | `74,0%` (37/50) | `86,0%` (43/50) | **`100,0%` (50/50 no ESP32)** | **$+26,0\%$ (100% de precisão limpa)** |
 | **Confusões `smut` $\rightarrow$ `Pokkah Boeng`** | 34 amostras erradas | 19 amostras erradas | **0 amostras erradas** | **100% das confusões eliminadas** |
-| **Confiança Média Global nas Predições** | `79,13%` | `78,82%` | **`86,20%`** | **$+7,07\text{ p.p.}$ de certeza estatística** |
+| **Confiança Média Global nas Predições** | `79,13%` | `78,82%` | **`84,83%`** | **$+5,70\text{ p.p.}$ de certeza estatística** |
 | **Fidelidade de Sinal do Tensor (PSNR)** | `27,1 dB` | `38,2 dB` | **`∞ dB` (Paridade Matemática)** | **Zero ruído de quantização/downscale** |
 | **Viés DC de Brilho da Entrada (Bias)** | `-2,90 LSB` (escurecido) | `-2,84 LSB` | **`0,00 LSB` (equilibrado)** | Escala física perfeitamente preservada |
-| **Tempo Médio de Inferência TFLite** | `626,6 ms` | `777,4 ms` (Contenção PSRAM) | **`336,5 ms` (240MHz + SRAM + Fork-Join)** | **Redução de 56,7% (-441 ms/foto)** |
-| **Tempo Médio Decodificação JPEG** | `814,0 ms` (ZeroFill) | `1.032,4 ms` | **`122,5 ms` (IDCT Scale 1/4 + 240MHz)** | **Redução de 88,1% (-910 ms/foto)** |
-| **Tempo Total de Processamento no ESP32** | `1.440,6 ms` | `1.809,8 ms` | **`459,0 ms`** | **$3,9\times$ mais rápido no chip** |
-| **Tempo de Execução do Lote (550 fotos)** | `871,51 s` (14,53 min) | `574,89 s` (9,58 min) | **`574,89 s` (9,58 min)** | **$-296,6\text{ s}$ (+34,0% mais veloz)** |
-| **Throughput Médio do Sistema** | `0,63 imagens/s` | `0,96 imagens/s` | **`0,96 imagens/s`** | **$1,52\times$ maior capacidade de vazão** |
-| **Cadência Média entre Predições** | `1.581,3 ms/frame` | `1.044,8 ms/frame` | **`1.044,8 ms/frame`** | **Redução de $-536,5\text{ ms}$ por foto** |
+| **Tempo Médio de Inferência TFLite** | `626,6 ms` | `777,4 ms` (Contenção PSRAM) | **`283,4 ms` (240MHz + SRAM + PSRAM 80MHz + -O2)** | **Redução de 63,5% (-494 ms/foto)** |
+| **Tempo Médio Decodificação JPEG** | `814,0 ms` (ZeroFill) | `1.032,4 ms` | **`102,7 ms` (IDCT Scale + BoxAcc 8B + 80MHz)** | **Redução de 90,1% (-930 ms/foto)** |
+| **Tempo Total de Processamento no ESP32** | `1.440,6 ms` | `1.809,8 ms` | **`386,1 ms`** | **$4,7\times$ mais rápido no chip** |
+| **Tempo de Execução do Lote (550 fotos)** | `871,51 s` (14,53 min) | `574,89 s` (9,58 min) | **`310,83 s` (5,18 min)** | **$-560,7\text{ s}$ (+64,3% mais veloz)** |
+| **Throughput Médio do Sistema** | `0,63 imagens/s` | `0,96 imagens/s` | **`1,77 imagens/s`** | **$2,81\times$ maior capacidade de vazão** |
+| **Cadência Média entre Predições** | `1.581,3 ms/frame` | `1.044,8 ms/frame` | **`564,7 ms/frame`** | **Redução de $-1.016,6\text{ ms}$ por foto** |
 | **Divisões Inteiras na Decodificação** | 786.432 divisões/foto | 786.432 divisões/foto | **1.792 divisões/foto (via LUT)** | **Eliminação de 99,77% das divisões** |
 | **Execução de Convolução em SRAM Interna** | 0% (Alocado na PSRAM) | 0% (Alocado na PSRAM) | **100% das 52 camadas (48 KB SRAM)** | **Zero contenção de barramento externo** |
 | **Tamanho do Binário do Modelo Neural** | ~2,5 MB (Float32 estimado) | 624 KB (INT8 v07) | **624 KB (INT8 v08)** | **Redução de 4× em Flash e RAM** |
