@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_f09992d95f7e8b925602c93633feea1d {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ljagis/leaflet-measure@2.1.7/dist/leaflet-measure.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ljagis/leaflet-measure@2.1.7/dist/leaflet-measure.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@3.0.0/Control.FullScreen.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.fullscreen@3.0.0/Control.FullScreen.css"/>
+</head>
+<body>
+    
+    
+    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; background: rgba(15, 23, 42, 0.92);
+                color: #f1f5f9; padding: 14px 18px; border-radius: 8px; border: 1px solid #334155;
+                font-family: Arial, sans-serif; font-size: 11px; box-shadow: 0 4px 16px rgba(0,0,0,0.4); max-width: 250px;">
+        <b style="font-size: 12px; color: #34d399;">Diagnóstico Fitossanitário ESP32-S3</b><br>
+        <span style="color: #94a3b8;">Classificação em Borda por Visão Computacional</span>
+        <hr style="border: 0; border-top: 1px solid #334155; margin: 8px 0;">
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+            <span style="background: #10b981; width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+            <span>Saudável (Healthy)</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+            <span style="background: #dc2626; width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+            <b>Carvão (smut) - Crítico</b>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+            <span style="background: #ea580c; width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+            <b>Ferrugem (BrownRust) - Crítico</b>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+            <span style="background: #eab308; width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+            <span>Clorose / Folha Amarela</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+            <span style="background: #64748b; width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+            <span>Folhas Secas (Dried)</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <span style="background: #8b5cf6; width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+            <span>Outras Patologias</span>
+        </div>
+    </div>
+    
+    
+            <div class="folium-map" id="map_f09992d95f7e8b925602c93633feea1d" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_f09992d95f7e8b925602c93633feea1d = L.map(
+                "map_f09992d95f7e8b925602c93633feea1d",
+                {
+                    center: [-21.177500000000002, -47.8103],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 18,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_f4be1b828fede23a1cb9189ddf3a575d = L.tileLayer(
+                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                {
+  "minZoom": 0,
+  "maxZoom": 18,
+  "maxNativeZoom": 18,
+  "noWrap": false,
+  "attribution": "Esri World Imagery",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_f4be1b828fede23a1cb9189ddf3a575d.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var tile_layer_6b6fc2889d740e66fed7978bed607030 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_6b6fc2889d740e66fed7978bed607030.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var polygon_bac04b31f162e49d3f53cf56c8ffd1e1 = L.polygon(
+                [[-21.1780717, -47.811316999999995], [-21.1780717, -47.809283], [-21.1769283, -47.809283], [-21.1769283, -47.811316999999995], [-21.1780717, -47.811316999999995]],
+                {"bubblingMouseEvents": true, "color": "#34d399", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 2}
+            ).addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            polygon_bac04b31f162e49d3f53cf56c8ffd1e1.bindTooltip(
+                `<div>
+                     <b>Talhão 04 - Canavial de Produção</b><br>Ribeirão Preto / SP
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var poly_line_758006dacecbe6b12a5755a737af44d1 = L.polyline(
+                [[-21.1779517, -47.811167], [-21.1779517, -47.8109936], [-21.1779517, -47.8108202], [-21.1779517, -47.8106468], [-21.1779517, -47.8104734], [-21.1779517, -47.8103], [-21.1779517, -47.8101266], [-21.1779517, -47.8099532], [-21.1779517, -47.8097798], [-21.1779517, -47.8096064], [-21.1779517, -47.809433], [-21.1777258, -47.809433], [-21.1777258, -47.8096064], [-21.1777258, -47.8097798], [-21.1777258, -47.8099532], [-21.1777258, -47.8101266], [-21.1777258, -47.8103], [-21.1777258, -47.8104734], [-21.1777258, -47.8106468], [-21.1777258, -47.8108202], [-21.1777258, -47.8109936], [-21.1777258, -47.811167], [-21.1775, -47.811167], [-21.1775, -47.8109936], [-21.1775, -47.8108202], [-21.1775, -47.8106468], [-21.1775, -47.8104734], [-21.1775, -47.8103], [-21.1775, -47.8101266], [-21.1775, -47.8099532], [-21.1775, -47.8097798], [-21.1775, -47.8096064], [-21.1775, -47.809433], [-21.1772742, -47.809433], [-21.1772742, -47.8096064], [-21.1772742, -47.8097798], [-21.1772742, -47.8099532], [-21.1772742, -47.8101266], [-21.1772742, -47.8103], [-21.1772742, -47.8104734], [-21.1772742, -47.8106468], [-21.1772742, -47.8108202], [-21.1772742, -47.8109936], [-21.1772742, -47.811167], [-21.1770483, -47.811167], [-21.1770483, -47.8109936], [-21.1770483, -47.8108202], [-21.1770483, -47.8106468], [-21.1770483, -47.8104734], [-21.1770483, -47.8103], [-21.1770483, -47.8101266], [-21.1770483, -47.8099532], [-21.1770483, -47.8097798], [-21.1770483, -47.8096064], [-21.1770483, -47.809433]],
+                {"bubblingMouseEvents": true, "color": "#38bdf8", "dashArray": "5, 8", "dashOffset": null, "fill": false, "fillColor": "#38bdf8", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.6, "smoothFactor": 1.0, "stroke": true, "weight": 2}
+            ).addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            poly_line_758006dacecbe6b12a5755a737af44d1.bindTooltip(
+                `<div>
+                     Trajetória de Voo VANT (Serpentina)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var feature_group_55ebd337445ae1e8df11c7b3da82e5df = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_9c7fe0802cced28ff82279b59146f046 = L.circleMarker(
+                [-21.1779517, -47.811167],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d97706", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_ac213dfed74005ab0425e6beef364a0d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_fafc06be780092c9a42ce94d9062e9c9 = $(`<div id="html_fafc06be780092c9a42ce94d9062e9c9" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #d97706; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #1 (Brown Spot)             </div>             <b>Talhão:</b> Linha 0, Col 0<br>             <b>Diagnóstico:</b> Brown Spot<br>             <b>Confiança:</b> 70.3%<br>             <b>Gabarito Real:</b> Pokkah Boeng<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1261 ms<br>             <b>Amostra:</b> <code>Pokkah Boeng001.jpg</code>         </div>         </div>`)[0];
+                popup_ac213dfed74005ab0425e6beef364a0d.setContent(html_fafc06be780092c9a42ce94d9062e9c9);
+            
+        
+
+        circle_marker_9c7fe0802cced28ff82279b59146f046.bindPopup(popup_ac213dfed74005ab0425e6beef364a0d)
+        ;
+
+        
+    
+    
+            circle_marker_9c7fe0802cced28ff82279b59146f046.bindTooltip(
+                `<div>
+                     WP #1: Brown Spot (70.3%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_92db5dae54a8449c3e9ee320f64c506b = L.circleMarker(
+                [-21.1779517, -47.8109936],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_9f14239e4733f8409ef51cb8e6ee51d0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_1ff0a2f005cbfe9035815de8eccce0f9 = $(`<div id="html_1ff0a2f005cbfe9035815de8eccce0f9" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #2 (Viral Disease)             </div>             <b>Talhão:</b> Linha 0, Col 1<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 98.0%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 79 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1150 ms<br>             <b>Amostra:</b> <code>image002.jpg</code>         </div>         </div>`)[0];
+                popup_9f14239e4733f8409ef51cb8e6ee51d0.setContent(html_1ff0a2f005cbfe9035815de8eccce0f9);
+            
+        
+
+        circle_marker_92db5dae54a8449c3e9ee320f64c506b.bindPopup(popup_9f14239e4733f8409ef51cb8e6ee51d0)
+        ;
+
+        
+    
+    
+            circle_marker_92db5dae54a8449c3e9ee320f64c506b.bindTooltip(
+                `<div>
+                     WP #2: Viral Disease (98.0%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5735ed5db0d98cf65e6508533af83aa7 = L.circleMarker(
+                [-21.1779517, -47.8108202],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_be79d157db2d8cd8679559aafbcc48eb = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_82f948b0b8c929a8ffc334a41c3d2995 = $(`<div id="html_82f948b0b8c929a8ffc334a41c3d2995" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #3 (Viral Disease)             </div>             <b>Talhão:</b> Linha 0, Col 2<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 98.4%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 79 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1044 ms<br>             <b>Amostra:</b> <code>image003.jpg</code>         </div>         </div>`)[0];
+                popup_be79d157db2d8cd8679559aafbcc48eb.setContent(html_82f948b0b8c929a8ffc334a41c3d2995);
+            
+        
+
+        circle_marker_5735ed5db0d98cf65e6508533af83aa7.bindPopup(popup_be79d157db2d8cd8679559aafbcc48eb)
+        ;
+
+        
+    
+    
+            circle_marker_5735ed5db0d98cf65e6508533af83aa7.bindTooltip(
+                `<div>
+                     WP #3: Viral Disease (98.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bba6eb6a311f44ea27d8421b9996a074 = L.circleMarker(
+                [-21.1779517, -47.8106468],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_fc97557a8fc0be367fbc1b58941b6da1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5ef71a96d07ea049e03d7ded281d3b93 = $(`<div id="html_5ef71a96d07ea049e03d7ded281d3b93" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #4 (Viral Disease)             </div>             <b>Talhão:</b> Linha 0, Col 3<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 98.8%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 79 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1045 ms<br>             <b>Amostra:</b> <code>image004.jpg</code>         </div>         </div>`)[0];
+                popup_fc97557a8fc0be367fbc1b58941b6da1.setContent(html_5ef71a96d07ea049e03d7ded281d3b93);
+            
+        
+
+        circle_marker_bba6eb6a311f44ea27d8421b9996a074.bindPopup(popup_fc97557a8fc0be367fbc1b58941b6da1)
+        ;
+
+        
+    
+    
+            circle_marker_bba6eb6a311f44ea27d8421b9996a074.bindTooltip(
+                `<div>
+                     WP #4: Viral Disease (98.8%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c3e3b65e516c467fb53b187a9c22df23 = L.circleMarker(
+                [-21.1779517, -47.8104734],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_eb78bd1b78194433e62a075ef1afacad = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cc38314c7df5cbb91197beaa19478026 = $(`<div id="html_cc38314c7df5cbb91197beaa19478026" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #5 (Viral Disease)             </div>             <b>Talhão:</b> Linha 0, Col 4<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 96.9%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 79 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1044 ms<br>             <b>Amostra:</b> <code>image005.jpg</code>         </div>         </div>`)[0];
+                popup_eb78bd1b78194433e62a075ef1afacad.setContent(html_cc38314c7df5cbb91197beaa19478026);
+            
+        
+
+        circle_marker_c3e3b65e516c467fb53b187a9c22df23.bindPopup(popup_eb78bd1b78194433e62a075ef1afacad)
+        ;
+
+        
+    
+    
+            circle_marker_c3e3b65e516c467fb53b187a9c22df23.bindTooltip(
+                `<div>
+                     WP #5: Viral Disease (96.9%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f171ae615f5088d5e2fa33de4965d136 = L.circleMarker(
+                [-21.1779517, -47.8103],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_109a2fde169dd6613a67a6a604abd7ce = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_05d6417e2e08fa88c968a5643355a5e6 = $(`<div id="html_05d6417e2e08fa88c968a5643355a5e6" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #6 (Viral Disease)             </div>             <b>Talhão:</b> Linha 0, Col 5<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 96.9%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 79 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1044 ms<br>             <b>Amostra:</b> <code>image006.jpg</code>         </div>         </div>`)[0];
+                popup_109a2fde169dd6613a67a6a604abd7ce.setContent(html_05d6417e2e08fa88c968a5643355a5e6);
+            
+        
+
+        circle_marker_f171ae615f5088d5e2fa33de4965d136.bindPopup(popup_109a2fde169dd6613a67a6a604abd7ce)
+        ;
+
+        
+    
+    
+            circle_marker_f171ae615f5088d5e2fa33de4965d136.bindTooltip(
+                `<div>
+                     WP #6: Viral Disease (96.9%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_80ed77d2e9eaea3402609c192175981d = L.circleMarker(
+                [-21.1779517, -47.8101266],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d97706", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_dfc5a8218e4dc38a2c326f4824d41230 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_577a119f4ebf995f8d53483ea5f46360 = $(`<div id="html_577a119f4ebf995f8d53483ea5f46360" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #d97706; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #7 (Brown Spot)             </div>             <b>Talhão:</b> Linha 0, Col 6<br>             <b>Diagnóstico:</b> Brown Spot<br>             <b>Confiança:</b> 94.5%<br>             <b>Gabarito Real:</b> Brown Spot<br>             <b>Decodificação:</b> 76 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 988 ms<br>             <b>Amostra:</b> <code>image007.jpg</code>         </div>         </div>`)[0];
+                popup_dfc5a8218e4dc38a2c326f4824d41230.setContent(html_577a119f4ebf995f8d53483ea5f46360);
+            
+        
+
+        circle_marker_80ed77d2e9eaea3402609c192175981d.bindPopup(popup_dfc5a8218e4dc38a2c326f4824d41230)
+        ;
+
+        
+    
+    
+            circle_marker_80ed77d2e9eaea3402609c192175981d.bindTooltip(
+                `<div>
+                     WP #7: Brown Spot (94.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e4b6dfff8997e4981a60ea169ceca5ab = L.circleMarker(
+                [-21.1779517, -47.8099532],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_7bdfff34b2335278de60bf6b92960cd6 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_28cbdc7bedab8900cb624a67a1c4d8e1 = $(`<div id="html_28cbdc7bedab8900cb624a67a1c4d8e1" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #8 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 7<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 47.7%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 71 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 998 ms<br>             <b>Amostra:</b> <code>image008.jpg</code>         </div>         </div>`)[0];
+                popup_7bdfff34b2335278de60bf6b92960cd6.setContent(html_28cbdc7bedab8900cb624a67a1c4d8e1);
+            
+        
+
+        circle_marker_e4b6dfff8997e4981a60ea169ceca5ab.bindPopup(popup_7bdfff34b2335278de60bf6b92960cd6)
+        ;
+
+        
+    
+    
+            circle_marker_e4b6dfff8997e4981a60ea169ceca5ab.bindTooltip(
+                `<div>
+                     WP #8: BrownRust (47.7%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5686fb0aae1b61d4b28a6eb159e96eb1 = L.circleMarker(
+                [-21.1779517, -47.8097798],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_39a92f2aa1a995c38fa9373758134d7e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_bae1437df8dd4cc12b41068316c8dba3 = $(`<div id="html_bae1437df8dd4cc12b41068316c8dba3" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #9 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 8<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 89.5%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 72 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1034 ms<br>             <b>Amostra:</b> <code>image009.jpg</code>         </div>         </div>`)[0];
+                popup_39a92f2aa1a995c38fa9373758134d7e.setContent(html_bae1437df8dd4cc12b41068316c8dba3);
+            
+        
+
+        circle_marker_5686fb0aae1b61d4b28a6eb159e96eb1.bindPopup(popup_39a92f2aa1a995c38fa9373758134d7e)
+        ;
+
+        
+    
+    
+            circle_marker_5686fb0aae1b61d4b28a6eb159e96eb1.bindTooltip(
+                `<div>
+                     WP #9: BrownRust (89.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_883b4f4752162e68ef8cb6e7e9396ba2 = L.circleMarker(
+                [-21.1779517, -47.8096064],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_7512b9b82a693bce5cc2c1edfdac202c = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_8863fd30408b8a37a04869bf1460e646 = $(`<div id="html_8863fd30408b8a37a04869bf1460e646" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #10 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 9<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 91.4%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 76 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 985 ms<br>             <b>Amostra:</b> <code>image010.jpg</code>         </div>         </div>`)[0];
+                popup_7512b9b82a693bce5cc2c1edfdac202c.setContent(html_8863fd30408b8a37a04869bf1460e646);
+            
+        
+
+        circle_marker_883b4f4752162e68ef8cb6e7e9396ba2.bindPopup(popup_7512b9b82a693bce5cc2c1edfdac202c)
+        ;
+
+        
+    
+    
+            circle_marker_883b4f4752162e68ef8cb6e7e9396ba2.bindTooltip(
+                `<div>
+                     WP #10: BrownRust (91.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_8d909d4e1b1c4a32ae89ca8b2be201fd = L.circleMarker(
+                [-21.1779517, -47.809433],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_7bbaee5c0c84426e1161e356291fef26 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_bab51acbb0c25fef76cf00703f4f2eea = $(`<div id="html_bab51acbb0c25fef76cf00703f4f2eea" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #11 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 10<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 84.8%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1009 ms<br>             <b>Amostra:</b> <code>image011.jpg</code>         </div>         </div>`)[0];
+                popup_7bbaee5c0c84426e1161e356291fef26.setContent(html_bab51acbb0c25fef76cf00703f4f2eea);
+            
+        
+
+        circle_marker_8d909d4e1b1c4a32ae89ca8b2be201fd.bindPopup(popup_7bbaee5c0c84426e1161e356291fef26)
+        ;
+
+        
+    
+    
+            circle_marker_8d909d4e1b1c4a32ae89ca8b2be201fd.bindTooltip(
+                `<div>
+                     WP #11: BrownRust (84.8%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_51a97594cedf858cc0c0ae5901ee94c9 = L.circleMarker(
+                [-21.1777258, -47.809433],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_1e2009f7a31dc53f387e07748badd1d4 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cb67ccd467c96a325cdda98e6994225c = $(`<div id="html_cb67ccd467c96a325cdda98e6994225c" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #12 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 10<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 96.1%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 77 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1045 ms<br>             <b>Amostra:</b> <code>image012.jpg</code>         </div>         </div>`)[0];
+                popup_1e2009f7a31dc53f387e07748badd1d4.setContent(html_cb67ccd467c96a325cdda98e6994225c);
+            
+        
+
+        circle_marker_51a97594cedf858cc0c0ae5901ee94c9.bindPopup(popup_1e2009f7a31dc53f387e07748badd1d4)
+        ;
+
+        
+    
+    
+            circle_marker_51a97594cedf858cc0c0ae5901ee94c9.bindTooltip(
+                `<div>
+                     WP #12: BrownRust (96.1%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_568ac3c89374dd70819cc1ef73d15d70 = L.circleMarker(
+                [-21.1777258, -47.8096064],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_48094eddafe524f48507dd7d7f50213e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_89d5008b31d77fe59a4f8a7908968a2c = $(`<div id="html_89d5008b31d77fe59a4f8a7908968a2c" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #13 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 9<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 96.9%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 77 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1048 ms<br>             <b>Amostra:</b> <code>image013.jpg</code>         </div>         </div>`)[0];
+                popup_48094eddafe524f48507dd7d7f50213e.setContent(html_89d5008b31d77fe59a4f8a7908968a2c);
+            
+        
+
+        circle_marker_568ac3c89374dd70819cc1ef73d15d70.bindPopup(popup_48094eddafe524f48507dd7d7f50213e)
+        ;
+
+        
+    
+    
+            circle_marker_568ac3c89374dd70819cc1ef73d15d70.bindTooltip(
+                `<div>
+                     WP #13: BrownRust (96.9%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a6d294333aabad1e3473394a315e3ddd = L.circleMarker(
+                [-21.1777258, -47.8097798],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_413efbe2832d5f27dca9bfc89ec54b8a = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_9604febaafc2dfc3330baf691e93ba15 = $(`<div id="html_9604febaafc2dfc3330baf691e93ba15" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #14 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 8<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 94.1%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1039 ms<br>             <b>Amostra:</b> <code>image014.jpg</code>         </div>         </div>`)[0];
+                popup_413efbe2832d5f27dca9bfc89ec54b8a.setContent(html_9604febaafc2dfc3330baf691e93ba15);
+            
+        
+
+        circle_marker_a6d294333aabad1e3473394a315e3ddd.bindPopup(popup_413efbe2832d5f27dca9bfc89ec54b8a)
+        ;
+
+        
+    
+    
+            circle_marker_a6d294333aabad1e3473394a315e3ddd.bindTooltip(
+                `<div>
+                     WP #14: BrownRust (94.1%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0c8fae423dfb6889c707e735bce8cd9a = L.circleMarker(
+                [-21.1777258, -47.8099532],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_8ce324a48b3e178d8fb48e55709bbe46 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_61be9d1a9351f20795096fb49c3409a6 = $(`<div id="html_61be9d1a9351f20795096fb49c3409a6" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #15 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 7<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 93.4%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 75 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1044 ms<br>             <b>Amostra:</b> <code>image015.jpg</code>         </div>         </div>`)[0];
+                popup_8ce324a48b3e178d8fb48e55709bbe46.setContent(html_61be9d1a9351f20795096fb49c3409a6);
+            
+        
+
+        circle_marker_0c8fae423dfb6889c707e735bce8cd9a.bindPopup(popup_8ce324a48b3e178d8fb48e55709bbe46)
+        ;
+
+        
+    
+    
+            circle_marker_0c8fae423dfb6889c707e735bce8cd9a.bindTooltip(
+                `<div>
+                     WP #15: BrownRust (93.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6235d01716d78fefbd363bd8c0445056 = L.circleMarker(
+                [-21.1777258, -47.8101266],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#eab308", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_ac465ac622c8ee1a9685c6b6a2fedab6 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_19368d505131030c9cfa17cb7643294a = $(`<div id="html_19368d505131030c9cfa17cb7643294a" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #eab308; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #16 (Yellow Leaf)             </div>             <b>Talhão:</b> Linha 1, Col 6<br>             <b>Diagnóstico:</b> Yellow Leaf<br>             <b>Confiança:</b> 78.1%<br>             <b>Gabarito Real:</b> Yellow Leaf<br>             <b>Decodificação:</b> 76 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1044 ms<br>             <b>Amostra:</b> <code>Yellow Leaf016.jpg</code>         </div>         </div>`)[0];
+                popup_ac465ac622c8ee1a9685c6b6a2fedab6.setContent(html_19368d505131030c9cfa17cb7643294a);
+            
+        
+
+        circle_marker_6235d01716d78fefbd363bd8c0445056.bindPopup(popup_ac465ac622c8ee1a9685c6b6a2fedab6)
+        ;
+
+        
+    
+    
+            circle_marker_6235d01716d78fefbd363bd8c0445056.bindTooltip(
+                `<div>
+                     WP #16: Yellow Leaf (78.1%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5d32b2353f55adf9186d4ab43407f847 = L.circleMarker(
+                [-21.1777258, -47.8103],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_32a71d8aa78836cbb7e505dea01d26c1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_636ed783c964a932fa081b338631c778 = $(`<div id="html_636ed783c964a932fa081b338631c778" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #17 (Viral Disease)             </div>             <b>Talhão:</b> Linha 1, Col 5<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 91.0%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 124 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1043 ms<br>             <b>Amostra:</b> <code>image017.jpg</code>         </div>         </div>`)[0];
+                popup_32a71d8aa78836cbb7e505dea01d26c1.setContent(html_636ed783c964a932fa081b338631c778);
+            
+        
+
+        circle_marker_5d32b2353f55adf9186d4ab43407f847.bindPopup(popup_32a71d8aa78836cbb7e505dea01d26c1)
+        ;
+
+        
+    
+    
+            circle_marker_5d32b2353f55adf9186d4ab43407f847.bindTooltip(
+                `<div>
+                     WP #17: Viral Disease (91.0%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_2ba2d124f3d8b463b18bc642dc5a5218 = L.circleMarker(
+                [-21.1777258, -47.8104734],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_d585b03062a75ac217121b3e888b124b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_53a1c0dbc69f72526c94aa28c313236a = $(`<div id="html_53a1c0dbc69f72526c94aa28c313236a" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #18 (Viral Disease)             </div>             <b>Talhão:</b> Linha 1, Col 4<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 92.6%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 124 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1046 ms<br>             <b>Amostra:</b> <code>image018.jpg</code>         </div>         </div>`)[0];
+                popup_d585b03062a75ac217121b3e888b124b.setContent(html_53a1c0dbc69f72526c94aa28c313236a);
+            
+        
+
+        circle_marker_2ba2d124f3d8b463b18bc642dc5a5218.bindPopup(popup_d585b03062a75ac217121b3e888b124b)
+        ;
+
+        
+    
+    
+            circle_marker_2ba2d124f3d8b463b18bc642dc5a5218.bindTooltip(
+                `<div>
+                     WP #18: Viral Disease (92.6%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1537138e039b9ae1ac43d2a7f3a84a3f = L.circleMarker(
+                [-21.1777258, -47.8106468],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_3bb50ec2e38b9131ac642432b78a7b70 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_dbde1daf875707515af464e62bb6970b = $(`<div id="html_dbde1daf875707515af464e62bb6970b" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #19 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 3<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 80.5%<br>             <b>Gabarito Real:</b> Viral Disease<br>             <b>Decodificação:</b> 72 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1045 ms<br>             <b>Amostra:</b> <code>Viral Disease019.jpg</code>         </div>         </div>`)[0];
+                popup_3bb50ec2e38b9131ac642432b78a7b70.setContent(html_dbde1daf875707515af464e62bb6970b);
+            
+        
+
+        circle_marker_1537138e039b9ae1ac43d2a7f3a84a3f.bindPopup(popup_3bb50ec2e38b9131ac642432b78a7b70)
+        ;
+
+        
+    
+    
+            circle_marker_1537138e039b9ae1ac43d2a7f3a84a3f.bindTooltip(
+                `<div>
+                     WP #19: BrownRust (80.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_fd8deb7a54cad9f82971b1adcbe88dcc = L.circleMarker(
+                [-21.1777258, -47.8108202],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_bc20f612139639daa0d6341077c3ad5d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_eb1eae6ba36cd6bac40387e2981cba66 = $(`<div id="html_eb1eae6ba36cd6bac40387e2981cba66" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #20 (Viral Disease)             </div>             <b>Talhão:</b> Linha 1, Col 2<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 80.9%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 123 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1048 ms<br>             <b>Amostra:</b> <code>image020.jpg</code>         </div>         </div>`)[0];
+                popup_bc20f612139639daa0d6341077c3ad5d.setContent(html_eb1eae6ba36cd6bac40387e2981cba66);
+            
+        
+
+        circle_marker_fd8deb7a54cad9f82971b1adcbe88dcc.bindPopup(popup_bc20f612139639daa0d6341077c3ad5d)
+        ;
+
+        
+    
+    
+            circle_marker_fd8deb7a54cad9f82971b1adcbe88dcc.bindTooltip(
+                `<div>
+                     WP #20: Viral Disease (80.9%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a4f24f253ee53bef6eacfdba13548dad = L.circleMarker(
+                [-21.1777258, -47.8109936],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#8b5cf6", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_e6f85ac609f067d140eac72bebb212c9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d831be964df345adc4101d6a535c0cb1 = $(`<div id="html_d831be964df345adc4101d6a535c0cb1" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #8b5cf6; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #21 (Viral Disease)             </div>             <b>Talhão:</b> Linha 1, Col 1<br>             <b>Diagnóstico:</b> Viral Disease<br>             <b>Confiança:</b> 73.4%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 121 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1050 ms<br>             <b>Amostra:</b> <code>image021.jpg</code>         </div>         </div>`)[0];
+                popup_e6f85ac609f067d140eac72bebb212c9.setContent(html_d831be964df345adc4101d6a535c0cb1);
+            
+        
+
+        circle_marker_a4f24f253ee53bef6eacfdba13548dad.bindPopup(popup_e6f85ac609f067d140eac72bebb212c9)
+        ;
+
+        
+    
+    
+            circle_marker_a4f24f253ee53bef6eacfdba13548dad.bindTooltip(
+                `<div>
+                     WP #21: Viral Disease (73.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_183878038476050783f9c8b2dc1fdd07 = L.circleMarker(
+                [-21.1777258, -47.811167],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_9e1616d95fd7110cc5f8416f8976269b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_918e5a78acf6aa92332e50beaa18b08f = $(`<div id="html_918e5a78acf6aa92332e50beaa18b08f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #22 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 1, Col 0<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 84.4%<br>             <b>Gabarito Real:</b> Pokkah Boeng<br>             <b>Decodificação:</b> 71 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1241 ms<br>             <b>Amostra:</b> <code>Pokkah Boeng022.jpg</code>         </div>         </div>`)[0];
+                popup_9e1616d95fd7110cc5f8416f8976269b.setContent(html_918e5a78acf6aa92332e50beaa18b08f);
+            
+        
+
+        circle_marker_183878038476050783f9c8b2dc1fdd07.bindPopup(popup_9e1616d95fd7110cc5f8416f8976269b)
+        ;
+
+        
+    
+    
+            circle_marker_183878038476050783f9c8b2dc1fdd07.bindTooltip(
+                `<div>
+                     WP #22: Dried Leaves (84.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6f8bea53df849faee985c9752cf5a67c = L.circleMarker(
+                [-21.1775, -47.811167],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#eab308", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_0772eaf6f75c2081ffe2d9098821181e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_412937a6a5b5bd7b3ab32918bb3caf7d = $(`<div id="html_412937a6a5b5bd7b3ab32918bb3caf7d" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #eab308; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #23 (Yellow Leaf)             </div>             <b>Talhão:</b> Linha 2, Col 0<br>             <b>Diagnóstico:</b> Yellow Leaf<br>             <b>Confiança:</b> 94.5%<br>             <b>Gabarito Real:</b> Yellow Leaf<br>             <b>Decodificação:</b> 87 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1148 ms<br>             <b>Amostra:</b> <code>Yellow Leaf023.jpg</code>         </div>         </div>`)[0];
+                popup_0772eaf6f75c2081ffe2d9098821181e.setContent(html_412937a6a5b5bd7b3ab32918bb3caf7d);
+            
+        
+
+        circle_marker_6f8bea53df849faee985c9752cf5a67c.bindPopup(popup_0772eaf6f75c2081ffe2d9098821181e)
+        ;
+
+        
+    
+    
+            circle_marker_6f8bea53df849faee985c9752cf5a67c.bindTooltip(
+                `<div>
+                     WP #23: Yellow Leaf (94.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ab84c2f1614253cf983067544d54428f = L.circleMarker(
+                [-21.1775, -47.8109936],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_ff83f79eef8aaf75b1afe8763e172662 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_be4d7f580849bebec78ff1b005fefa3f = $(`<div id="html_be4d7f580849bebec78ff1b005fefa3f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #24 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 2, Col 1<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 62.5%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 119 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1042 ms<br>             <b>Amostra:</b> <code>image024.jpg</code>         </div>         </div>`)[0];
+                popup_ff83f79eef8aaf75b1afe8763e172662.setContent(html_be4d7f580849bebec78ff1b005fefa3f);
+            
+        
+
+        circle_marker_ab84c2f1614253cf983067544d54428f.bindPopup(popup_ff83f79eef8aaf75b1afe8763e172662)
+        ;
+
+        
+    
+    
+            circle_marker_ab84c2f1614253cf983067544d54428f.bindTooltip(
+                `<div>
+                     WP #24: Healthy Leaves (62.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_21cad9f70afabb9b84d25405eaa513a9 = L.circleMarker(
+                [-21.1775, -47.8108202],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#84cc16", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_9a9ea2df414a68ae198689caa5cccfe7 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_aa469f9698cd2961e1030e3865decd3f = $(`<div id="html_aa469f9698cd2961e1030e3865decd3f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #84cc16; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #25 (Grassy shoot)             </div>             <b>Talhão:</b> Linha 2, Col 2<br>             <b>Diagnóstico:</b> Grassy shoot<br>             <b>Confiança:</b> 98.4%<br>             <b>Gabarito Real:</b> Grassy shoot<br>             <b>Decodificação:</b> 233 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1614 ms<br>             <b>Amostra:</b> <code>image025.jpg</code>         </div>         </div>`)[0];
+                popup_9a9ea2df414a68ae198689caa5cccfe7.setContent(html_aa469f9698cd2961e1030e3865decd3f);
+            
+        
+
+        circle_marker_21cad9f70afabb9b84d25405eaa513a9.bindPopup(popup_9a9ea2df414a68ae198689caa5cccfe7)
+        ;
+
+        
+    
+    
+            circle_marker_21cad9f70afabb9b84d25405eaa513a9.bindTooltip(
+                `<div>
+                     WP #25: Grassy shoot (98.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d6656aece24beb1a5e14ddaa776378ea = L.circleMarker(
+                [-21.1775, -47.8106468],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#facc15", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_00a1dddd5f88ef6629fd7b73d1ccd249 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_ef2ed22971def86d0ce3cbe2e7964dcd = $(`<div id="html_ef2ed22971def86d0ce3cbe2e7964dcd" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #facc15; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #26 (Banded Chlorosis)             </div>             <b>Talhão:</b> Linha 2, Col 3<br>             <b>Diagnóstico:</b> Banded Chlorosis<br>             <b>Confiança:</b> 51.6%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 118 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1087 ms<br>             <b>Amostra:</b> <code>image026.jpg</code>         </div>         </div>`)[0];
+                popup_00a1dddd5f88ef6629fd7b73d1ccd249.setContent(html_ef2ed22971def86d0ce3cbe2e7964dcd);
+            
+        
+
+        circle_marker_d6656aece24beb1a5e14ddaa776378ea.bindPopup(popup_00a1dddd5f88ef6629fd7b73d1ccd249)
+        ;
+
+        
+    
+    
+            circle_marker_d6656aece24beb1a5e14ddaa776378ea.bindTooltip(
+                `<div>
+                     WP #26: Banded Chlorosis (51.6%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cf1d4cd8b5129f9a6645dccbb2d97d65 = L.circleMarker(
+                [-21.1775, -47.8104734],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#78350f", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_d6004338135f82ae1243789c3eedcfb3 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d6253b90d17593b1c466f8da80e97903 = $(`<div id="html_d6253b90d17593b1c466f8da80e97903" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #78350f; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #27 (Sett Rot)             </div>             <b>Talhão:</b> Linha 2, Col 4<br>             <b>Diagnóstico:</b> Sett Rot<br>             <b>Confiança:</b> 95.7%<br>             <b>Gabarito Real:</b> Sett Rot<br>             <b>Decodificação:</b> 125 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1347 ms<br>             <b>Amostra:</b> <code>Sett Rot027.jpg</code>         </div>         </div>`)[0];
+                popup_d6004338135f82ae1243789c3eedcfb3.setContent(html_d6253b90d17593b1c466f8da80e97903);
+            
+        
+
+        circle_marker_cf1d4cd8b5129f9a6645dccbb2d97d65.bindPopup(popup_d6004338135f82ae1243789c3eedcfb3)
+        ;
+
+        
+    
+    
+            circle_marker_cf1d4cd8b5129f9a6645dccbb2d97d65.bindTooltip(
+                `<div>
+                     WP #27: Sett Rot (95.7%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ea146748542c49409a1eda292dc2bbe0 = L.circleMarker(
+                [-21.1775, -47.8103],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_c54beca5947e4f5edd5ff9c5f22e6100 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_21f1448f8cf6a7f110e71705bbf3d801 = $(`<div id="html_21f1448f8cf6a7f110e71705bbf3d801" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #28 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 2, Col 5<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 82.0%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 118 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1021 ms<br>             <b>Amostra:</b> <code>image028.jpg</code>         </div>         </div>`)[0];
+                popup_c54beca5947e4f5edd5ff9c5f22e6100.setContent(html_21f1448f8cf6a7f110e71705bbf3d801);
+            
+        
+
+        circle_marker_ea146748542c49409a1eda292dc2bbe0.bindPopup(popup_c54beca5947e4f5edd5ff9c5f22e6100)
+        ;
+
+        
+    
+    
+            circle_marker_ea146748542c49409a1eda292dc2bbe0.bindTooltip(
+                `<div>
+                     WP #28: Healthy Leaves (82.0%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_3c8138c70d084644e06b34e2623b51b1 = L.circleMarker(
+                [-21.1775, -47.8101266],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d97706", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_3507b1c19c298ec8e421af61e755ed14 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_531fd3f36fd4622fb8cc8ea78ae3c0dd = $(`<div id="html_531fd3f36fd4622fb8cc8ea78ae3c0dd" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #d97706; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #29 (Brown Spot)             </div>             <b>Talhão:</b> Linha 2, Col 6<br>             <b>Diagnóstico:</b> Brown Spot<br>             <b>Confiança:</b> 94.9%<br>             <b>Gabarito Real:</b> Brown Spot<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1029 ms<br>             <b>Amostra:</b> <code>image029.jpg</code>         </div>         </div>`)[0];
+                popup_3507b1c19c298ec8e421af61e755ed14.setContent(html_531fd3f36fd4622fb8cc8ea78ae3c0dd);
+            
+        
+
+        circle_marker_3c8138c70d084644e06b34e2623b51b1.bindPopup(popup_3507b1c19c298ec8e421af61e755ed14)
+        ;
+
+        
+    
+    
+            circle_marker_3c8138c70d084644e06b34e2623b51b1.bindTooltip(
+                `<div>
+                     WP #29: Brown Spot (94.9%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_dfb1a865a3129722a48b466d11f58a67 = L.circleMarker(
+                [-21.1775, -47.8099532],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_67bcec133d20633ff5989b70093838d7 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_896eac5b6b2fdf226af956b33df997b5 = $(`<div id="html_896eac5b6b2fdf226af956b33df997b5" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #30 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 2, Col 7<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 93.4%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 106 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1217 ms<br>             <b>Amostra:</b> <code>image030.jpg</code>         </div>         </div>`)[0];
+                popup_67bcec133d20633ff5989b70093838d7.setContent(html_896eac5b6b2fdf226af956b33df997b5);
+            
+        
+
+        circle_marker_dfb1a865a3129722a48b466d11f58a67.bindPopup(popup_67bcec133d20633ff5989b70093838d7)
+        ;
+
+        
+    
+    
+            circle_marker_dfb1a865a3129722a48b466d11f58a67.bindTooltip(
+                `<div>
+                     WP #30: Healthy Leaves (93.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_897dde21a262d713fbdb3ebb9ffce440 = L.circleMarker(
+                [-21.1775, -47.8097798],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_666c82a75373aff896c62db3b70a9b09 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d72f1066e8fe3d35e8879d53baa8c498 = $(`<div id="html_d72f1066e8fe3d35e8879d53baa8c498" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #31 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 2, Col 8<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 93.4%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 106 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1302 ms<br>             <b>Amostra:</b> <code>image031.jpg</code>         </div>         </div>`)[0];
+                popup_666c82a75373aff896c62db3b70a9b09.setContent(html_d72f1066e8fe3d35e8879d53baa8c498);
+            
+        
+
+        circle_marker_897dde21a262d713fbdb3ebb9ffce440.bindPopup(popup_666c82a75373aff896c62db3b70a9b09)
+        ;
+
+        
+    
+    
+            circle_marker_897dde21a262d713fbdb3ebb9ffce440.bindTooltip(
+                `<div>
+                     WP #31: Healthy Leaves (93.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_69a20d99aca1cf8adbab6956d9d6b944 = L.circleMarker(
+                [-21.1775, -47.8096064],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_c34f684f42fd264bbbc20cd78c4b8d96 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a2aeaef50554cdc043a55126c5d8ffb5 = $(`<div id="html_a2aeaef50554cdc043a55126c5d8ffb5" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #32 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 2, Col 9<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 89.8%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 108 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1204 ms<br>             <b>Amostra:</b> <code>image032.jpg</code>         </div>         </div>`)[0];
+                popup_c34f684f42fd264bbbc20cd78c4b8d96.setContent(html_a2aeaef50554cdc043a55126c5d8ffb5);
+            
+        
+
+        circle_marker_69a20d99aca1cf8adbab6956d9d6b944.bindPopup(popup_c34f684f42fd264bbbc20cd78c4b8d96)
+        ;
+
+        
+    
+    
+            circle_marker_69a20d99aca1cf8adbab6956d9d6b944.bindTooltip(
+                `<div>
+                     WP #32: Healthy Leaves (89.8%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_efde3ca33a090b868a6c1370c71165ca = L.circleMarker(
+                [-21.1775, -47.809433],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_7d8134c6616cf4ffd3223714e060ef2d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_bc936e30cfeefb6432f90936d6eba786 = $(`<div id="html_bc936e30cfeefb6432f90936d6eba786" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #33 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 2, Col 10<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 92.6%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 105 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1206 ms<br>             <b>Amostra:</b> <code>image033.jpg</code>         </div>         </div>`)[0];
+                popup_7d8134c6616cf4ffd3223714e060ef2d.setContent(html_bc936e30cfeefb6432f90936d6eba786);
+            
+        
+
+        circle_marker_efde3ca33a090b868a6c1370c71165ca.bindPopup(popup_7d8134c6616cf4ffd3223714e060ef2d)
+        ;
+
+        
+    
+    
+            circle_marker_efde3ca33a090b868a6c1370c71165ca.bindTooltip(
+                `<div>
+                     WP #33: Healthy Leaves (92.6%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d4253feb9460a66b1c414fa0374242e1 = L.circleMarker(
+                [-21.1772742, -47.809433],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_7d20d0c17fe65f1eb13f3e4e13806d7f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_aadf5baf299f1fbb8f173e23130a6090 = $(`<div id="html_aadf5baf299f1fbb8f173e23130a6090" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #34 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 10<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 73.8%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 71 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1124 ms<br>             <b>Amostra:</b> <code>Smut034.jpg</code>         </div>         </div>`)[0];
+                popup_7d20d0c17fe65f1eb13f3e4e13806d7f.setContent(html_aadf5baf299f1fbb8f173e23130a6090);
+            
+        
+
+        circle_marker_d4253feb9460a66b1c414fa0374242e1.bindPopup(popup_7d20d0c17fe65f1eb13f3e4e13806d7f)
+        ;
+
+        
+    
+    
+            circle_marker_d4253feb9460a66b1c414fa0374242e1.bindTooltip(
+                `<div>
+                     WP #34: Dried Leaves (73.8%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_07c10a842ed134594eb2d798ec92e1c0 = L.circleMarker(
+                [-21.1772742, -47.8096064],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d97706", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_f114ce326d8447ecc48285261aef3c74 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_9735ed019be34db7606b6f5426f869aa = $(`<div id="html_9735ed019be34db7606b6f5426f869aa" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #d97706; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #35 (Brown Spot)             </div>             <b>Talhão:</b> Linha 3, Col 9<br>             <b>Diagnóstico:</b> Brown Spot<br>             <b>Confiança:</b> 35.5%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 71 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1037 ms<br>             <b>Amostra:</b> <code>Smut035.jpg</code>         </div>         </div>`)[0];
+                popup_f114ce326d8447ecc48285261aef3c74.setContent(html_9735ed019be34db7606b6f5426f869aa);
+            
+        
+
+        circle_marker_07c10a842ed134594eb2d798ec92e1c0.bindPopup(popup_f114ce326d8447ecc48285261aef3c74)
+        ;
+
+        
+    
+    
+            circle_marker_07c10a842ed134594eb2d798ec92e1c0.bindTooltip(
+                `<div>
+                     WP #35: Brown Spot (35.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_9dda2cedd0b0be4061f4c2897f82af3a = L.circleMarker(
+                [-21.1772742, -47.8097798],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_bdc82b49821965ae9965be2b933edb48 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_18d7e49590753f2191531c416bcdaeb0 = $(`<div id="html_18d7e49590753f2191531c416bcdaeb0" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #36 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 8<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 72.7%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 73 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1050 ms<br>             <b>Amostra:</b> <code>Smut036.jpg</code>         </div>         </div>`)[0];
+                popup_bdc82b49821965ae9965be2b933edb48.setContent(html_18d7e49590753f2191531c416bcdaeb0);
+            
+        
+
+        circle_marker_9dda2cedd0b0be4061f4c2897f82af3a.bindPopup(popup_bdc82b49821965ae9965be2b933edb48)
+        ;
+
+        
+    
+    
+            circle_marker_9dda2cedd0b0be4061f4c2897f82af3a.bindTooltip(
+                `<div>
+                     WP #36: Dried Leaves (72.7%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c7790a270a396e87f7326c3eaf301365 = L.circleMarker(
+                [-21.1772742, -47.8099532],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_f9310a629ea12df9f85448758697fc9e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e1875b4e4d0310ed66dbb2a7c5573ef6 = $(`<div id="html_e1875b4e4d0310ed66dbb2a7c5573ef6" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #37 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 7<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 49.6%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1035 ms<br>             <b>Amostra:</b> <code>Smut037.jpg</code>         </div>         </div>`)[0];
+                popup_f9310a629ea12df9f85448758697fc9e.setContent(html_e1875b4e4d0310ed66dbb2a7c5573ef6);
+            
+        
+
+        circle_marker_c7790a270a396e87f7326c3eaf301365.bindPopup(popup_f9310a629ea12df9f85448758697fc9e)
+        ;
+
+        
+    
+    
+            circle_marker_c7790a270a396e87f7326c3eaf301365.bindTooltip(
+                `<div>
+                     WP #37: Dried Leaves (49.6%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_513de4253f24924c288432c0829786f9 = L.circleMarker(
+                [-21.1772742, -47.8101266],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#eab308", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_6c047d7962150ba3a3a86e668694190f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cf4b7999809072ae587a962a082d1639 = $(`<div id="html_cf4b7999809072ae587a962a082d1639" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #eab308; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #38 (Yellow Leaf)             </div>             <b>Talhão:</b> Linha 3, Col 6<br>             <b>Diagnóstico:</b> Yellow Leaf<br>             <b>Confiança:</b> 69.5%<br>             <b>Gabarito Real:</b> Yellow Leaf<br>             <b>Decodificação:</b> 79 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1056 ms<br>             <b>Amostra:</b> <code>Yellow Leaf038.jpg</code>         </div>         </div>`)[0];
+                popup_6c047d7962150ba3a3a86e668694190f.setContent(html_cf4b7999809072ae587a962a082d1639);
+            
+        
+
+        circle_marker_513de4253f24924c288432c0829786f9.bindPopup(popup_6c047d7962150ba3a3a86e668694190f)
+        ;
+
+        
+    
+    
+            circle_marker_513de4253f24924c288432c0829786f9.bindTooltip(
+                `<div>
+                     WP #38: Yellow Leaf (69.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5e5c156c2c63ce46d3850b1cc1050d8f = L.circleMarker(
+                [-21.1772742, -47.8103],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_3c5c667148fee60501083405d36620cf = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_20d835ae19358d6197364bf1a12e565f = $(`<div id="html_20d835ae19358d6197364bf1a12e565f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #39 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 5<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 97.7%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 106 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1234 ms<br>             <b>Amostra:</b> <code>image039.jpg</code>         </div>         </div>`)[0];
+                popup_3c5c667148fee60501083405d36620cf.setContent(html_20d835ae19358d6197364bf1a12e565f);
+            
+        
+
+        circle_marker_5e5c156c2c63ce46d3850b1cc1050d8f.bindPopup(popup_3c5c667148fee60501083405d36620cf)
+        ;
+
+        
+    
+    
+            circle_marker_5e5c156c2c63ce46d3850b1cc1050d8f.bindTooltip(
+                `<div>
+                     WP #39: Healthy Leaves (97.7%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ab560629680f58784fcea3786289938b = L.circleMarker(
+                [-21.1772742, -47.8104734],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_fa1cfd66e6d7568e19459b99d5bae4aa = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_17516d5c4861d1dc36c3d9b5888548bc = $(`<div id="html_17516d5c4861d1dc36c3d9b5888548bc" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #40 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 4<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 98.4%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 98 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1153 ms<br>             <b>Amostra:</b> <code>image040.jpg</code>         </div>         </div>`)[0];
+                popup_fa1cfd66e6d7568e19459b99d5bae4aa.setContent(html_17516d5c4861d1dc36c3d9b5888548bc);
+            
+        
+
+        circle_marker_ab560629680f58784fcea3786289938b.bindPopup(popup_fa1cfd66e6d7568e19459b99d5bae4aa)
+        ;
+
+        
+    
+    
+            circle_marker_ab560629680f58784fcea3786289938b.bindTooltip(
+                `<div>
+                     WP #40: Healthy Leaves (98.4%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c8fd40ae3ebd4a3860c84e7d9aa93faa = L.circleMarker(
+                [-21.1772742, -47.8106468],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_b0ba41e634c4f09a7a66cc562f28a7bf = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_1b6cf03e4ae4d9d9f6029923c9f265bb = $(`<div id="html_1b6cf03e4ae4d9d9f6029923c9f265bb" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #41 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 3<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 94.9%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 93 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1148 ms<br>             <b>Amostra:</b> <code>image041.jpg</code>         </div>         </div>`)[0];
+                popup_b0ba41e634c4f09a7a66cc562f28a7bf.setContent(html_1b6cf03e4ae4d9d9f6029923c9f265bb);
+            
+        
+
+        circle_marker_c8fd40ae3ebd4a3860c84e7d9aa93faa.bindPopup(popup_b0ba41e634c4f09a7a66cc562f28a7bf)
+        ;
+
+        
+    
+    
+            circle_marker_c8fd40ae3ebd4a3860c84e7d9aa93faa.bindTooltip(
+                `<div>
+                     WP #41: Healthy Leaves (94.9%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7fc07140a687c07fad6236be5c6424d2 = L.circleMarker(
+                [-21.1772742, -47.8108202],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_fe9f9cf92a0d7abbf5e46f9f4120f043 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_684754ca02c95fa55c3c3ef5ac35fb39 = $(`<div id="html_684754ca02c95fa55c3c3ef5ac35fb39" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #42 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 2<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 92.6%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 123 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1344 ms<br>             <b>Amostra:</b> <code>image042.jpg</code>         </div>         </div>`)[0];
+                popup_fe9f9cf92a0d7abbf5e46f9f4120f043.setContent(html_684754ca02c95fa55c3c3ef5ac35fb39);
+            
+        
+
+        circle_marker_7fc07140a687c07fad6236be5c6424d2.bindPopup(popup_fe9f9cf92a0d7abbf5e46f9f4120f043)
+        ;
+
+        
+    
+    
+            circle_marker_7fc07140a687c07fad6236be5c6424d2.bindTooltip(
+                `<div>
+                     WP #42: Healthy Leaves (92.6%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_84717a825c01bc22814e45c41eb0f50a = L.circleMarker(
+                [-21.1772742, -47.8109936],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_46afa33bb08182c1aab74843737c0f30 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_6be5582cb992f258687b03aabdc871a7 = $(`<div id="html_6be5582cb992f258687b03aabdc871a7" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #43 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 3, Col 1<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 97.3%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 122 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1282 ms<br>             <b>Amostra:</b> <code>image043.jpg</code>         </div>         </div>`)[0];
+                popup_46afa33bb08182c1aab74843737c0f30.setContent(html_6be5582cb992f258687b03aabdc871a7);
+            
+        
+
+        circle_marker_84717a825c01bc22814e45c41eb0f50a.bindPopup(popup_46afa33bb08182c1aab74843737c0f30)
+        ;
+
+        
+    
+    
+            circle_marker_84717a825c01bc22814e45c41eb0f50a.bindTooltip(
+                `<div>
+                     WP #43: Healthy Leaves (97.3%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1d4fcefe63e20959366e9e42369694ed = L.circleMarker(
+                [-21.1772742, -47.811167],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#eab308", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_fcca0f42318ef4cf7a75f845256721b6 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_493bafac5d01e563fb1762d9f6ec96f3 = $(`<div id="html_493bafac5d01e563fb1762d9f6ec96f3" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #eab308; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #44 (Yellow Leaf)             </div>             <b>Talhão:</b> Linha 3, Col 0<br>             <b>Diagnóstico:</b> Yellow Leaf<br>             <b>Confiança:</b> 50.0%<br>             <b>Gabarito Real:</b> Yellow Leaf<br>             <b>Decodificação:</b> 81 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1110 ms<br>             <b>Amostra:</b> <code>Yellow Leaf044.jpg</code>         </div>         </div>`)[0];
+                popup_fcca0f42318ef4cf7a75f845256721b6.setContent(html_493bafac5d01e563fb1762d9f6ec96f3);
+            
+        
+
+        circle_marker_1d4fcefe63e20959366e9e42369694ed.bindPopup(popup_fcca0f42318ef4cf7a75f845256721b6)
+        ;
+
+        
+    
+    
+            circle_marker_1d4fcefe63e20959366e9e42369694ed.bindTooltip(
+                `<div>
+                     WP #44: Yellow Leaf (50.0%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f84e11c1066b6e0b2624d5e4febaed7a = L.circleMarker(
+                [-21.1770483, -47.811167],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#eab308", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_5940c89e63264dc87b1b105dc4695ea8 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_9d9788cc9fd60fd96bcbd725466a427e = $(`<div id="html_9d9788cc9fd60fd96bcbd725466a427e" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #eab308; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #45 (Yellow Leaf)             </div>             <b>Talhão:</b> Linha 4, Col 0<br>             <b>Diagnóstico:</b> Yellow Leaf<br>             <b>Confiança:</b> 62.1%<br>             <b>Gabarito Real:</b> Yellow Leaf<br>             <b>Decodificação:</b> 81 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1144 ms<br>             <b>Amostra:</b> <code>Yellow Leaf045.jpg</code>         </div>         </div>`)[0];
+                popup_5940c89e63264dc87b1b105dc4695ea8.setContent(html_9d9788cc9fd60fd96bcbd725466a427e);
+            
+        
+
+        circle_marker_f84e11c1066b6e0b2624d5e4febaed7a.bindPopup(popup_5940c89e63264dc87b1b105dc4695ea8)
+        ;
+
+        
+    
+    
+            circle_marker_f84e11c1066b6e0b2624d5e4febaed7a.bindTooltip(
+                `<div>
+                     WP #45: Yellow Leaf (62.1%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_40e5768ee187147b4d4a64b5610b81de = L.circleMarker(
+                [-21.1770483, -47.8109936],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_86703e1dd3e6364e0aca0df6b0daa206 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_d74b15e3016c4da83ed6fb0a8add8496 = $(`<div id="html_d74b15e3016c4da83ed6fb0a8add8496" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #46 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 1<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 88.3%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 113 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1253 ms<br>             <b>Amostra:</b> <code>image046.jpg</code>         </div>         </div>`)[0];
+                popup_86703e1dd3e6364e0aca0df6b0daa206.setContent(html_d74b15e3016c4da83ed6fb0a8add8496);
+            
+        
+
+        circle_marker_40e5768ee187147b4d4a64b5610b81de.bindPopup(popup_86703e1dd3e6364e0aca0df6b0daa206)
+        ;
+
+        
+    
+    
+            circle_marker_40e5768ee187147b4d4a64b5610b81de.bindTooltip(
+                `<div>
+                     WP #46: Healthy Leaves (88.3%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a16e6e7617f3f34dd39b4ac5241cbb31 = L.circleMarker(
+                [-21.1770483, -47.8108202],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_3f01946b3989c755d68105ab7d52ab1f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_457fdc72d74b6d6b7516e428c988531e = $(`<div id="html_457fdc72d74b6d6b7516e428c988531e" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #47 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 2<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 94.5%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 114 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1358 ms<br>             <b>Amostra:</b> <code>image047.jpg</code>         </div>         </div>`)[0];
+                popup_3f01946b3989c755d68105ab7d52ab1f.setContent(html_457fdc72d74b6d6b7516e428c988531e);
+            
+        
+
+        circle_marker_a16e6e7617f3f34dd39b4ac5241cbb31.bindPopup(popup_3f01946b3989c755d68105ab7d52ab1f)
+        ;
+
+        
+    
+    
+            circle_marker_a16e6e7617f3f34dd39b4ac5241cbb31.bindTooltip(
+                `<div>
+                     WP #47: Healthy Leaves (94.5%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_f256d044c4f81f7d5952c905222fa9f1 = L.circleMarker(
+                [-21.1770483, -47.8106468],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_4c11b26aff1b0dbff8c596f10e267cc1 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_642f478538ded00cff5a0c6831d9a5db = $(`<div id="html_642f478538ded00cff5a0c6831d9a5db" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #48 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 3<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 96.9%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 115 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1352 ms<br>             <b>Amostra:</b> <code>image048.jpg</code>         </div>         </div>`)[0];
+                popup_4c11b26aff1b0dbff8c596f10e267cc1.setContent(html_642f478538ded00cff5a0c6831d9a5db);
+            
+        
+
+        circle_marker_f256d044c4f81f7d5952c905222fa9f1.bindPopup(popup_4c11b26aff1b0dbff8c596f10e267cc1)
+        ;
+
+        
+    
+    
+            circle_marker_f256d044c4f81f7d5952c905222fa9f1.bindTooltip(
+                `<div>
+                     WP #48: Healthy Leaves (96.9%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5f7a428d666cb4ce2d436e8a79e450e1 = L.circleMarker(
+                [-21.1770483, -47.8104734],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_3c2dff7fa04a66db7f0fde237dbb4d98 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_fc0cd2c886cd3f7be8fb76f11ab59dd6 = $(`<div id="html_fc0cd2c886cd3f7be8fb76f11ab59dd6" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #49 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 4<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 93.8%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 118 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1342 ms<br>             <b>Amostra:</b> <code>image049.jpg</code>         </div>         </div>`)[0];
+                popup_3c2dff7fa04a66db7f0fde237dbb4d98.setContent(html_fc0cd2c886cd3f7be8fb76f11ab59dd6);
+            
+        
+
+        circle_marker_5f7a428d666cb4ce2d436e8a79e450e1.bindPopup(popup_3c2dff7fa04a66db7f0fde237dbb4d98)
+        ;
+
+        
+    
+    
+            circle_marker_5f7a428d666cb4ce2d436e8a79e450e1.bindTooltip(
+                `<div>
+                     WP #49: Healthy Leaves (93.8%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_726c14c47bdc0fb4006600fb09fda5cd = L.circleMarker(
+                [-21.1770483, -47.8103],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#10b981", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_3612b5a55aa7eabe9ee1f166c83338b8 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_b0a3a6f8c6297b9790edcfe71d5c1cdb = $(`<div id="html_b0a3a6f8c6297b9790edcfe71d5c1cdb" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #10b981; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #50 (Healthy Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 5<br>             <b>Diagnóstico:</b> Healthy Leaves<br>             <b>Confiança:</b> 96.1%<br>             <b>Gabarito Real:</b> Healthy Leaves<br>             <b>Decodificação:</b> 116 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1246 ms<br>             <b>Amostra:</b> <code>image050.jpg</code>         </div>         </div>`)[0];
+                popup_3612b5a55aa7eabe9ee1f166c83338b8.setContent(html_b0a3a6f8c6297b9790edcfe71d5c1cdb);
+            
+        
+
+        circle_marker_726c14c47bdc0fb4006600fb09fda5cd.bindPopup(popup_3612b5a55aa7eabe9ee1f166c83338b8)
+        ;
+
+        
+    
+    
+            circle_marker_726c14c47bdc0fb4006600fb09fda5cd.bindTooltip(
+                `<div>
+                     WP #50: Healthy Leaves (96.1%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_df72f15e559ecfa3b4bd42a6681565bd = L.circleMarker(
+                [-21.1770483, -47.8101266],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d97706", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_7acff1bdcc2240213670bb1a1cee46f0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7d44472e5bd0e9ba7efd67a10f5b6f95 = $(`<div id="html_7d44472e5bd0e9ba7efd67a10f5b6f95" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #d97706; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #51 (Brown Spot)             </div>             <b>Talhão:</b> Linha 4, Col 6<br>             <b>Diagnóstico:</b> Brown Spot<br>             <b>Confiança:</b> 94.1%<br>             <b>Gabarito Real:</b> Brown Spot<br>             <b>Decodificação:</b> 72 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1045 ms<br>             <b>Amostra:</b> <code>image051.jpg</code>         </div>         </div>`)[0];
+                popup_7acff1bdcc2240213670bb1a1cee46f0.setContent(html_7d44472e5bd0e9ba7efd67a10f5b6f95);
+            
+        
+
+        circle_marker_df72f15e559ecfa3b4bd42a6681565bd.bindPopup(popup_7acff1bdcc2240213670bb1a1cee46f0)
+        ;
+
+        
+    
+    
+            circle_marker_df72f15e559ecfa3b4bd42a6681565bd.bindTooltip(
+                `<div>
+                     WP #51: Brown Spot (94.1%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_9ee921d08f403684ef2188c7eb2ef221 = L.circleMarker(
+                [-21.1770483, -47.8099532],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_d27c2ca93fa86a4b9d2ba97aef60b812 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_837ae0b46f5faaf4459ca0d9900d2f4c = $(`<div id="html_837ae0b46f5faaf4459ca0d9900d2f4c" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #52 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 7<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 91.8%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 77 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1044 ms<br>             <b>Amostra:</b> <code>Smut052.jpg</code>         </div>         </div>`)[0];
+                popup_d27c2ca93fa86a4b9d2ba97aef60b812.setContent(html_837ae0b46f5faaf4459ca0d9900d2f4c);
+            
+        
+
+        circle_marker_9ee921d08f403684ef2188c7eb2ef221.bindPopup(popup_d27c2ca93fa86a4b9d2ba97aef60b812)
+        ;
+
+        
+    
+    
+            circle_marker_9ee921d08f403684ef2188c7eb2ef221.bindTooltip(
+                `<div>
+                     WP #52: Dried Leaves (91.8%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d21ac9a904868162718b213a9496e778 = L.circleMarker(
+                [-21.1770483, -47.8097798],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_63ed7c69f99dbfab0c6e932c9c0cf26d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a772639e3028839399bd93aa6a86ca94 = $(`<div id="html_a772639e3028839399bd93aa6a86ca94" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #53 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 8<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 92.6%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 79 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1147 ms<br>             <b>Amostra:</b> <code>Smut053.jpg</code>         </div>         </div>`)[0];
+                popup_63ed7c69f99dbfab0c6e932c9c0cf26d.setContent(html_a772639e3028839399bd93aa6a86ca94);
+            
+        
+
+        circle_marker_d21ac9a904868162718b213a9496e778.bindPopup(popup_63ed7c69f99dbfab0c6e932c9c0cf26d)
+        ;
+
+        
+    
+    
+            circle_marker_d21ac9a904868162718b213a9496e778.bindTooltip(
+                `<div>
+                     WP #53: Dried Leaves (92.6%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_91aefb8c23298e4373e5f27cbd628348 = L.circleMarker(
+                [-21.1770483, -47.8096064],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_69fa8e493ae52b9a39c630fc67f3b2d3 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_503d36e8ca96e829b6435692ab680269 = $(`<div id="html_503d36e8ca96e829b6435692ab680269" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #54 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 9<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 89.8%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1045 ms<br>             <b>Amostra:</b> <code>Smut054.jpg</code>         </div>         </div>`)[0];
+                popup_69fa8e493ae52b9a39c630fc67f3b2d3.setContent(html_503d36e8ca96e829b6435692ab680269);
+            
+        
+
+        circle_marker_91aefb8c23298e4373e5f27cbd628348.bindPopup(popup_69fa8e493ae52b9a39c630fc67f3b2d3)
+        ;
+
+        
+    
+    
+            circle_marker_91aefb8c23298e4373e5f27cbd628348.bindTooltip(
+                `<div>
+                     WP #54: Dried Leaves (89.8%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a239db7d3482cb6b3bbb9e239a2dfed4 = L.circleMarker(
+                [-21.1770483, -47.809433],
+                {"bubblingMouseEvents": true, "color": "#ffffff", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#64748b", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 1.5}
+            ).addTo(feature_group_55ebd337445ae1e8df11c7b3da82e5df);
+        
+    
+        var popup_e56952a2633ce0eab20d742f6d2a7572 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e11bdc008e6179faa7f6fc593347694f = $(`<div id="html_e11bdc008e6179faa7f6fc593347694f" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #64748b; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #55 (Dried Leaves)             </div>             <b>Talhão:</b> Linha 4, Col 10<br>             <b>Diagnóstico:</b> Dried Leaves<br>             <b>Confiança:</b> 92.2%<br>             <b>Gabarito Real:</b> smut<br>             <b>Decodificação:</b> 78 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1096 ms<br>             <b>Amostra:</b> <code>Smut055.jpg</code>         </div>         </div>`)[0];
+                popup_e56952a2633ce0eab20d742f6d2a7572.setContent(html_e11bdc008e6179faa7f6fc593347694f);
+            
+        
+
+        circle_marker_a239db7d3482cb6b3bbb9e239a2dfed4.bindPopup(popup_e56952a2633ce0eab20d742f6d2a7572)
+        ;
+
+        
+    
+    
+            circle_marker_a239db7d3482cb6b3bbb9e239a2dfed4.bindTooltip(
+                `<div>
+                     WP #55: Dried Leaves (92.2%)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            feature_group_55ebd337445ae1e8df11c7b3da82e5df.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var feature_group_276a44801037217a9d075fc0b2a652ac = L.featureGroup(
+                {
+}
+            );
+        
+    
+            feature_group_276a44801037217a9d075fc0b2a652ac.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var feature_group_e06124fd82d23f8071566ee6e1d84c0c = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_482164a8e6bc2226005794308072ebe5 = L.circleMarker(
+                [-21.1779517, -47.8099532],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_c48b1445629c173452a538894df5240d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_f5de0f508eca5e34092bf376cf7caae4 = $(`<div id="html_f5de0f508eca5e34092bf376cf7caae4" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #8 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 7<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 47.7%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 71 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 998 ms<br>             <b>Amostra:</b> <code>image008.jpg</code>         </div>         </div>`)[0];
+                popup_c48b1445629c173452a538894df5240d.setContent(html_f5de0f508eca5e34092bf376cf7caae4);
+            
+        
+
+        circle_marker_482164a8e6bc2226005794308072ebe5.bindPopup(popup_c48b1445629c173452a538894df5240d)
+        ;
+
+        
+    
+    
+            circle_marker_482164a8e6bc2226005794308072ebe5.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #8
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_64a77f7d42d3abe379eb167c31189946 = L.circleMarker(
+                [-21.1779517, -47.8097798],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_2b2dd7b31e0fd57300e008db25cb55d9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e5888399229fe90a93d7f4c618e16103 = $(`<div id="html_e5888399229fe90a93d7f4c618e16103" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #9 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 8<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 89.5%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 72 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1034 ms<br>             <b>Amostra:</b> <code>image009.jpg</code>         </div>         </div>`)[0];
+                popup_2b2dd7b31e0fd57300e008db25cb55d9.setContent(html_e5888399229fe90a93d7f4c618e16103);
+            
+        
+
+        circle_marker_64a77f7d42d3abe379eb167c31189946.bindPopup(popup_2b2dd7b31e0fd57300e008db25cb55d9)
+        ;
+
+        
+    
+    
+            circle_marker_64a77f7d42d3abe379eb167c31189946.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #9
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_84b11036bfaadbea4cb85cd71e73d431 = L.circleMarker(
+                [-21.1779517, -47.8096064],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_bc2516247cc0bdade24445c7f8200d49 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_41041a00d8cba288cb578cc472401982 = $(`<div id="html_41041a00d8cba288cb578cc472401982" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #10 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 9<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 91.4%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 76 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 985 ms<br>             <b>Amostra:</b> <code>image010.jpg</code>         </div>         </div>`)[0];
+                popup_bc2516247cc0bdade24445c7f8200d49.setContent(html_41041a00d8cba288cb578cc472401982);
+            
+        
+
+        circle_marker_84b11036bfaadbea4cb85cd71e73d431.bindPopup(popup_bc2516247cc0bdade24445c7f8200d49)
+        ;
+
+        
+    
+    
+            circle_marker_84b11036bfaadbea4cb85cd71e73d431.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #10
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7cc6ca493f85251a44837f31e7bdd79b = L.circleMarker(
+                [-21.1779517, -47.809433],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_6af6c5a2f3ebbfc6db943f8efb77bf49 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e27d83088960b981eeab2d01f75e9c5c = $(`<div id="html_e27d83088960b981eeab2d01f75e9c5c" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #11 (BrownRust)             </div>             <b>Talhão:</b> Linha 0, Col 10<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 84.8%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1009 ms<br>             <b>Amostra:</b> <code>image011.jpg</code>         </div>         </div>`)[0];
+                popup_6af6c5a2f3ebbfc6db943f8efb77bf49.setContent(html_e27d83088960b981eeab2d01f75e9c5c);
+            
+        
+
+        circle_marker_7cc6ca493f85251a44837f31e7bdd79b.bindPopup(popup_6af6c5a2f3ebbfc6db943f8efb77bf49)
+        ;
+
+        
+    
+    
+            circle_marker_7cc6ca493f85251a44837f31e7bdd79b.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #11
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1b733cc6109117e17f79401b814d6387 = L.circleMarker(
+                [-21.1777258, -47.809433],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_b8d4683c5c68f11b919c0a87dfbb7b48 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_531c4f5d6e055fc516f3e2a2c1f84095 = $(`<div id="html_531c4f5d6e055fc516f3e2a2c1f84095" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #12 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 10<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 96.1%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 77 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1045 ms<br>             <b>Amostra:</b> <code>image012.jpg</code>         </div>         </div>`)[0];
+                popup_b8d4683c5c68f11b919c0a87dfbb7b48.setContent(html_531c4f5d6e055fc516f3e2a2c1f84095);
+            
+        
+
+        circle_marker_1b733cc6109117e17f79401b814d6387.bindPopup(popup_b8d4683c5c68f11b919c0a87dfbb7b48)
+        ;
+
+        
+    
+    
+            circle_marker_1b733cc6109117e17f79401b814d6387.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #12
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d500ced63a41b73a17b32154a53ce8d1 = L.circleMarker(
+                [-21.1777258, -47.8096064],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_df126c24290174f82a00968478d478ae = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_3bf56dd4a8870166b337b2c2c67613cb = $(`<div id="html_3bf56dd4a8870166b337b2c2c67613cb" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #13 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 9<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 96.9%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 77 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1048 ms<br>             <b>Amostra:</b> <code>image013.jpg</code>         </div>         </div>`)[0];
+                popup_df126c24290174f82a00968478d478ae.setContent(html_3bf56dd4a8870166b337b2c2c67613cb);
+            
+        
+
+        circle_marker_d500ced63a41b73a17b32154a53ce8d1.bindPopup(popup_df126c24290174f82a00968478d478ae)
+        ;
+
+        
+    
+    
+            circle_marker_d500ced63a41b73a17b32154a53ce8d1.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #13
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cef56fdc532922ac6ecb1f88a51a62f8 = L.circleMarker(
+                [-21.1777258, -47.8097798],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_e1a85689098276d5871e28cb415597d5 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_dfa2c73deee27bfac95364330b53ab11 = $(`<div id="html_dfa2c73deee27bfac95364330b53ab11" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #14 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 8<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 94.1%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 74 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1039 ms<br>             <b>Amostra:</b> <code>image014.jpg</code>         </div>         </div>`)[0];
+                popup_e1a85689098276d5871e28cb415597d5.setContent(html_dfa2c73deee27bfac95364330b53ab11);
+            
+        
+
+        circle_marker_cef56fdc532922ac6ecb1f88a51a62f8.bindPopup(popup_e1a85689098276d5871e28cb415597d5)
+        ;
+
+        
+    
+    
+            circle_marker_cef56fdc532922ac6ecb1f88a51a62f8.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #14
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_dd147e4d21bce91d80afbf7e58718299 = L.circleMarker(
+                [-21.1777258, -47.8099532],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_237218f39de032ebe5cf614f12efc36a = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_93ab45978ac32231904108e50c526882 = $(`<div id="html_93ab45978ac32231904108e50c526882" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #15 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 7<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 93.4%<br>             <b>Gabarito Real:</b> BrownRust<br>             <b>Decodificação:</b> 75 ms<br>             <b>Inferência ESP32:</b> 283 ms<br>             <b>Ciclo de Parada:</b> 1044 ms<br>             <b>Amostra:</b> <code>image015.jpg</code>         </div>         </div>`)[0];
+                popup_237218f39de032ebe5cf614f12efc36a.setContent(html_93ab45978ac32231904108e50c526882);
+            
+        
+
+        circle_marker_dd147e4d21bce91d80afbf7e58718299.bindPopup(popup_237218f39de032ebe5cf614f12efc36a)
+        ;
+
+        
+    
+    
+            circle_marker_dd147e4d21bce91d80afbf7e58718299.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #15
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_647c232b0e0d17f6f7672688c847ef70 = L.circleMarker(
+                [-21.1777258, -47.8106468],
+                {"bubblingMouseEvents": true, "color": "#ea580c", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ea580c", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
+            ).addTo(feature_group_e06124fd82d23f8071566ee6e1d84c0c);
+        
+    
+        var popup_3e751fa2ffcd8fd8bde0e3832a6323d2 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_55b1a2b866ef8c8850cb20b9623c58f2 = $(`<div id="html_55b1a2b866ef8c8850cb20b9623c58f2" style="width: 100.0%; height: 100.0%;">         <div style="font-family: Arial, sans-serif; font-size: 12px; width: 240px; line-height: 1.4;">             <div style="background: #ea580c; color: white; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 6px;">                 Waypoint #19 (BrownRust)             </div>             <b>Talhão:</b> Linha 1, Col 3<br>             <b>Diagnóstico:</b> BrownRust<br>             <b>Confiança:</b> 80.5%<br>             <b>Gabarito Real:</b> Viral Disease<br>             <b>Decodificação:</b> 72 ms<br>             <b>Inferência ESP32:</b> 284 ms<br>             <b>Ciclo de Parada:</b> 1045 ms<br>             <b>Amostra:</b> <code>Viral Disease019.jpg</code>         </div>         </div>`)[0];
+                popup_3e751fa2ffcd8fd8bde0e3832a6323d2.setContent(html_55b1a2b866ef8c8850cb20b9623c58f2);
+            
+        
+
+        circle_marker_647c232b0e0d17f6f7672688c847ef70.bindPopup(popup_3e751fa2ffcd8fd8bde0e3832a6323d2)
+        ;
+
+        
+    
+    
+            circle_marker_647c232b0e0d17f6f7672688c847ef70.bindTooltip(
+                `<div>
+                     ALERTA FERRUGEM: WP #19
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            feature_group_e06124fd82d23f8071566ee6e1d84c0c.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var heat_map_a8270f0ab91ab62418b07102e2e819f4 = L.heatLayer(
+                [[-21.1779517, -47.811167, 1.2], [-21.1779517, -47.8109936, 1.2], [-21.1779517, -47.8108202, 1.2], [-21.1779517, -47.8106468, 1.2], [-21.1779517, -47.8104734, 1.2], [-21.1779517, -47.8103, 1.2], [-21.1779517, -47.8101266, 1.2], [-21.1779517, -47.8099532, 2.2], [-21.1779517, -47.8097798, 2.2], [-21.1779517, -47.8096064, 2.2], [-21.1779517, -47.809433, 2.2], [-21.1777258, -47.809433, 2.2], [-21.1777258, -47.8096064, 2.2], [-21.1777258, -47.8097798, 2.2], [-21.1777258, -47.8099532, 2.2], [-21.1777258, -47.8101266, 1.2], [-21.1777258, -47.8103, 1.2], [-21.1777258, -47.8104734, 1.2], [-21.1777258, -47.8106468, 2.2], [-21.1777258, -47.8108202, 1.2], [-21.1777258, -47.8109936, 1.2], [-21.1777258, -47.811167, 0.2], [-21.1775, -47.811167, 1.2], [-21.1775, -47.8109936, 0.2], [-21.1775, -47.8108202, 1.2], [-21.1775, -47.8106468, 1.2], [-21.1775, -47.8104734, 1.2], [-21.1775, -47.8103, 0.2], [-21.1775, -47.8101266, 1.2], [-21.1775, -47.8099532, 0.2], [-21.1775, -47.8097798, 0.2], [-21.1775, -47.8096064, 0.2], [-21.1775, -47.809433, 0.2], [-21.1772742, -47.809433, 0.2], [-21.1772742, -47.8096064, 1.2], [-21.1772742, -47.8097798, 0.2], [-21.1772742, -47.8099532, 0.2], [-21.1772742, -47.8101266, 1.2], [-21.1772742, -47.8103, 0.2], [-21.1772742, -47.8104734, 0.2], [-21.1772742, -47.8106468, 0.2], [-21.1772742, -47.8108202, 0.2], [-21.1772742, -47.8109936, 0.2], [-21.1772742, -47.811167, 1.2], [-21.1770483, -47.811167, 1.2], [-21.1770483, -47.8109936, 0.2], [-21.1770483, -47.8108202, 0.2], [-21.1770483, -47.8106468, 0.2], [-21.1770483, -47.8104734, 0.2], [-21.1770483, -47.8103, 0.2], [-21.1770483, -47.8101266, 1.2], [-21.1770483, -47.8099532, 0.2], [-21.1770483, -47.8097798, 0.2], [-21.1770483, -47.8096064, 0.2], [-21.1770483, -47.809433, 0.2]],
+                {
+  "minOpacity": 0.25,
+  "maxZoom": 1,
+  "radius": 25,
+  "blur": 18,
+  "gradient": {
+  0.2: "#3b82f6",
+  0.5: "#eab308",
+  0.8: "#ea580c",
+  1.0: "#dc2626",
+},
+}
+            );
+        
+    
+            heat_map_a8270f0ab91ab62418b07102e2e819f4.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var heat_map_955cd444149376753fcf9175b935e80f = L.heatLayer(
+                [[-21.1779517, -47.811167, 0.0], [-21.1779517, -47.8109936, 0.0], [-21.1779517, -47.8108202, 0.0], [-21.1779517, -47.8106468, 0.0], [-21.1779517, -47.8104734, 0.0], [-21.1779517, -47.8103, 0.0], [-21.1779517, -47.8101266, 0.0], [-21.1779517, -47.8099532, 0.0], [-21.1779517, -47.8097798, 0.0], [-21.1779517, -47.8096064, 0.0], [-21.1779517, -47.809433, 0.0], [-21.1777258, -47.809433, 0.0], [-21.1777258, -47.8096064, 0.0], [-21.1777258, -47.8097798, 0.0], [-21.1777258, -47.8099532, 0.0], [-21.1777258, -47.8101266, 0.0], [-21.1777258, -47.8103, 0.0], [-21.1777258, -47.8104734, 0.0], [-21.1777258, -47.8106468, 0.0], [-21.1777258, -47.8108202, 0.0], [-21.1777258, -47.8109936, 0.0], [-21.1777258, -47.811167, 0.0], [-21.1775, -47.811167, 0.0], [-21.1775, -47.8109936, 0.0], [-21.1775, -47.8108202, 0.0], [-21.1775, -47.8106468, 0.0], [-21.1775, -47.8104734, 0.0], [-21.1775, -47.8103, 0.0], [-21.1775, -47.8101266, 0.0], [-21.1775, -47.8099532, 0.0], [-21.1775, -47.8097798, 0.0], [-21.1775, -47.8096064, 0.0], [-21.1775, -47.809433, 0.0], [-21.1772742, -47.809433, 0.0], [-21.1772742, -47.8096064, 0.0], [-21.1772742, -47.8097798, 0.0], [-21.1772742, -47.8099532, 0.0], [-21.1772742, -47.8101266, 0.0], [-21.1772742, -47.8103, 0.0], [-21.1772742, -47.8104734, 0.0], [-21.1772742, -47.8106468, 0.0], [-21.1772742, -47.8108202, 0.0], [-21.1772742, -47.8109936, 0.0], [-21.1772742, -47.811167, 0.0], [-21.1770483, -47.811167, 0.0], [-21.1770483, -47.8109936, 0.0], [-21.1770483, -47.8108202, 0.0], [-21.1770483, -47.8106468, 0.0], [-21.1770483, -47.8104734, 0.0], [-21.1770483, -47.8103, 0.0], [-21.1770483, -47.8101266, 0.0], [-21.1770483, -47.8099532, 0.0], [-21.1770483, -47.8097798, 0.0], [-21.1770483, -47.8096064, 0.0], [-21.1770483, -47.809433, 0.0]],
+                {
+  "minOpacity": 0.3,
+  "maxZoom": 18,
+  "radius": 30,
+  "blur": 20,
+  "gradient": {
+  0.3: "#f87171",
+  0.7: "#ef4444",
+  1.0: "#991b1b",
+},
+}
+            );
+        
+    
+            heat_map_955cd444149376753fcf9175b935e80f.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var heat_map_c376595cb2dade924411b04ac14558e1 = L.heatLayer(
+                [[-21.1779517, -47.811167, 0.0], [-21.1779517, -47.8109936, 0.0], [-21.1779517, -47.8108202, 0.0], [-21.1779517, -47.8106468, 0.0], [-21.1779517, -47.8104734, 0.0], [-21.1779517, -47.8103, 0.0], [-21.1779517, -47.8101266, 0.0], [-21.1779517, -47.8099532, 1.0], [-21.1779517, -47.8097798, 1.0], [-21.1779517, -47.8096064, 1.0], [-21.1779517, -47.809433, 1.0], [-21.1777258, -47.809433, 1.0], [-21.1777258, -47.8096064, 1.0], [-21.1777258, -47.8097798, 1.0], [-21.1777258, -47.8099532, 1.0], [-21.1777258, -47.8101266, 0.0], [-21.1777258, -47.8103, 0.0], [-21.1777258, -47.8104734, 0.0], [-21.1777258, -47.8106468, 1.0], [-21.1777258, -47.8108202, 0.0], [-21.1777258, -47.8109936, 0.0], [-21.1777258, -47.811167, 0.0], [-21.1775, -47.811167, 0.0], [-21.1775, -47.8109936, 0.0], [-21.1775, -47.8108202, 0.0], [-21.1775, -47.8106468, 0.0], [-21.1775, -47.8104734, 0.0], [-21.1775, -47.8103, 0.0], [-21.1775, -47.8101266, 0.0], [-21.1775, -47.8099532, 0.0], [-21.1775, -47.8097798, 0.0], [-21.1775, -47.8096064, 0.0], [-21.1775, -47.809433, 0.0], [-21.1772742, -47.809433, 0.0], [-21.1772742, -47.8096064, 0.0], [-21.1772742, -47.8097798, 0.0], [-21.1772742, -47.8099532, 0.0], [-21.1772742, -47.8101266, 0.0], [-21.1772742, -47.8103, 0.0], [-21.1772742, -47.8104734, 0.0], [-21.1772742, -47.8106468, 0.0], [-21.1772742, -47.8108202, 0.0], [-21.1772742, -47.8109936, 0.0], [-21.1772742, -47.811167, 0.0], [-21.1770483, -47.811167, 0.0], [-21.1770483, -47.8109936, 0.0], [-21.1770483, -47.8108202, 0.0], [-21.1770483, -47.8106468, 0.0], [-21.1770483, -47.8104734, 0.0], [-21.1770483, -47.8103, 0.0], [-21.1770483, -47.8101266, 0.0], [-21.1770483, -47.8099532, 0.0], [-21.1770483, -47.8097798, 0.0], [-21.1770483, -47.8096064, 0.0], [-21.1770483, -47.809433, 0.0]],
+                {
+  "minOpacity": 0.3,
+  "maxZoom": 18,
+  "radius": 30,
+  "blur": 20,
+  "gradient": {
+  0.3: "#fdba74",
+  0.7: "#f97316",
+  1.0: "#c2410c",
+},
+}
+            );
+        
+    
+            heat_map_c376595cb2dade924411b04ac14558e1.addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+    
+            var layer_control_923eb49cba4ea88960ea8cdbc1665434_layers = {
+                base_layers : {
+                    "Sat\u00e9lite de Alta Resolu\u00e7\u00e3o (Esri)" : tile_layer_f4be1b828fede23a1cb9189ddf3a575d,
+                    "OpenStreetMap Padr\u00e3o" : tile_layer_6b6fc2889d740e66fed7978bed607030,
+                },
+                overlays :  {
+                    "Pontos de Amostragem (Todos)" : feature_group_55ebd337445ae1e8df11c7b3da82e5df,
+                    "Focos de Carv\u00e3o (smut)" : feature_group_276a44801037217a9d075fc0b2a652ac,
+                    "Focos de Ferrugem (BrownRust)" : feature_group_e06124fd82d23f8071566ee6e1d84c0c,
+                    "Mapa de Calor: Severidade Global" : heat_map_a8270f0ab91ab62418b07102e2e819f4,
+                    "Mapa de Calor: Foco Carv\u00e3o (smut)" : heat_map_955cd444149376753fcf9175b935e80f,
+                    "Mapa de Calor: Foco Ferrugem (BrownRust)" : heat_map_c376595cb2dade924411b04ac14558e1,
+                },
+            };
+            let layer_control_923eb49cba4ea88960ea8cdbc1665434 = L.control.layers(
+                layer_control_923eb49cba4ea88960ea8cdbc1665434_layers.base_layers,
+                layer_control_923eb49cba4ea88960ea8cdbc1665434_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": false,
+  "autoZIndex": true,
+}
+            ).addTo(map_f09992d95f7e8b925602c93633feea1d);
+
+        
+    
+            var measure_control_505e4f4f0f1173cc35cbbceddc627bb0 = new L.Control.Measure(
+                {
+  "position": "topleft",
+  "primaryLengthUnit": "meters",
+  "secondaryLengthUnit": "miles",
+  "primaryAreaUnit": "sqmeters",
+  "secondaryAreaUnit": "acres",
+});
+            map_f09992d95f7e8b925602c93633feea1d.addControl(measure_control_505e4f4f0f1173cc35cbbceddc627bb0);
+
+            // Workaround for using this plugin with Leaflet>=1.8.0
+            // https://github.com/ljagis/leaflet-measure/issues/171
+            L.Control.Measure.include({
+                _setCaptureMarkerIcon: function () {
+                    // disable autopan
+                    this._captureMarker.options.autoPanOnFocus = false;
+                    // default function
+                    this._captureMarker.setIcon(
+                        L.divIcon({
+                            iconSize: this._map.getSize().multiplyBy(2)
+                        })
+                    );
+                },
+            });
+
+        
+    
+            L.control.fullscreen(
+                {
+  "position": "topleft",
+  "title": "Full Screen",
+  "titleCancel": "Exit Full Screen",
+  "forceSeparateButton": false,
+}
+            ).addTo(map_f09992d95f7e8b925602c93633feea1d);
+        
+</script>
+</html>

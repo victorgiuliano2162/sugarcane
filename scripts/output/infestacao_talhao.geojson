@@ -1,0 +1,1552 @@
+{
+  "type": "FeatureCollection",
+  "name": "Levantamento_Fitossanitario_Canavial_HIL",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.811167,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 1,
+        "linha_talhao": 0,
+        "coluna_talhao": 0,
+        "classe_real": "Pokkah Boeng",
+        "classe_predita": "Brown Spot",
+        "confianca": 0.7031,
+        "confianca_pct": 70.3,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 74,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1260.9,
+        "arquivo_amostra": "Pokkah Boeng001.jpg",
+        "cor_hex": "#d97706",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8109936,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 2,
+        "linha_talhao": 0,
+        "coluna_talhao": 1,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.9805,
+        "confianca_pct": 98.0,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 79,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1149.8,
+        "arquivo_amostra": "image002.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8108202,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 3,
+        "linha_talhao": 0,
+        "coluna_talhao": 2,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.9844,
+        "confianca_pct": 98.4,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 79,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1043.9,
+        "arquivo_amostra": "image003.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8106468,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 4,
+        "linha_talhao": 0,
+        "coluna_talhao": 3,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.9883,
+        "confianca_pct": 98.8,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 79,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1044.7,
+        "arquivo_amostra": "image004.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8104734,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 5,
+        "linha_talhao": 0,
+        "coluna_talhao": 4,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.9688,
+        "confianca_pct": 96.9,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 79,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1043.5,
+        "arquivo_amostra": "image005.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8103,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 6,
+        "linha_talhao": 0,
+        "coluna_talhao": 5,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.9688,
+        "confianca_pct": 96.9,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 79,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1044.4,
+        "arquivo_amostra": "image006.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8101266,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 7,
+        "linha_talhao": 0,
+        "coluna_talhao": 6,
+        "classe_real": "Brown Spot",
+        "classe_predita": "Brown Spot",
+        "confianca": 0.9453,
+        "confianca_pct": 94.5,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 76,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 988.5,
+        "arquivo_amostra": "image007.jpg",
+        "cor_hex": "#d97706",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8099532,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 8,
+        "linha_talhao": 0,
+        "coluna_talhao": 7,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.4766,
+        "confianca_pct": 47.7,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 71,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 997.8,
+        "arquivo_amostra": "image008.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8097798,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 9,
+        "linha_talhao": 0,
+        "coluna_talhao": 8,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.8945,
+        "confianca_pct": 89.5,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 72,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1034.4,
+        "arquivo_amostra": "image009.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8096064,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 10,
+        "linha_talhao": 0,
+        "coluna_talhao": 9,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.9141,
+        "confianca_pct": 91.4,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 76,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 985.4,
+        "arquivo_amostra": "image010.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.809433,
+          -21.1779517,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 11,
+        "linha_talhao": 0,
+        "coluna_talhao": 10,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.8477,
+        "confianca_pct": 84.8,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 74,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1009.1,
+        "arquivo_amostra": "image011.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.809433,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 12,
+        "linha_talhao": 1,
+        "coluna_talhao": 10,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.9609,
+        "confianca_pct": 96.1,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 77,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1044.7,
+        "arquivo_amostra": "image012.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8096064,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 13,
+        "linha_talhao": 1,
+        "coluna_talhao": 9,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.9688,
+        "confianca_pct": 96.9,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 77,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1047.9,
+        "arquivo_amostra": "image013.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8097798,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 14,
+        "linha_talhao": 1,
+        "coluna_talhao": 8,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.9414,
+        "confianca_pct": 94.1,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 74,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1038.8,
+        "arquivo_amostra": "image014.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8099532,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 15,
+        "linha_talhao": 1,
+        "coluna_talhao": 7,
+        "classe_real": "BrownRust",
+        "classe_predita": "BrownRust",
+        "confianca": 0.9336,
+        "confianca_pct": 93.4,
+        "acerto": true,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 75,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1044.1,
+        "arquivo_amostra": "image015.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8101266,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 16,
+        "linha_talhao": 1,
+        "coluna_talhao": 6,
+        "classe_real": "Yellow Leaf",
+        "classe_predita": "Yellow Leaf",
+        "confianca": 0.7812,
+        "confianca_pct": 78.1,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 76,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1043.5,
+        "arquivo_amostra": "Yellow Leaf016.jpg",
+        "cor_hex": "#eab308",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8103,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 17,
+        "linha_talhao": 1,
+        "coluna_talhao": 5,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.9102,
+        "confianca_pct": 91.0,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 124,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1043.0,
+        "arquivo_amostra": "image017.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8104734,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 18,
+        "linha_talhao": 1,
+        "coluna_talhao": 4,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.9258,
+        "confianca_pct": 92.6,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 124,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1045.9,
+        "arquivo_amostra": "image018.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8106468,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 19,
+        "linha_talhao": 1,
+        "coluna_talhao": 3,
+        "classe_real": "Viral Disease",
+        "classe_predita": "BrownRust",
+        "confianca": 0.8047,
+        "confianca_pct": 80.5,
+        "acerto": false,
+        "severidade_risco": 2,
+        "tempo_decodificacao_ms": 72,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1044.6,
+        "arquivo_amostra": "Viral Disease019.jpg",
+        "cor_hex": "#ea580c",
+        "alerta_critico": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8108202,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 20,
+        "linha_talhao": 1,
+        "coluna_talhao": 2,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.8086,
+        "confianca_pct": 80.9,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 123,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1048.2,
+        "arquivo_amostra": "image020.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8109936,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 21,
+        "linha_talhao": 1,
+        "coluna_talhao": 1,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Viral Disease",
+        "confianca": 0.7344,
+        "confianca_pct": 73.4,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 121,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1050.2,
+        "arquivo_amostra": "image021.jpg",
+        "cor_hex": "#8b5cf6",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.811167,
+          -21.1777258,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 22,
+        "linha_talhao": 1,
+        "coluna_talhao": 0,
+        "classe_real": "Pokkah Boeng",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.8438,
+        "confianca_pct": 84.4,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 71,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1240.9,
+        "arquivo_amostra": "Pokkah Boeng022.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.811167,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 23,
+        "linha_talhao": 2,
+        "coluna_talhao": 0,
+        "classe_real": "Yellow Leaf",
+        "classe_predita": "Yellow Leaf",
+        "confianca": 0.9453,
+        "confianca_pct": 94.5,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 87,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1147.5,
+        "arquivo_amostra": "Yellow Leaf023.jpg",
+        "cor_hex": "#eab308",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8109936,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 24,
+        "linha_talhao": 2,
+        "coluna_talhao": 1,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.625,
+        "confianca_pct": 62.5,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 119,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1041.9,
+        "arquivo_amostra": "image024.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8108202,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 25,
+        "linha_talhao": 2,
+        "coluna_talhao": 2,
+        "classe_real": "Grassy shoot",
+        "classe_predita": "Grassy shoot",
+        "confianca": 0.9844,
+        "confianca_pct": 98.4,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 233,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1614.3,
+        "arquivo_amostra": "image025.jpg",
+        "cor_hex": "#84cc16",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8106468,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 26,
+        "linha_talhao": 2,
+        "coluna_talhao": 3,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Banded Chlorosis",
+        "confianca": 0.5156,
+        "confianca_pct": 51.6,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 118,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1087.4,
+        "arquivo_amostra": "image026.jpg",
+        "cor_hex": "#facc15",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8104734,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 27,
+        "linha_talhao": 2,
+        "coluna_talhao": 4,
+        "classe_real": "Sett Rot",
+        "classe_predita": "Sett Rot",
+        "confianca": 0.957,
+        "confianca_pct": 95.7,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 125,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1346.6,
+        "arquivo_amostra": "Sett Rot027.jpg",
+        "cor_hex": "#78350f",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8103,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 28,
+        "linha_talhao": 2,
+        "coluna_talhao": 5,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.8203,
+        "confianca_pct": 82.0,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 118,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1021.1,
+        "arquivo_amostra": "image028.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8101266,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 29,
+        "linha_talhao": 2,
+        "coluna_talhao": 6,
+        "classe_real": "Brown Spot",
+        "classe_predita": "Brown Spot",
+        "confianca": 0.9492,
+        "confianca_pct": 94.9,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 74,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1028.6,
+        "arquivo_amostra": "image029.jpg",
+        "cor_hex": "#d97706",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8099532,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 30,
+        "linha_talhao": 2,
+        "coluna_talhao": 7,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9336,
+        "confianca_pct": 93.4,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 106,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1217.1,
+        "arquivo_amostra": "image030.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8097798,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 31,
+        "linha_talhao": 2,
+        "coluna_talhao": 8,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9336,
+        "confianca_pct": 93.4,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 106,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1301.7,
+        "arquivo_amostra": "image031.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8096064,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 32,
+        "linha_talhao": 2,
+        "coluna_talhao": 9,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.8984,
+        "confianca_pct": 89.8,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 108,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1204.0,
+        "arquivo_amostra": "image032.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.809433,
+          -21.1775,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 33,
+        "linha_talhao": 2,
+        "coluna_talhao": 10,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9258,
+        "confianca_pct": 92.6,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 105,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1205.8,
+        "arquivo_amostra": "image033.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.809433,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 34,
+        "linha_talhao": 3,
+        "coluna_talhao": 10,
+        "classe_real": "smut",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.7383,
+        "confianca_pct": 73.8,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 71,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1124.0,
+        "arquivo_amostra": "Smut034.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8096064,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 35,
+        "linha_talhao": 3,
+        "coluna_talhao": 9,
+        "classe_real": "smut",
+        "classe_predita": "Brown Spot",
+        "confianca": 0.3555,
+        "confianca_pct": 35.5,
+        "acerto": false,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 71,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1037.0,
+        "arquivo_amostra": "Smut035.jpg",
+        "cor_hex": "#d97706",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8097798,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 36,
+        "linha_talhao": 3,
+        "coluna_talhao": 8,
+        "classe_real": "smut",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.7266,
+        "confianca_pct": 72.7,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 73,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1049.6,
+        "arquivo_amostra": "Smut036.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8099532,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 37,
+        "linha_talhao": 3,
+        "coluna_talhao": 7,
+        "classe_real": "smut",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.4961,
+        "confianca_pct": 49.6,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 74,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1035.4,
+        "arquivo_amostra": "Smut037.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8101266,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 38,
+        "linha_talhao": 3,
+        "coluna_talhao": 6,
+        "classe_real": "Yellow Leaf",
+        "classe_predita": "Yellow Leaf",
+        "confianca": 0.6953,
+        "confianca_pct": 69.5,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 79,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1056.0,
+        "arquivo_amostra": "Yellow Leaf038.jpg",
+        "cor_hex": "#eab308",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8103,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 39,
+        "linha_talhao": 3,
+        "coluna_talhao": 5,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9766,
+        "confianca_pct": 97.7,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 106,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1234.0,
+        "arquivo_amostra": "image039.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8104734,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 40,
+        "linha_talhao": 3,
+        "coluna_talhao": 4,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9844,
+        "confianca_pct": 98.4,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 98,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1152.7,
+        "arquivo_amostra": "image040.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8106468,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 41,
+        "linha_talhao": 3,
+        "coluna_talhao": 3,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9492,
+        "confianca_pct": 94.9,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 93,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1147.8,
+        "arquivo_amostra": "image041.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8108202,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 42,
+        "linha_talhao": 3,
+        "coluna_talhao": 2,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9258,
+        "confianca_pct": 92.6,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 123,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1343.7,
+        "arquivo_amostra": "image042.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8109936,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 43,
+        "linha_talhao": 3,
+        "coluna_talhao": 1,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9727,
+        "confianca_pct": 97.3,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 122,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1282.3,
+        "arquivo_amostra": "image043.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.811167,
+          -21.1772742,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 44,
+        "linha_talhao": 3,
+        "coluna_talhao": 0,
+        "classe_real": "Yellow Leaf",
+        "classe_predita": "Yellow Leaf",
+        "confianca": 0.5,
+        "confianca_pct": 50.0,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 81,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1110.4,
+        "arquivo_amostra": "Yellow Leaf044.jpg",
+        "cor_hex": "#eab308",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.811167,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 45,
+        "linha_talhao": 4,
+        "coluna_talhao": 0,
+        "classe_real": "Yellow Leaf",
+        "classe_predita": "Yellow Leaf",
+        "confianca": 0.6211,
+        "confianca_pct": 62.1,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 81,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1143.5,
+        "arquivo_amostra": "Yellow Leaf045.jpg",
+        "cor_hex": "#eab308",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8109936,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 46,
+        "linha_talhao": 4,
+        "coluna_talhao": 1,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.8828,
+        "confianca_pct": 88.3,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 113,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1252.6,
+        "arquivo_amostra": "image046.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8108202,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 47,
+        "linha_talhao": 4,
+        "coluna_talhao": 2,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9453,
+        "confianca_pct": 94.5,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 114,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1358.5,
+        "arquivo_amostra": "image047.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8106468,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 48,
+        "linha_talhao": 4,
+        "coluna_talhao": 3,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9688,
+        "confianca_pct": 96.9,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 115,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1352.3,
+        "arquivo_amostra": "image048.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8104734,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 49,
+        "linha_talhao": 4,
+        "coluna_talhao": 4,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9375,
+        "confianca_pct": 93.8,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 118,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1342.5,
+        "arquivo_amostra": "image049.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8103,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 50,
+        "linha_talhao": 4,
+        "coluna_talhao": 5,
+        "classe_real": "Healthy Leaves",
+        "classe_predita": "Healthy Leaves",
+        "confianca": 0.9609,
+        "confianca_pct": 96.1,
+        "acerto": true,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 116,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1245.9,
+        "arquivo_amostra": "image050.jpg",
+        "cor_hex": "#10b981",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8101266,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 51,
+        "linha_talhao": 4,
+        "coluna_talhao": 6,
+        "classe_real": "Brown Spot",
+        "classe_predita": "Brown Spot",
+        "confianca": 0.9414,
+        "confianca_pct": 94.1,
+        "acerto": true,
+        "severidade_risco": 1,
+        "tempo_decodificacao_ms": 72,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1045.3,
+        "arquivo_amostra": "image051.jpg",
+        "cor_hex": "#d97706",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8099532,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 52,
+        "linha_talhao": 4,
+        "coluna_talhao": 7,
+        "classe_real": "smut",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.918,
+        "confianca_pct": 91.8,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 77,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1043.7,
+        "arquivo_amostra": "Smut052.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8097798,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 53,
+        "linha_talhao": 4,
+        "coluna_talhao": 8,
+        "classe_real": "smut",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.9258,
+        "confianca_pct": 92.6,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 79,
+        "tempo_inferencia_ms": 284,
+        "tempo_total_pausa_ms": 1146.7,
+        "arquivo_amostra": "Smut053.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.8096064,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 54,
+        "linha_talhao": 4,
+        "coluna_talhao": 9,
+        "classe_real": "smut",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.8984,
+        "confianca_pct": 89.8,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 74,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1045.1,
+        "arquivo_amostra": "Smut054.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -47.809433,
+          -21.1770483,
+          595.0
+        ]
+      },
+      "properties": {
+        "waypoint_id": 55,
+        "linha_talhao": 4,
+        "coluna_talhao": 10,
+        "classe_real": "smut",
+        "classe_predita": "Dried Leaves",
+        "confianca": 0.9219,
+        "confianca_pct": 92.2,
+        "acerto": false,
+        "severidade_risco": 0,
+        "tempo_decodificacao_ms": 78,
+        "tempo_inferencia_ms": 283,
+        "tempo_total_pausa_ms": 1096.2,
+        "arquivo_amostra": "Smut055.jpg",
+        "cor_hex": "#64748b",
+        "alerta_critico": false
+      }
+    }
+  ]
+}
