@@ -55,18 +55,59 @@
       </div>
       <p class="empty-text">Aguardando rajada de inferência do pipeline...</p>
     </div>
+
+    <!-- Botão de Upload e Disparo de Inferência On-Demand -->
+    <div class="card-action-bar">
+      <label class="btn btn-primary btn-sm btn-upload" :class="{ 'btn-disabled': !wsConnected }">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Testar Imagem (Câmera / Arquivo)</span>
+        <input 
+          type="file" 
+          accept="image/jpeg,image/png" 
+          :disabled="!wsConnected"
+          @change="onFileSelected" 
+          style="display: none;" 
+        />
+      </label>
+      <span class="action-hint" v-if="uploadStatus">{{ uploadStatus }}</span>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   latestDiagnosis: {
     type: Object,
     default: () => ({})
+  },
+  wsConnected: {
+    type: Boolean,
+    default: false
   }
 })
+
+const emit = defineEmits(['send-image'])
+const uploadStatus = ref('')
+
+function onFileSelected(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  uploadStatus.value = `Enviando ${file.name} (${(file.size / 1024).toFixed(1)} KB)...`
+  emit('send-image', file)
+  event.target.value = ''
+}
+
+watch(() => props.latestDiagnosis, () => {
+  if (uploadStatus.value) {
+    uploadStatus.value = 'Inferência concluída com sucesso!'
+    setTimeout(() => {
+      uploadStatus.value = ''
+    }, 4000)
+  }
+}, { deep: true })
 
 const classTranslations = {
   'Healthy Leaves': 'Folha Sadia',
@@ -213,5 +254,34 @@ const confColor = computed(() => {
 
 .empty-text {
   font-size: 0.875rem;
+}
+
+.card-action-bar {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #1a253c;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-upload {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.action-hint {
+  font-size: 0.75rem;
+  color: #38bdf8;
+  font-family: var(--font-mono);
 }
 </style>

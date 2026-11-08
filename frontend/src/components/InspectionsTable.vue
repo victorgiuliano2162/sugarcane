@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   inspections: {
@@ -122,6 +122,11 @@ const pageSize = ref(10)
 const currentPage = ref(1)
 const sortKey = ref('id')
 const sortOrder = ref('desc') // 'asc' ou 'desc'
+
+// Reseta para a página 1 ao alterar o tamanho da página ou filtrar
+watch([pageSize, searchQuery], () => {
+  currentPage.value = 1
+})
 
 const exportCsvUrl = computed(() => {
   return '/api/export-csv'
@@ -187,7 +192,13 @@ const filteredList = computed(() => {
 })
 
 const totalPages = computed(() => {
-  return Math.ceil(filteredList.value.length / pageSize.value)
+  return Math.ceil(filteredList.value.length / pageSize.value) || 1
+})
+
+watch(totalPages, (newTotal) => {
+  if (currentPage.value > newTotal) {
+    currentPage.value = newTotal
+  }
 })
 
 const startIndex = computed(() => {

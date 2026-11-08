@@ -14,7 +14,11 @@
 
       <!-- 2. Linha Central: Diagnóstico em Tempo Real + Mapa Cartográfico -->
       <section class="section-mb grid grid-cols-2">
-        <LiveInferenceCard :latest-diagnosis="latestDiagnosis" />
+        <LiveInferenceCard 
+          :latest-diagnosis="latestDiagnosis" 
+          :ws-connected="wsConnected"
+          @send-image="handleSendImage"
+        />
         <MapViewer :points="inspections" />
       </section>
 
@@ -60,73 +64,68 @@ const telemetry = ref({
   }
 })
 
-const latestDiagnosis = ref({
-  id: 1,
-  class_name: 'smut',
-  confidence: 0.884,
-  anomaly_alert: true,
-  lat: -8.053891,
-  lon: -34.881052,
-  alt_m: 24.5,
-  timing: {
-    decode_ms: 102.7,
-    inference_ms: 283.4,
-    total_chip_ms: 386.1
-  }
-})
-
+const latestDiagnosis = ref({})
 const inspections = ref([])
 
-// Carrega dados iniciais simulados baseados na missão real de 55 waypoints do talhão
-function loadInitialFieldData() {
-  const baseLat = -8.05389
-  const baseLon = -34.88105
-  const sampleClasses = [
-    { name: 'Healthy Leaves', conf: 0.96, alert: false },
-    { name: 'Healthy Leaves', conf: 0.94, alert: false },
-    { name: 'BrownRust', conf: 0.98, alert: true },
-    { name: 'BrownRust', conf: 0.92, alert: true },
-    { name: 'smut', conf: 0.84, alert: true },
-    { name: 'smut', conf: 0.88, alert: true },
-    { name: 'Pokkah Boeng', conf: 1.00, alert: true },
-    { name: 'Sett Rot', conf: 1.00, alert: true },
-    { name: 'Yellow Leaf', conf: 0.90, alert: true },
-    { name: 'Grassy shoot', conf: 0.98, alert: true },
-    { name: 'Banded Chlorosis', conf: 0.94, alert: true },
-    { name: 'Healthy Leaves', conf: 0.98, alert: false }
-  ]
+// Carrega o histórico real gravado na LittleFS da ESP32 (evitando dados mockados)
+async function loadHistoryFromESP32() {
+  try {
+    const res = await fetch('/api/export-csv')
+    if (!res.ok) return
+    const text = await res.text()
+    const lines = text.trim().split('\n')
+    if (lines.length <= 1) {
+      inspections.value = []
+      return
+    }
 
-  const list = []
-  const now = Math.floor(Date.now() / 1000)
-
-  for (let i = 0; i < 24; i++) {
-    const row = Math.floor(i / 6)
-    const col = i % 6
-    const offsetLat = baseLat + (row * 0.00035) + (Math.random() * 0.00005)
-    const offsetLon = baseLon + (col * 0.00045) + (Math.random() * 0.00005)
-    const cls = sampleClasses[i % sampleClasses.length]
-
-    list.push({
-      id: i + 1,
-      timestamp: now - (24 - i) * 12,
-      class_name: cls.name,
-      confidence: cls.conf,
-      anomaly_alert: cls.alert,
-      lat: offsetLat,
-      lon: offsetLon,
-      alt_m: 24.0 + Math.random() * 1.5,
-      timing: {
-        decode_ms: 101.5 + Math.random() * 3.0,
-        inference_ms: 283.2 + Math.random() * 0.5,
-        total_chip_ms: 384.7 + Math.random() * 3.5
+    const items = []
+    // Cabeçalho: id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim()
+      if (!line) continue
+      const cols = line.split(',')
+      if (cols.length >= 7) {
+        const infMs = parseFloat(cols[8]) || 283.4
+        const decMs = parseFloat(cols[9]) || 86.2
+        items.push({
+          id: parseInt(cols[0]) || i,
+          timestamp: parseInt(cols[1]) || Math.floor(Date.now() / 1000),
+          lat: parseFloat(cols[2]) || -8.05389,
+          lon: parseFloat(cols[3]) || -34.88105,
+          alt_m: parseFloat(cols[4]) || 24.5,
+          class_name: cols[5],
+          confidence: parseFloat(cols[6]) || 0.85,
+          anomaly_alert: cols[5] !== 'Healthy Leaves',
+          timing: {
+            decode_ms: decMs,
+            inference_ms: infMs,
+            total_chip_ms: decMs + infMs
+          }
+        })
       }
-    })
-  }
+    }
 
-  inspections.value = list
-  if (list.length > 0) {
-    latestDiagnosis.value = list[list.length - 1]
+    inspections.value = items
+    if (items.length > 0) {
+      latestDiagnosis.value = items[items.length - 1]
+    }
+  } catch (err) {
+    console.warn('Não foi possível carregar histórico inicial da ESP32:', err)
   }
+}
+
+// Envia foto real (binária JPEG) para o pipeline TFLite Micro na ESP32 via WebSocket
+function handleSendImage(file) {
+  if (!ws || !wsConnected.value) {
+    alert('WebSocket desconectado. Aguarde conexão com a ESP32-S3.')
+    return
+  }
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    ws.send(e.target.result)
+  }
+  reader.readAsArrayBuffer(file)
 }
 
 // Gerenciador de WebSocket com Reconexão Automática
@@ -213,10 +212,11 @@ function handleClearHistory() {
     ws.send(JSON.stringify({ cmd: 'clear_history', auth_token: 'sugarcane' }))
   }
   inspections.value = []
+  latestDiagnosis.value = {}
 }
 
 onMounted(() => {
-  loadInitialFieldData()
+  loadHistoryFromESP32()
   setupWebSocket()
 })
 

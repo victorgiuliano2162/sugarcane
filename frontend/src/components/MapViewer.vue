@@ -7,11 +7,14 @@
           Mapeamento Espacial de Focos (Talhão Georreferenciado)
         </span>
         <span class="badge" :class="isOnline ? 'badge-info' : 'badge-neutral'">
-          {{ isOnline ? 'Mapa Online (OSM)' : 'Modo Offline (Grid)' }}
+          {{ isOnline ? (mapType === 'satellite' ? 'Satélite (Esri)' : 'Mapa (OSM)') : 'Modo Offline (Grid)' }}
         </span>
       </div>
 
       <div class="map-controls">
+        <button v-if="isOnline" class="btn btn-secondary btn-sm" @click="toggleMapType">
+          {{ mapType === 'satellite' ? 'Ver Mapa Vetorial' : 'Ver Satélite' }}
+        </button>
         <button class="btn btn-secondary btn-sm" @click="toggleHeatmap" :class="{ 'btn-active': showHeatmap }">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
           {{ showHeatmap ? 'Ocultar Heatmap' : 'Exibir Heatmap' }}
@@ -68,6 +71,7 @@ let baseTileLayer = null
 const isOnline = ref(false)
 const showHeatmap = ref(false)
 const activeFilter = ref(null)
+const mapType = ref('satellite') // 'satellite' ou 'osm'
 
 const classColors = {
   'smut': '#dc2626',            // Carvão (Vermelho intenso)
@@ -99,6 +103,59 @@ function toggleFilter(cls) {
 function toggleHeatmap() {
   showHeatmap.value = !showHeatmap.value
   renderPoints()
+}
+
+function toggleMapType() {
+  mapType.value = mapType.value === 'satellite' ? 'osm' : 'satellite'
+  updateBaseLayer()
+}
+
+function updateBaseLayer() {
+  if (!map) return
+  if (baseTileLayer) {
+    map.removeLayer(baseTileLayer)
+    baseTileLayer = null
+  }
+
+  if (isOnline.value) {
+    if (mapType.value === 'satellite') {
+      // Esri World Imagery (Satélite Agrícola de Alta Resolução - 100% Livre de Chave)
+      baseTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Esri World Imagery'
+      }).addTo(map)
+    } else {
+      // OpenStreetMap Padrão (Sem chave de API)
+      baseTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map)
+    }
+  } else {
+    // Grid Cartesiano Escuro Procedural Offline (para operação sem internet no talhão)
+    const GridLayer = L.GridLayer.extend({
+      createTile: function(coords) {
+        const tile = document.createElement('canvas')
+        tile.width = 256
+        tile.height = 256
+        const ctx = tile.getContext('2d')
+        ctx.fillStyle = '#0b1120'
+        ctx.fillRect(0, 0, 256, 256)
+        ctx.strokeStyle = '#1e293b'
+        ctx.lineWidth = 1
+        ctx.strokeRect(0, 0, 256, 256)
+        ctx.fillStyle = '#475569'
+        ctx.font = '10px monospace'
+        ctx.fillText(`Talhão [${coords.x}, ${coords.y}]`, 12, 20)
+        return tile
+      }
+    })
+    baseTileLayer = new GridLayer().addTo(map)
+  }
+
+  if (baseTileLayer) {
+    baseTileLayer.bringToBack()
+  }
 }
 
 async function checkOnlineConnectivity() {
@@ -139,34 +196,7 @@ function initMap() {
     attributionControl: false
   })
 
-  if (isOnline.value) {
-    // Camada CartoDB Dark Matter quando online
-    baseTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      subdomains: 'abcd'
-    }).addTo(map)
-  } else {
-    // Grid Cartesiano Escuro Procedural Offline
-    const GridLayer = L.GridLayer.extend({
-      createTile: function(coords) {
-        const tile = document.createElement('canvas')
-        tile.width = 256
-        tile.height = 256
-        const ctx = tile.getContext('2d')
-        ctx.fillStyle = '#0b1120'
-        ctx.fillRect(0, 0, 256, 256)
-        ctx.strokeStyle = '#1e293b'
-        ctx.lineWidth = 1
-        ctx.strokeRect(0, 0, 256, 256)
-        ctx.fillStyle = '#475569'
-        ctx.font = '10px monospace'
-        ctx.fillText(`Talhão [${coords.x}, ${coords.y}]`, 12, 20)
-        return tile
-      }
-    })
-    new GridLayer().addTo(map)
-  }
-
+  updateBaseLayer()
   markersLayer = L.layerGroup().addTo(map)
 }
 
