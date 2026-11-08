@@ -69,6 +69,10 @@ static float get_chip_temperature() {
     return temp;
 }
 
+void reset_inspection_counter() {
+    s_inspection_counter = 0;
+}
+
 static void init_csv_log() {
     struct stat st;
     if (stat(CSV_LOG_PATH, &st) != 0) {
@@ -77,6 +81,21 @@ static void init_csv_log() {
             fputs("id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n", f);
             fclose(f);
             ESP_LOGI(TAG, "Arquivo de log CSV criado: %s", CSV_LOG_PATH);
+        }
+    } else {
+        // Recupera contagem de inspeções já gravadas para não reiniciar os IDs
+        FILE* f = fopen(CSV_LOG_PATH, "r");
+        if (f) {
+            char line[128];
+            uint32_t lines = 0;
+            while (fgets(line, sizeof(line), f)) {
+                if (lines > 0 && strlen(line) > 5) {
+                    s_inspection_counter++;
+                }
+                lines++;
+            }
+            fclose(f);
+            ESP_LOGI(TAG, "CSV existente recuperado com %lu inspeções prévias.", s_inspection_counter);
         }
     }
 }

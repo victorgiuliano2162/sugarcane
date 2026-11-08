@@ -13,6 +13,7 @@
 
 static const char* TAG = "WEB_SERVER";
 extern QueueHandle_t inference_queue;
+extern void reset_inspection_counter();
 static httpd_handle_t server = NULL;
 static SemaphoreHandle_t s_ws_mutex = NULL;
 
@@ -213,6 +214,7 @@ static esp_err_t ws_handler(httpd_req_t *req) {
                             fputs("id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n", f);
                             fclose(f);
                         }
+                        reset_inspection_counter();
                         web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"ok\",\"msg\":\"Histórico limpo com sucesso\"}");
                     }
                     free(buf);
