@@ -68,6 +68,7 @@ A documentação do repositório está subdividida conforme as áreas de concent
 | **Ciência de Dados (v09)**| [GUIA_INTERPRETACAO_GRAFICOS_V09.md](file:///home/victor/projects/sugarcane/docs/GUIA_INTERPRETACAO_GRAFICOS_V09.md) | Análise técnica dos 6 gráficos analíticos de ablação, overfitting e Pareto do v09. |
 | **Pesquisa Teórica** | [POR_QUE_A_QUANTIZACAO_MANTEM_OU_MELHORA_O_DESEMPENHO.md](file:///home/victor/projects/sugarcane/docs/POR_QUE_A_QUANTIZACAO_MANTEM_OU_MELHORA_O_DESEMPENHO.md) | Fundamentação científica com 12 referências: Flat Minima, MDL, QAT e Gargalo de Informação. |
 | **Rigor Estatístico** | [ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md](file:///home/victor/projects/sugarcane/docs/ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md) | Análise de variância estocástica, impacto de sementes e intervalo de confiança da acurácia. |
+| **Mundo Aberto & OOD** | [ESTUDO_TECNICO_SUPOSICAO_MUNDO_FECHADO_E_OOD_CANAVIAL.md](file:///home/victor/projects/sugarcane/docs/ESTUDO_TECNICO_SUPOSICAO_MUNDO_FECHADO_E_OOD_CANAVIAL.md) | Estudo sobre mundo fechado, dados OOD (não-cana) e estratégias de triagem (ExG e 12ª classe). |
 
 ---
 
