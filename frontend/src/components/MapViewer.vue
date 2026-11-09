@@ -7,13 +7,13 @@
           Mapeamento Espacial de Focos (Talhão Georreferenciado)
         </span>
         <span class="badge" :class="isOnline ? 'badge-info' : 'badge-neutral'">
-          {{ isOnline ? (mapType === 'satellite' ? 'Satélite (Esri)' : 'Mapa (OSM)') : 'Modo Offline (Grid)' }}
+          {{ isOnline ? (mapType === 'osm' ? 'Mapa Vetorial (OSM)' : 'Satélite (Esri)') : 'Modo Offline (Grid)' }}
         </span>
       </div>
 
       <div class="map-controls">
         <button v-if="isOnline" class="btn btn-secondary btn-sm" @click="toggleMapType">
-          {{ mapType === 'satellite' ? 'Ver Mapa Vetorial' : 'Ver Satélite' }}
+          {{ mapType === 'osm' ? 'Alternar para Satélite' : 'Alternar para Mapa Vetorial' }}
         </button>
         <button class="btn btn-secondary btn-sm" @click="toggleHeatmap" :class="{ 'btn-active': showHeatmap }">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
@@ -71,7 +71,7 @@ let baseTileLayer = null
 const isOnline = ref(false)
 const showHeatmap = ref(false)
 const activeFilter = ref(null)
-const mapType = ref('satellite') // 'satellite' ou 'osm'
+const mapType = ref('osm') // 'osm' (vetorial padrão) ou 'satellite'
 
 const classColors = {
   'smut': '#dc2626',            // Carvão (Vermelho intenso)
