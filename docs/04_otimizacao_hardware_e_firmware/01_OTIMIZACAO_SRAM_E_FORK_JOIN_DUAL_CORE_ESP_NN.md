@@ -1,4 +1,4 @@
-# ⚡ Otimização de Memória SRAM Interna, Paralelismo Dual-Core (`Fork-Join`) e Referência Técnica `esp-nn` (ESP32-S3)
+# Otimização de Memória SRAM Interna, Paralelismo Dual-Core (`Fork-Join`) e Referência Técnica `esp-nn` (ESP32-S3)
 
 **Data:** 07 de Novembro de 2026  
 **Modelo Alvo:** `data/model_mbnet_int8.tflite` (`MobileNetV3Small Int8 v08`, entrada $160 \times 160 \times 3$, 11 classes)  

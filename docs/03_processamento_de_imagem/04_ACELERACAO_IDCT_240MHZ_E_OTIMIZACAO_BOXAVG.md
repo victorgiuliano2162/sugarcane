@@ -1,4 +1,4 @@
-# 🚀 Aceleração de Decodificação JPEG via IDCT Downscaling, Frequência Máxima de 240 MHz e Otimização Vetorial de Entrada (ESP32-S3)
+# Aceleração de Decodificação JPEG via IDCT Downscaling, Frequência Máxima de 240 MHz e Otimização Vetorial de Entrada (ESP32-S3)
 
 **Data:** 07 de Novembro de 2026  
 **Autor:** Engenharia de Sistemas Embarcados e Edge AI  
