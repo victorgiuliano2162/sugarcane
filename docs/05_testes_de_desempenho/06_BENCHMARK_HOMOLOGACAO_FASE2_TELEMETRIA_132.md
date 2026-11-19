@@ -78,4 +78,4 @@
 3. **Convergência com o Modelo v08 e Box Averaging Nativo:**
    - A acurácia global no dispositivo atingiu **`78.03%`** com confiança média de **`79.8%`**, refletindo a eliminação de *aliasing* pela decodificação `Modo 7 (RGB8888 + BoxAvg)` pré-computada em LUTs.
 
-4. **Registro de Rastreabilidade:** Dados brutos exportados em [`resultado_benchmark_12amostras.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_benchmark_12amostras.csv).
+4. **Registro de Rastreabilidade:** Dados brutos exportados em [`resultado_benchmark_12amostras.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/06_homologacao_fase2_telemetria_132.csv).

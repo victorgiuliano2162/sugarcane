@@ -4,23 +4,23 @@
 **Motor de Decodificação:** Biblioteca `JPEGDEC` (Caminho de Referência C do ESP32-S3)  
 **Modelo Avaliado:** `data/model_mbnet_int8.tflite` (MobileNetV2 Int8 — `[1, 160, 160, 3]`)  
 **Dataset Avaliado:** 550 imagens (50 amostras $\times$ 11 classes — Total de 4.400 inferências nos 8 métodos)  
-**Planilha de Dados Brutos:** [`model_inference_tests/resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv)  
-**Documentação Matemática Detalhada:** [`docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md)
+**Planilha de Dados Brutos:** [`docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv)  
+**Documentação Matemática Detalhada:** [`docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md)
 
 ---
 
 ## 1. Resumo Geral Comparativo (8 Variantes da `JPEGDraw()`)
 
-| Método Avaliado | Acertos (550) | Acurácia Global | Confiança Média | Viés de Brilho (Bias DC) | Erro de Cor (MAE) | Erro Global (RMSE) | Qualidade Sinal (PSNR) | Tempo Médio Decode (Ref) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **0. Atual (`RGB565 ZeroFill + Overwrite`)** | 453 / 550 | **82.36%** | 79.13% | `-2.90 LSB` | 2.83 LSB | 11.25 LSB | 27.1 dB | 5.689 µs (Base) |
-| **1. `RGB565 BitRep + Overwrite`** | 449 / 550 | **81.64%** | **79.56%** | `+0.60 LSB` | 1.93 LSB | 11.00 LSB | 27.3 dB | 6.397 µs (+12.4%) |
-| **2. `RGB8888 Nativo + Overwrite`** | 450 / 550 | **81.82%** | 78.92% | **`-0.06 LSB`** | **0.00 LSB** | 10.35 LSB | 27.8 dB | 6.116 µs (+7.5%) |
-| **3. `RGB565 BitRep + FastLUT`** | 449 / 550 | **81.64%** | **79.56%** | `+0.60 LSB` | 1.93 LSB | 11.00 LSB | 27.3 dB | **3.904 µs (-31.4%)** |
-| **4. `RGB8888 Nativo + FastLUT`** | 450 / 550 | **81.82%** | 78.92% | **`-0.06 LSB`** | **0.00 LSB** | 10.35 LSB | 27.8 dB | **4.663 µs (-18.0%)** |
-| **5. `RGB565 ZeroFill + BoxAvg`** | **455 / 550** | **82.73% (1º)** | 78.82% | `-2.84 LSB` | 2.84 LSB | **3.15 LSB** | **38.2 dB** | 6.445 µs (+13.3%) |
-| **6. `RGB565 BitRep + BoxAvg`** | 444 / 550 | **80.73%** | 78.75% | `+0.66 LSB` | 1.28 LSB | **1.69 LSB** | **43.6 dB** | 7.191 µs (+26.4%) |
-| **7. `RGB8888 Nativo + BoxAvg (Ideal)`** | 445 / 550 | **80.91%** | 78.75% | **`0.00 LSB`** | **0.00 LSB** | **0.00 LSB** | **∞ dB** | 7.267 µs (+27.7%) |
+| Método Avaliado                              | Acertos (550) | Acurácia Global | Confiança Média | Viés de Brilho (Bias DC) | Erro de Cor (MAE) | Erro Global (RMSE) | Qualidade Sinal (PSNR) | Tempo Médio Decode (Ref) |
+| :------------------------------------------- | :-----------: | :-------------: | :-------------: | :----------------------: | :---------------: | :----------------: | :--------------------: | :----------------------: |
+| **0. Atual (`RGB565 ZeroFill + Overwrite`)** |   453 / 550   |   **82.36%**    |     79.13%      |       `-2.90 LSB`        |     2.83 LSB      |     11.25 LSB      |        27.1 dB         |     5.689 µs (Base)      |
+| **1. `RGB565 BitRep + Overwrite`**           |   449 / 550   |   **81.64%**    |   **79.56%**    |       `+0.60 LSB`        |     1.93 LSB      |     11.00 LSB      |        27.3 dB         |    6.397 µs (+12.4%)     |
+| **2. `RGB8888 Nativo + Overwrite`**          |   450 / 550   |   **81.82%**    |     78.92%      |     **`-0.06 LSB`**      |   **0.00 LSB**    |     10.35 LSB      |        27.8 dB         |     6.116 µs (+7.5%)     |
+| **3. `RGB565 BitRep + FastLUT`**             |   449 / 550   |   **81.64%**    |   **79.56%**    |       `+0.60 LSB`        |     1.93 LSB      |     11.00 LSB      |        27.3 dB         |  **3.904 µs (-31.4%)**   |
+| **4. `RGB8888 Nativo + FastLUT`**            |   450 / 550   |   **81.82%**    |     78.92%      |     **`-0.06 LSB`**      |   **0.00 LSB**    |     10.35 LSB      |        27.8 dB         |  **4.663 µs (-18.0%)**   |
+| **5. `RGB565 ZeroFill + BoxAvg`**            | **455 / 550** | **82.73% (1º)** |     78.82%      |       `-2.84 LSB`        |     2.84 LSB      |    **3.15 LSB**    |      **38.2 dB**       |    6.445 µs (+13.3%)     |
+| **6. `RGB565 BitRep + BoxAvg`**              |   444 / 550   |   **80.73%**    |     78.75%      |       `+0.66 LSB`        |     1.28 LSB      |    **1.69 LSB**    |      **43.6 dB**       |    7.191 µs (+26.4%)     |
+| **7. `RGB8888 Nativo + BoxAvg (Ideal)`**     |   445 / 550   |   **80.91%**    |     78.75%      |      **`0.00 LSB`**      |   **0.00 LSB**    |    **0.00 LSB**    |        **∞ dB**        |    7.267 µs (+27.7%)     |
 
 ---
 

@@ -113,12 +113,12 @@ Com base no ciclo médio de **1,13 segundo por ponto**:
 A execução da ferramenta `scripts/generate_infestation_heatmaps.py` processou os registros do voo e gerou três classes de artefatos fitossanitários:
 
 ### 5.1. Camada Vetorial GeoJSON (RFC 7946 / EPSG:4326)
-- **Arquivo:** [`docs/heatmaps/infestacao_talhao.geojson`](file:///home/victor/projects/sugarcane/docs/heatmaps/infestacao_talhao.geojson)
+- **Arquivo:** [`docs/heatmaps/infestacao_talhao.geojson`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/infestacao_talhao.geojson)
 - **Estrutura:** `FeatureCollection` contendo 55 pontos com coordenadas geodésicas tridimensionais `[lon, lat, alt]` e metadados completos em cada elemento (`waypoint_id`, `classe_predita`, `classe_real`, `confianca`, `severidade_risco`, `tempo_decodificacao_ms`, `tempo_inferencia_ms`, `cor_hex`, `alerta_critico`).
 - **Compatibilidade:** Abre nativamente no **QGIS**, **ArcGIS Pro** e **Google Earth Pro**.
 
 ### 5.2. Dashboard Web GIS Interativo (Leaflet / Folium)
-- **Arquivo:** [`docs/heatmaps/mapa_calor_interativo.html`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_calor_interativo.html)
+- **Arquivo:** [`docs/heatmaps/mapa_calor_interativo.html`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_calor_interativo.html)
 - **Recursos Interativos:**
   - Alternância de mapas-base (Satélite de Alta Resolução Esri e OpenStreetMap);
   - Polígono georreferenciado delimitando o talhão com transparência translúcida;
@@ -132,13 +132,13 @@ A execução da ferramenta `scripts/generate_infestation_heatmaps.py` processou 
   - Legenda flutuante com código visual de cores e criticidade.
 
 ### 5.3. Painéis Cartográficos Estáticos de Alta Resolução (Matplotlib PNG)
-- **Painel Geral 2D:** [`docs/heatmaps/mapa_infestacao_talhao_2d.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_infestacao_talhao_2d.png)
+- **Painel Geral 2D:** [`docs/heatmaps/mapa_infestacao_talhao_2d.png`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_infestacao_talhao_2d.png)
   - *(a) Levantamento Fitossanitário Amostral:* Disposição dos 55 waypoints com linhas de voo e códigos de cores por patologia;
   - *(b) Mapa de Calor Contínuo (KDE 2D):* Superfície contínua de risco com contornos das reboleiras de Carvão e Ferrugem;
   - *(c) Perfil de Latência por Ponto:* Gráfico de barras empilhadas decompondo Estabilização (504 ms) + Decodificação (94 ms) + Inferência (283 ms) frente ao limite operacional de 1.000 ms;
   - *(d) Frequência de Diagnósticos:* Histograma das classes identificadas pelo ESP32-S3.
-- **Foco Epidêmico - Carvão:** [`docs/heatmaps/mapa_foco_carvao_smut.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_foco_carvao_smut.png)
-- **Foco Epidêmico - Ferrugem Marrom:** [`docs/heatmaps/mapa_foco_ferrugem_brownrust.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_foco_ferrugem_brownrust.png)
+- **Foco Epidêmico - Carvão:** [`docs/heatmaps/mapa_foco_carvao_smut.png`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_foco_carvao_smut.png)
+- **Foco Epidêmico - Ferrugem Marrom:** [`docs/heatmaps/mapa_foco_ferrugem_brownrust.png`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_foco_ferrugem_brownrust.png)
 
 ---
 
@@ -160,7 +160,7 @@ Para executar uma nova missão HIL contra o ESP32-S3:
 ### 6.3. Abertura e Visualização no QGIS
 1. Abra o QGIS (versão 3.x ou superior);
 2. Vá em `Camada` -> `Adicionar Camada` -> `Adicionar Camada Vetorial...`;
-3. Selecione o arquivo [`docs/heatmaps/infestacao_talhao.geojson`](file:///home/victor/projects/sugarcane/docs/heatmaps/infestacao_talhao.geojson);
+3. Selecione o arquivo [`docs/heatmaps/infestacao_talhao.geojson`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/infestacao_talhao.geojson);
 4. Em `Propriedades da Camada` -> `Simbologia`:
    - Escolha o renderizador **Categorizado**;
    - Selecione a coluna `classe_predita` como valor;

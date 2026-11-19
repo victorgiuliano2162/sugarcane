@@ -27,14 +27,14 @@ A tabela abaixo sintetiza a evolução temporal de todos os testes de bancada ex
 
 | # | Data / Hora | Identificador do Experimento | Script Python | Planilha CSV Gerada | Relatório Técnico | Versão Modelo | Amostras | Tempo Inf. (Médio) | Tempo Dec. (Médio) | Cadência RTT | Tempo Lote | Throughput | Acurácia Global |
 | :-: | :---: | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | **06/11 15:38** | **Linha de Base Sequencial (Single-Core)** | [`run_evaluation.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation.py) | [`resultado_inferencia.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia.csv) | [`RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO.md) | `v07` | 550 brutas | 626,6 ms | 814,0 ms | 1.581,3 ms | 871,5 s (14,5 min) | 0,63 img/s | 82,55% (454/550) |
-| **2** | **06/11 18:02** | **Pipeline Assíncrono Dual-Core (Streaming)** | [`run_evaluation_dualcore.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_dualcore.py) | [`resultado_inferencia_dualcore.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dualcore.csv) | [`RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md) | `v07` | 550 brutas | 777,4 ms | 1.032,4 ms | 1.044,8 ms | 574,9 s (9,6 min) | 0,96 img/s | 82,55% (454/550) |
-| **3** | **06/11 19:14** | **Auditoria de Sinal: 8 Variantes JPEGDraw** | *Test Harness* C++/Python | [`resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv) | [`RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md) | `v07` | 4.400 inferências (550 $\times$ 8) | ~626 ms | 4,0 a 7,2 µs/px | - | - | - | 80,7% a 82,7% (Modo 5: 82,73%) |
-| **4** | **07/11 06:06** | **Avaliação do Modelo v08 (Deduplicado MD5)** | *Test Harness* C++/Python | [`resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv)<br/>[`resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv) | [`RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md) | `v08` | 13.104 inferências (Bateria Ampla) | ~626 ms | 4,0 a 6,9 µs/px | - | - | - | **91,09%** (Modo 7 Limpo) |
-| **5** | **07/11 18:19** | **Scratch SRAM Interna + Fork-Join esp-nn** | [`run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py) | [`resultado_inferencia_espnn_sram.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram.csv) | [`RELATORIO_DESEMPENHO_ESP_NN_SRAM.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md) | `v08` | 550 brutas | 336,3 ms | 145,2 ms | 7.173,7 ms | 3.945,8 s (65,8 min)* | 0,14 img/s* | 83,09% (457/550) |
-| **6** | **08/11 06:03** | **Salto de Silício: PSRAM 80MHz + BoxAcc 8B** | [`run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py) | [`resultado_inferencia_espnn_sram_limpo.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram_limpo.csv) | [`RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md) | `v08` | 550 limpas | **283,4 ms** | **102,7 ms** | **564,7 ms** | **310,8 s (5,18 min)** | **1,77 img/s** | **89,82% (494/550)** |
-| **7** | **08/11 08:42** | **Stress Test Exaustivo: Dataset Completo** | [`run_evaluation_all_dataset.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_all_dataset.py) | [`resultado_inferencia_dataset_completo.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dataset_completo.csv) | [`RELATORIO_DATASET_COMPLETO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DATASET_COMPLETO.md) | `v08` | **9.269 imagens** (6.748 + 2.521) | **283,4 ms** | **92,6 ms** | ~612 ms | **5.678,1 s (94,6 min)** | **1,63 img/s** | 82,26% (Primário)<br/>3,13% (Archive) |
-| **8** | **08/11 16:35** | **Homologação Fase 2: Telemetria Concorrente** | [`run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py) | [`resultado_benchmark_12amostras.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_benchmark_12amostras.csv) | [`RELATORIO_BENCHMARK_132_AMOSTRAS.md`](file:///home/victor/projects/sugarcane/docs/RELATORIO_BENCHMARK_132_AMOSTRAS.md) | `v08` | 132 balanceadas (11 $\times$ 12) | **284,4 ms** | **96,3 ms** | **769,2 ms** | **101,6 s (1,69 min)** | **1,30 img/s** | **78,03% (103/132)** |
+| **1** | **06/11 15:38** | **Linha de Base Sequencial (Single-Core)** | [`run_evaluation.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation.py) | [`resultado_inferencia.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/01_baseline_single_core_v07_550.csv) | [`RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md) | `v07` | 550 brutas | 626,6 ms | 814,0 ms | 1.581,3 ms | 871,5 s (14,5 min) | 0,63 img/s | 82,55% (454/550) |
+| **2** | **06/11 18:02** | **Pipeline Assíncrono Dual-Core (Streaming)** | [`run_evaluation_dualcore.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_dualcore.py) | [`resultado_inferencia_dualcore.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/02_pipeline_dual_core_v07_550.csv) | [`RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md) | `v07` | 550 brutas | 777,4 ms | 1.032,4 ms | 1.044,8 ms | 574,9 s (9,6 min) | 0,96 img/s | 82,55% (454/550) |
+| **3** | **06/11 19:14** | **Auditoria de Sinal: 8 Variantes JPEGDraw** | *Test Harness* C++/Python | [`resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv) | [`RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md) | `v07` | 4.400 inferências (550 $\times$ 8) | ~626 ms | 4,0 a 7,2 µs/px | - | - | - | 80,7% a 82,7% (Modo 5: 82,73%) |
+| **4** | **07/11 06:06** | **Avaliação do Modelo v08 (Deduplicado MD5)** | *Test Harness* C++/Python | [`resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv)<br/>[`resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv) | [`RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md) | `v08` | 13.104 inferências (Bateria Ampla) | ~626 ms | 4,0 a 6,9 µs/px | - | - | - | **91,09%** (Modo 7 Limpo) |
+| **5** | **07/11 18:19** | **Scratch SRAM Interna + Fork-Join esp-nn** | [`run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py) | [`resultado_inferencia_espnn_sram.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv) | [`RELATORIO_DESEMPENHO_ESP_NN_SRAM.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md) | `v08` | 550 brutas | 336,3 ms | 145,2 ms | 7.173,7 ms | 3.945,8 s (65,8 min)* | 0,14 img/s* | 83,09% (457/550) |
+| **6** | **08/11 06:03** | **Salto de Silício: PSRAM 80MHz + BoxAcc 8B** | [`run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py) | [`resultado_inferencia_espnn_sram_limpo.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/04_psram80mhz_v08_limpo_550.csv) | [`RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/04_BENCHMARK_PSRAM80MHZ_V08_LIMPO_550.md) | `v08` | 550 limpas | **283,4 ms** | **102,7 ms** | **564,7 ms** | **310,8 s (5,18 min)** | **1,77 img/s** | **89,82% (494/550)** |
+| **7** | **08/11 08:42** | **Stress Test Exaustivo: Dataset Completo** | [`run_evaluation_all_dataset.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_all_dataset.py) | [`resultado_inferencia_dataset_completo.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/05_dataset_completo_9269.csv) | [`RELATORIO_DATASET_COMPLETO.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/05_BENCHMARK_EXAUSTIVO_DATASET_COMPLETO_9269.md) | `v08` | **9.269 imagens** (6.748 + 2.521) | **283,4 ms** | **92,6 ms** | ~612 ms | **5.678,1 s (94,6 min)** | **1,63 img/s** | 82,26% (Primário)<br/>3,13% (Archive) |
+| **8** | **08/11 16:35** | **Homologação Fase 2: Telemetria Concorrente** | [`run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py) | [`resultado_benchmark_12amostras.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/06_homologacao_fase2_telemetria_132.csv) | [`RELATORIO_BENCHMARK_132_AMOSTRAS.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/06_BENCHMARK_HOMOLOGACAO_FASE2_TELEMETRIA_132.md) | `v08` | 132 balanceadas (11 $\times$ 12) | **284,4 ms** | **96,3 ms** | **769,2 ms** | **101,6 s (1,69 min)** | **1,30 img/s** | **78,03% (103/132)** |
 
 *\* Nota do Teste 5: Gargalo transitório de rede decorrente do Wi-Fi Modem Sleep ativo na pilha LwIP antes da introdução de `WIFI_PS_NONE`.*
 
@@ -62,8 +62,8 @@ flowchart TD
 
 * **Timestamp:** `06/11/2026 15:38:24`
 * **Script:** [`model_inference_tests/run_evaluation.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation.py)
-* **Planilha Gerada:** [`model_inference_tests/resultado_inferencia.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia.csv)
-* **Relatório:** [`model_inference_tests/RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO.md)
+* **Planilha Gerada:** [`docs/05_testes_de_desempenho/dados/01_baseline_single_core_v07_550.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/01_baseline_single_core_v07_550.csv)
+* **Relatório:** [`docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v07`, 639.272 bytes, MD5 `bfe792823603ff822be86c426aecb1e5`)
 
 #### Condições Experimentais de Hardware & Software
@@ -90,8 +90,8 @@ flowchart TD
 
 * **Timestamp:** `06/11/2026 18:02:01`
 * **Script:** [`model_inference_tests/run_evaluation_dualcore.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_dualcore.py)
-* **Planilha Gerada:** [`model_inference_tests/resultado_inferencia_dualcore.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dualcore.csv)
-* **Relatório:** [`model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md)
+* **Planilha Gerada:** [`docs/05_testes_de_desempenho/dados/02_pipeline_dual_core_v07_550.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/02_pipeline_dual_core_v07_550.csv)
+* **Relatório:** [`docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v07`)
 
 #### Condições Experimentais de Hardware & Software
@@ -115,8 +115,8 @@ flowchart TD
 
 * **Timestamp:** `06/11/2026 19:14:00` (CSV) / `19:21:00` (Relatório)
 * **Test Harness:** Bateria comparativa C++/Python com emulação estrita dos operadores de quantização afim.
-* **Planilha Gerada:** [`model_inference_tests/resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv) (2,8 MB | 4.400 linhas)
-* **Relatórios:** [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md) e [`docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md)
+* **Planilha Gerada:** [`docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv) (2,8 MB | 4.400 linhas)
+* **Relatórios:** [`docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md) e [`docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v07`)
 * **Volume Amostral:** **4.400 inferências** (550 imagens $\times$ 8 métodos).
 
@@ -142,9 +142,9 @@ flowchart TD
 * **Timestamp:** `07/11/2026 06:06:00` a `10:50:00`
 * **Test Harness:** Baterias em dataset bruto vs limpo vs partição de validação.
 * **Planilhas Geradas:**
-  * [`model_inference_tests/resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv) (2,8 MB | 4.400 linhas)
-  * [`model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv) (2,8 MB | 4.400 linhas)
-* **Relatório:** [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md)
+  * [`docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv) (2,8 MB | 4.400 linhas)
+  * [`docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv) (2,8 MB | 4.400 linhas)
+* **Relatório:** [`docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v08`, 639.272 bytes, MD5 `95abc002c2e9c49175c9f5cc69a1a909`)
 * **Volume Amostral:** **13.104 inferências** totais.
 
@@ -163,8 +163,8 @@ flowchart TD
 
 * **Timestamp:** `07/11/2026 18:19:04`
 * **Script:** [`model_inference_tests/run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py)
-* **Planilha Gerada:** [`model_inference_tests/resultado_inferencia_espnn_sram.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram.csv)
-* **Relatório:** [`model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md)
+* **Planilha Gerada:** [`docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv)
+* **Relatório:** [`docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v08`)
 * **Dataset:** 550 imagens brutas (11 classes $\times$ 50 amostras).
 
@@ -185,8 +185,8 @@ flowchart TD
 
 * **Timestamp:** `08/11/2026 06:03:57`
 * **Script:** [`model_inference_tests/run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py)
-* **Planilha Gerada:** [`model_inference_tests/resultado_inferencia_espnn_sram_limpo.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram_limpo.csv)
-* **Relatórios:** [`model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md) e [`docs/RELATORIO_FASE1_MODELO_V08_PSRAM80MHZ_REDE_E_BENCHMARK.md`](file:///home/victor/projects/sugarcane/docs/RELATORIO_FASE1_MODELO_V08_PSRAM80MHZ_REDE_E_BENCHMARK.md)
+* **Planilha Gerada:** [`docs/05_testes_de_desempenho/dados/04_psram80mhz_v08_limpo_550.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/04_psram80mhz_v08_limpo_550.csv)
+* **Relatórios:** [`docs/05_testes_de_desempenho/04_BENCHMARK_PSRAM80MHZ_V08_LIMPO_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/04_BENCHMARK_PSRAM80MHZ_V08_LIMPO_550.md) e [`docs/04_otimizacao_hardware_e_firmware/02_FASE1_PSRAM_80MHZ_BOXACC8B_REDE_E_V08.md`](file:///home/victor/projects/sugarcane/docs/04_otimizacao_hardware_e_firmware/02_FASE1_PSRAM_80MHZ_BOXACC8B_REDE_E_V08.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v08`)
 * **Dataset:** 550 imagens limpas (11 classes $\times$ 50 amostras limpas).
 
@@ -210,8 +210,8 @@ flowchart TD
 
 * **Timestamp:** `08/11/2026 07:08:00` a `08:42:57`
 * **Script:** [`model_inference_tests/run_evaluation_all_dataset.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_all_dataset.py)
-* **Planilha Gerada:** [`model_inference_tests/resultado_inferencia_dataset_completo.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dataset_completo.csv) (5,7 MB | 9.270 linhas)
-* **Relatório:** [`model_inference_tests/RELATORIO_DATASET_COMPLETO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DATASET_COMPLETO.md)
+* **Planilha Gerada:** [`docs/05_testes_de_desempenho/dados/05_dataset_completo_9269.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/05_dataset_completo_9269.csv) (5,7 MB | 9.270 linhas)
+* **Relatório:** [`docs/05_testes_de_desempenho/05_BENCHMARK_EXAUSTIVO_DATASET_COMPLETO_9269.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/05_BENCHMARK_EXAUSTIVO_DATASET_COMPLETO_9269.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v08`)
 * **Volume Amostral:** **9.269 imagens** processadas sequencialmente sem interrupção.
 
@@ -231,8 +231,8 @@ flowchart TD
 
 * **Timestamp:** `08/11/2026 16:35:12`
 * **Script:** [`model_inference_tests/run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py) *(com filtro de mensagens assíncronas)*
-* **Planilha Gerada:** [`model_inference_tests/resultado_benchmark_12amostras.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_benchmark_12amostras.csv) (79,4 KB | 133 linhas)
-* **Relatórios:** [`docs/RELATORIO_BENCHMARK_132_AMOSTRAS.md`](file:///home/victor/projects/sugarcane/docs/RELATORIO_BENCHMARK_132_AMOSTRAS.md) e [`docs/RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md`](file:///home/victor/projects/sugarcane/docs/RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md)
+* **Planilha Gerada:** [`docs/05_testes_de_desempenho/dados/06_homologacao_fase2_telemetria_132.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/06_homologacao_fase2_telemetria_132.csv) (79,4 KB | 133 linhas)
+* **Relatórios:** [`docs/05_testes_de_desempenho/06_BENCHMARK_HOMOLOGACAO_FASE2_TELEMETRIA_132.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/06_BENCHMARK_HOMOLOGACAO_FASE2_TELEMETRIA_132.md) e [`docs/04_otimizacao_hardware_e_firmware/04_FASE2_HOMOLOGACAO_DASHBOARD_VUE3_E_TELEMETRIA.md`](file:///home/victor/projects/sugarcane/docs/04_otimizacao_hardware_e_firmware/04_FASE2_HOMOLOGACAO_DASHBOARD_VUE3_E_TELEMETRIA.md)
 * **Modelo:** `data/model_mbnet_int8.tflite` (`v08`)
 * **Volume Amostral:** 132 imagens balanceadas (11 classes $\times$ 12 amostras rigorosamente idênticas).
 

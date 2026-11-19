@@ -298,13 +298,13 @@ Após retreinamento do modelo [`data/model_mbnet_int8.tflite`](file:///home/vict
 
 ## 7. Referências Cruzadas no Projeto
 
-- **Relatório Completo da Bateria `v08` (8.800 inferências):** [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md)
+- **Relatório Completo da Bateria `v08` (8.800 inferências):** [`docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md)
 - **Planilhas do Experimento `v08`:**
-  - [`model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv) (550 amostras limpas $\times$ 8 métodos)
-  - [`model_inference_tests/resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv) (550 primeiras amostras brutas $\times$ 8 métodos)
+  - [`docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv) (550 amostras limpas $\times$ 8 métodos)
+  - [`docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv) (550 primeiras amostras brutas $\times$ 8 métodos)
 - **Planilha e Relatório do Modelo Anterior (`v07`):**
-  - [`model_inference_tests/resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv)
-  - [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md)
+  - [`docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv)
+  - [`docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md)
 - **Relatórios das Baterias de Hardware Anteriores:**
-  - [`model_inference_tests/RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO.md) (Single-Core Sequencial)
-  - [`model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md) (Dual-Core Assíncrono Pipelined)
+  - [`docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md) (Single-Core Sequencial)
+  - [`docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md) (Dual-Core Assíncrono Pipelined)

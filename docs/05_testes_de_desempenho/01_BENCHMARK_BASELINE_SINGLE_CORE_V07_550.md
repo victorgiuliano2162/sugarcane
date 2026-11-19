@@ -61,4 +61,4 @@ As linhas representam a **Classe Real** e as colunas a **Classe Predita**:
 3. **Padrão de Confusão Relevante (`smut` vs `Pokkah Boeng`):** 
    * A classe `smut` obteve apenas 6.0% de acurácia nesta amostra, tendo sido classificada 34 vezes como `Pokkah Boeng` e 8 vezes como `Viral Disease`.
    * Essa confusão visual decorre das características morfológicas semelhantes em folhas afetadas por fungos do topo da cana (chicote do carvão vs deformação foliar do Pokkah Boeng).
-4. **Planilha Completa:** Os registros detalhados (amostra por amostra com todas as probabilidades) estão persistidos em `model_inference_tests/resultado_inferencia.csv`.
+4. **Planilha Completa:** Os registros detalhados (amostra por amostra com todas as probabilidades) estão persistidos em `docs/05_testes_de_desempenho/dados/01_baseline_single_core_v07_550.csv`.

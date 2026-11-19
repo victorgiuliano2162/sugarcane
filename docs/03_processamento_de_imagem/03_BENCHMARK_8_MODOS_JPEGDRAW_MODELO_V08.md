@@ -6,11 +6,11 @@
 **Modelo Anterior (`v07`):** `639.272 bytes` | `MD5: bfe792823603ff822be86c426aecb1e5`  
 **Total de Inferências Executadas:** **13.104 inferências** (4.400 na Bateria Limpa + 4.400 na Bateria Bruta + 4.304 no Conjunto de Validação `val/` de 1.076 imagens inéditas)  
 **Planilhas de Dados Brutos Geradas:**
-- [`model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv) (550 amostras limpas sem colisão MD5 $\times$ 8 métodos)
-- [`model_inference_tests/resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv) (550 primeiras amostras brutas $\times$ 8 métodos)
+- [`docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv) (550 amostras limpas sem colisão MD5 $\times$ 8 métodos)
+- [`docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv) (550 primeiras amostras brutas $\times$ 8 métodos)
 **Documentação Relacionada:**
-- [`docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md)
-- [`docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md)
+- [`docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md)
+- [`docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md)
 
 ---
 
@@ -140,7 +140,7 @@ Como o novo treinamento (`v08`) deduplicou o dataset por hash MD5 (excluindo os 
 
 ## 3. Bateria 2: Análise nas 550 Primeiras Amostras Brutas (`[:50]` Sem Filtro de Colisão MD5)
 
-Para manter **100% de rastreabilidade com o protocolo bruto anterior**, também executamos os 8 métodos sobre os exatos mesmos 550 arquivos (`[:50]` em ordem alfabética de cada pasta, salvo em [`model_inference_tests/resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv)):
+Para manter **100% de rastreabilidade com o protocolo bruto anterior**, também executamos os 8 métodos sobre os exatos mesmos 550 arquivos (`[:50]` em ordem alfabética de cada pasta, salvo em [`docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv)):
 
 | Método Avaliado | Acertos Brutos (`v08` — 550 c/ 179 colisões) | Acurácia Bruta Aparente | Confiança Média | Acertos em `Pokkah Boeng` (`001..050`) | Acertos em `smut` (`001..050`) |
 | :--- | :---: | :---: | :---: | :---: | :---: |

@@ -4,7 +4,7 @@
 **Dispositivo Físico:** ESP32-S3 DevKitM-1 (Dual-Core Xtensa LX7 @ 240 MHz, 512 KB SRAM, 8 MB Octal PSRAM @ 80 MHz DDR)  
 **Firmware:** Sugarcane Classifier v5.0 (Fork-Join esp-nn + BoxAvg RGB8888 24-bit + PSRAM 80 MHz DDR + -O2)  
 **Modelo Neural:** `data/model_mbnet_int8.tflite` (MobileNetV3Small Int8 v08, 160x160x3, 11 classes)  
-**Planilha de Dados Brutos:** [`resultado_inferencia_dataset_completo.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dataset_completo.csv)  
+**Planilha de Dados Brutos:** [`resultado_inferencia_dataset_completo.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/05_dataset_completo_9269.csv)  
 
 ---
 
@@ -27,19 +27,19 @@
 
 ## 2. Desempenho Detalhado por Classe no Dataset Primário (11 Classes)
 
-| Subpasta / Classe | Amostras | Acertos | Acurácia (%) | Confiança Média | Tempo Médio Inf. | Tempo Médio Dec. |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Banded Chlorosis** | 471 | 403 | **85.56%** | 86.9% | 283.3 ms | 83.9 ms |
-| **Brown Spot** | 1,722 | 1,504 | **87.34%** | 79.7% | 283.4 ms | 89.9 ms |
-| **BrownRust** | 314 | 254 | **80.89%** | 84.6% | 283.3 ms | 87.6 ms |
-| **Dried Leaves** | 343 | 253 | **73.76%** | 78.5% | 283.4 ms | 81.7 ms |
-| **Grassy shoot** | 346 | 346 | **100.00%** | 95.6% | 283.3 ms | 157.0 ms |
-| **Healthy Leaves** | 430 | 406 | **94.42%** | 92.4% | 283.4 ms | 108.7 ms |
-| **Pokkah Boeng** | 297 | 161 | **54.21%** | 69.4% | 283.4 ms | 95.3 ms |
-| **Sett Rot** | 652 | 644 | **98.77%** | 89.1% | 283.4 ms | 131.9 ms |
-| **Viral Disease** | 663 | 542 | **81.75%** | 86.6% | 283.4 ms | 83.9 ms |
-| **Yellow Leaf** | 1,194 | 875 | **73.28%** | 75.7% | 283.4 ms | 89.6 ms |
-| **smut** | 316 | 163 | **51.58%** | 78.1% | 283.4 ms | 109.1 ms |
+| Subpasta / Classe    | Amostras | Acertos | Acurácia (%) | Confiança Média | Tempo Médio Inf. | Tempo Médio Dec. |
+| :------------------- | :------: | :-----: | :----------: | :-------------: | :--------------: | :--------------: |
+| **Banded Chlorosis** |   471    |   403   |  **85.56%**  |      86.9%      |     283.3 ms     |     83.9 ms      |
+| **Brown Spot**       |  1,722   |  1,504  |  **87.34%**  |      79.7%      |     283.4 ms     |     89.9 ms      |
+| **BrownRust**        |   314    |   254   |  **80.89%**  |      84.6%      |     283.3 ms     |     87.6 ms      |
+| **Dried Leaves**     |   343    |   253   |  **73.76%**  |      78.5%      |     283.4 ms     |     81.7 ms      |
+| **Grassy shoot**     |   346    |   346   | **100.00%**  |      95.6%      |     283.3 ms     |     157.0 ms     |
+| **Healthy Leaves**   |   430    |   406   |  **94.42%**  |      92.4%      |     283.4 ms     |     108.7 ms     |
+| **Pokkah Boeng**     |   297    |   161   |  **54.21%**  |      69.4%      |     283.4 ms     |     95.3 ms      |
+| **Sett Rot**         |   652    |   644   |  **98.77%**  |      89.1%      |     283.4 ms     |     131.9 ms     |
+| **Viral Disease**    |   663    |   542   |  **81.75%**  |      86.6%      |     283.4 ms     |     83.9 ms      |
+| **Yellow Leaf**      |  1,194   |   875   |  **73.28%**  |      75.7%      |     283.4 ms     |     89.6 ms      |
+| **smut**             |   316    |   163   |  **51.58%**  |      78.1%      |     283.4 ms     |     109.1 ms     |
 
 ### 2.1. Matriz de Confusão do Dataset Primário (11x11)
 

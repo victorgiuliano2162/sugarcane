@@ -48,7 +48,7 @@ flowchart TB
 * **Evidência Técnica:**
   * O arquivo [`data/model_mbnet_int8.tflite`](file:///home/victor/projects/sugarcane/data/model_mbnet_int8.tflite) no computador contém o novo modelo `v08` (`MD5: 95abc002c2e9c49175c9f5cc69a1a909`), atualizado no commit `7b1edff`.
   * Porém, nos procedimentos de gravação no hardware, executamos apenas `pio run -t upload` (que grava o aplicativo na partição `factory` em `0x10000`), **sem executar `pio run -t uploadfs`** (que grava a partição `storage` LittleFS em `0x410000`).
-  * Como consequência, o ESP32-S3 carregou da Flash o binário antigo (`v07`, `MD5: bfe792823603ff822be86c426aecb1e5`). Isso explica por que, na bateria recém-concluída ([`RELATORIO_DESEMPENHO_ESP_NN_SRAM.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md)), a classe `smut` teve apenas **2/50 acertos (4,0%)** com 36 amostras confundidas com `Pokkah Boeng` — assinatura exata do modelo `v07` contaminado!
+  * Como consequência, o ESP32-S3 carregou da Flash o binário antigo (`v07`, `MD5: bfe792823603ff822be86c426aecb1e5`). Isso explica por que, na bateria recém-concluída ([`RELATORIO_DESEMPENHO_ESP_NN_SRAM.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md)), a classe `smut` teve apenas **2/50 acertos (4,0%)** com 36 amostras confundidas com `Pokkah Boeng` — assinatura exata do modelo `v07` contaminado!
 * **Ação Necessária:**
   * Executar `pio run -t uploadfs --upload-port /dev/ttyUSB0` para embarcar efetivamente o modelo `v08` no microcontrolador.
 
@@ -67,7 +67,7 @@ flowchart TB
 
 ### 🟠 P3. [Testes e Validação] Ausência de Benchmark no Hardware com o Modelo `v08` sobre o Dataset Limpo e de Validação (`val/`)
 * **Evidência Técnica:**
-  * Os relatórios do modelo `v08` ([`RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md)) foram gerados em simulação Python no host.
+  * Os relatórios do modelo `v08` ([`RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md)) foram gerados em simulação Python no host.
   * Todos os três testes executados no hardware físico ESP32-S3 via WebSocket utilizaram a lista alfabética bruta (`[:50]` de cada pasta, que inclui pares de arquivos com colisão cruzada MD5) e com o modelo `v07` na Flash.
   * Além disso, na análise por classe da última bateria, verificou-se que:
     * As pastas `Grassy shoot` (29 de 50 fotos) e `Healthy Leaves` (15 de 50 fotos) possuem imagens de resolução **$768 \times 576$**. Como $576 \gg 2 = 144 < 160$, o seletor adaptativo usou `JPEG_SCALE_HALF` ($1/2$, levando ~266 ms) em vez de `JPEG_SCALE_QUARTER` ($1/4$, ~122 ms).
@@ -105,7 +105,7 @@ flowchart TB
 ### 🟡 P6. [Produto, Segurança e Usabilidade] Credenciais Hardcoded, Rota Web `/` e Scripts Auxiliares
 * **Evidência Técnica:**
   1. **Credenciais em Texto Claro:** Em [`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp#L10-L11), `WIFI_SSID` e `WIFI_PASS` estão fixos no código-fonte.
-  2. **Ausência de Interface Web Embarcada na Rota `/`:** O [`GUIA_DE_USO.md`](file:///home/victor/projects/sugarcane/GUIA_DE_USO.md#L117-L185) instrui o usuário a copiar manualmente um código HTML para um arquivo local `cliente.html`. Como a partição `storage` (LittleFS) possui **10 MB** e usa apenas **624 KB** (~6% de ocupação), o próprio ESP32-S3 pode servir uma interface web completa e moderna em `http://<IP_DO_ESP32>/` via handler `HTTP_GET /`.
+  2. **Ausência de Interface Web Embarcada na Rota `/`:** O [`docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md`](file:///home/victor/projects/sugarcane/docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md#L117-L185) instrui o usuário a copiar manualmente um código HTML para um arquivo local `cliente.html`. Como a partição `storage` (LittleFS) possui **10 MB** e usa apenas **624 KB** (~6% de ocupação), o próprio ESP32-S3 pode servir uma interface web completa e moderna em `http://<IP_DO_ESP32>/` via handler `HTTP_GET /`.
   3. **Defasagem no [`scripts/test_inference.py`](file:///home/victor/projects/sugarcane/scripts/test_inference.py#L43-L75):** O script local ainda usa `Image.Resampling.BILINEAR` (linha 43) em vez de `Image.Resampling.BOX` (que corresponde ao treino `v08` e ao `Modo 7` do ESP32) e aponta para um diretório padrão inexistente (linha 74).
 
 ---

@@ -93,7 +93,7 @@ O projeto está organizado de forma modular, separando o código-fonte do firmwa
 | **[`notebooks/cane_disease_esp32s3_v07.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v07.ipynb)** e **[`v08.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v08.ipynb)** | Notebooks de treinamento comparando CNN Customizada vs. MobileNet, auditoria criptográfica MD5, *split* estratificado, *Data Augmentation*, *Focal Loss*, *Quantization-Aware Training* (QAT) e exportação TFLite `int8`. |
 | **[`scripts/test_inference.py`](file:///home/victor/projects/sugarcane/scripts/test_inference.py)** | Utilitário CLI em Python para validação local rápida do modelo `.tflite` no computador host sem necessidade da placa física. |
 | **[`model_inference_tests/`](file:///home/victor/projects/sugarcane/model_inference_tests)** | Suite de avaliação de desempenho em hardware real ([`run_evaluation.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation.py) e [`run_evaluation_dualcore.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_dualcore.py)), planilhas CSV com milhares de inferências auditadas e relatórios comparativos. |
-| **[`docs/`](file:///home/victor/projects/sugarcane/docs)** | Documentos matemáticos aprofundados sobre conversão de cor/redimensionamento ([`ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md)), auditoria do dataset ([`AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md)) e otimização de SRAM/Dual-Core ([`OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md`](file:///home/victor/projects/sugarcane/docs/OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md)). |
+| **[`docs/`](file:///home/victor/projects/sugarcane/docs)** | Documentos matemáticos aprofundados sobre conversão de cor/redimensionamento ([`ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md)), auditoria do dataset ([`AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md)) e otimização de SRAM/Dual-Core ([`OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md`](file:///home/victor/projects/sugarcane/docs/04_otimizacao_hardware_e_firmware/01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md)). |
 
 ---
 
@@ -268,7 +268,7 @@ uint8_t b = (pixel & 0x001F) << 3; // 5 bits << 3 (Zero-Fill)
 out_tensor[(dst_y * 160 + dst_x) * 3 + 0] = (int8_t)(r - 128);
 ```
 
-A auditoria matemática documentada em [`docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md) provou que esse código introduz **três degradações severas**:
+A auditoria matemática documentada em [`docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md) provou que esse código introduz **três degradações severas**:
 
 1. **Truncamento de Faixa Dinâmica e Viés DC de Escurecimento (*Brightness Bias*):**
    Ao converter YCbCr para `RGB565`, o decodificador descarta 3 bits de R, 2 bits de G e 3 bits de B. Ao preencher os bits inferiores com zeros (*Zero-Fill*), o branco puro ($255$) torna-se inatingível ($31 \times 8 = 248$ em R/B e $63 \times 4 = 252$ em G), truncando o tensor `int8` em $+120$ (R/B) e $+124$ (G) em vez de $+127$. Além disso, sob distribuição uniforme dos bits descartados, introduz um erro sistemático negativo esperado de:
@@ -398,11 +398,11 @@ Em [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.
 
 ## 8. Curadoria Criptográfica do Dataset (MD5) e Engenharia de Treinamento (`v07` → `v08`)
 
-A evolução entre os notebooks [`notebooks/cane_disease_esp32s3_v07.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v07.ipynb) e [`notebooks/cane_disease_esp32s3_v08.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v08.ipynb) (documentada em [`docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md)) exemplifica como a engenharia de dados e o co-design hardware/software impactam diretamente a precisão do modelo embarcado.
+A evolução entre os notebooks [`notebooks/cane_disease_esp32s3_v07.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v07.ipynb) e [`notebooks/cane_disease_esp32s3_v08.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v08.ipynb) (documentada em [`docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md)) exemplifica como a engenharia de dados e o co-design hardware/software impactam diretamente a precisão do modelo embarcado.
 
 ### 8.1. Descoberta da Contaminação Cruzada no Dataset Original via Auditoria MD5
 
-Nos primeiros testes com o modelo `v07` no ESP32-S3 ([`RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO.md)), enquanto classes como `Brown Spot`, `Grassy shoot` e `Sett Rot` atingiam **100% de acerto**, a classe `smut` apresentava apenas **6,0% de acurácia** (sendo classificada 34/50 vezes como `Pokkah Boeng` com confiança travada em ~53%).
+Nos primeiros testes com o modelo `v07` no ESP32-S3 ([`RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md)), enquanto classes como `Brown Spot`, `Grassy shoot` e `Sett Rot` atingiam **100% de acerto**, a classe `smut` apresentava apenas **6,0% de acurácia** (sendo classificada 34/50 vezes como `Pokkah Boeng` com confiança travada em ~53%).
 
 Uma auditoria criptográfica por **hash MD5** sobre todos os **6.748 arquivos** do *Sugarcane Leaf Image Dataset* revelou que a falha não era da arquitetura neural nem da quantização `int8`, mas sim de **duas anomalias graves no dataset público original**:
 
@@ -455,16 +455,16 @@ O repositório conta com três ferramentas em Python para validação local e em
 1. **[`scripts/test_inference.py`](file:///home/victor/projects/sugarcane/scripts/test_inference.py):**
    Executa o modelo [`data/model_mbnet_int8.tflite`](file:///home/victor/projects/sugarcane/data/model_mbnet_int8.tflite) localmente no PC via `tflite_runtime` ou `tensorflow.lite`, simulando o redimensionamento $160 \times 160$, a quantização `(arr - 128).astype(np.int8)` e a dequantização de saída, exibindo o Top-3 de classes com barras gráficas no terminal.
 2. **[`model_inference_tests/run_evaluation.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation.py):**
-   Cliente WebSocket síncrono/sequencial que envia 550 imagens (50 por classe) para a ESP32-S3, coleta `decode_ms`, `inferencia_ms`, classe predita e vetor completo de probabilidades, salva [`resultado_inferencia.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia.csv) e gera automaticamente o relatório Markdown com Matriz de Confusão ([`RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO.md)).
+   Cliente WebSocket síncrono/sequencial que envia 550 imagens (50 por classe) para a ESP32-S3, coleta `decode_ms`, `inferencia_ms`, classe predita e vetor completo de probabilidades, salva [`resultado_inferencia.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/01_baseline_single_core_v07_550.csv) e gera automaticamente o relatório Markdown com Matriz de Confusão ([`RELATORIO_DESEMPENHO.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md)).
 3. **[`model_inference_tests/run_evaluation_dualcore.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_dualcore.py):**
-   Cliente WebSocket assíncrono avançado baseado em `asyncio.gather(sender(), receiver())` com controle de fluxo por janela deslizante (`asyncio.Semaphore(2)`). Mantém sempre **2 imagens em trânsito (*in-flight*)** na ESP32-S3 para exercitar simultaneamente o Core 0 (`decode_task`) e o Core 1 (`inference_task`), gerando [`resultado_inferencia_dualcore.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dualcore.csv) e [`RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md).
+   Cliente WebSocket assíncrono avançado baseado em `asyncio.gather(sender(), receiver())` com controle de fluxo por janela deslizante (`asyncio.Semaphore(2)`). Mantém sempre **2 imagens em trânsito (*in-flight*)** na ESP32-S3 para exercitar simultaneamente o Core 0 (`decode_task`) e o Core 1 (`inference_task`), gerando [`resultado_inferencia_dualcore.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/02_pipeline_dual_core_v07_550.csv) e [`RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md).
 
 ---
 
 ### 9.2. Resultados Empíricos Consolidados
 
 #### A. Ganho de Vazão (Throughput) no Hardware ESP32-S3: Single-Core vs. Dual-Core Pipelined
-*(Avaliação em hardware real sobre 550 imagens em resolução original $768 \times 1024$ via Wi-Fi WebSocket — fonte: [`RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md))*
+*(Avaliação em hardware real sobre 550 imagens em resolução original $768 \times 1024$ via Wi-Fi WebSocket — fonte: [`RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md))*
 
 | Métrica de Desempenho no Dispositivo | Arquitetura Single-Core Sequencial | Arquitetura Dual-Core Pipelined | Ganho / Evolução Técnica |
 | :--- | :---: | :---: | :---: |
@@ -474,7 +474,7 @@ O repositório conta com três ferramentas em Python para validação local e em
 | **Estabilidade da Inferência Neural** | Desvio padrão de apenas `±1,0 ms` | Zero falhas ou fragmentação de memória | **100% de consistência bit-a-bit** |
 
 #### B. Evolução de Acurácia, Confiança e Qualidade de Sinal (`v07` vs. `v08` + `Modo 7 RGB8888 BoxAvg`)
-*(Avaliação consolidada em 13.104 inferências — fontes: [`RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md) e [`RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md))*
+*(Avaliação consolidada em 13.104 inferências — fontes: [`RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md) e [`RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md))*
 
 | Cenário / Métrica Avaliada | Baseline Inicial (`v07` + `Modo 0: RGB565 Overwrite`) | Intermediário (`v08` + `Modo 0: RGB565 Overwrite`) | **Estado Atual Ativo (`v08` + `Opção C / Modo 7: RGB8888 BoxAvg`)** | Ganho Total Consolidado |
 | :--- | :---: | :---: | :---: | :---: |

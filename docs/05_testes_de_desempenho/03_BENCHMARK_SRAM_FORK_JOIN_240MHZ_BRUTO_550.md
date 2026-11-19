@@ -16,16 +16,16 @@
 
 ## 1. Quadro Comparativo Consolidado das Gerações do Firmware
 
-| Métrica de Desempenho | Teste 1 (Single-Core Seq.) | Teste 2 (Pipeline Dual-Core) | Teste 3 (SRAM + Fork-Join esp-nn) | Ganho vs Teste 2 | Ganho vs Teste 1 |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Tempo Médio de Inferência** | `626.6 ms` | `777.4 ms` | **`336.3 ms`** | **`+56.7%`** | **`+46.3%`** |
-| **Mediana da Inferência** | ~`625 ms` | ~`775 ms` | **`336.0 ms`** | - | - |
-| **Tempo Médio Decodificação JPEG** | `814.0 ms` | `1032.4 ms` | **`145.2 ms`** | `+85.9%` | `+82.2%` |
-| **Cadência Média entre Imagens** | `1581.0 ms` | `1044.8 ms` | **`7173.7 ms`** | `-586.6%` | `-353.7%` |
-| **Tempo Total do Lote (550 imagens)** | `871.51 s` (`14.5 min`) | `574.89 s` (`9.6 min`) | **`3945.82 s` (`65.76 min`)** | **`-586.4%`** | **`-352.8%`** |
-| **Vazão Média (Throughput)** | `0.63 img/s` | `0.96 img/s` | **`0.14 img/s`** | **`0.15x`** | **`0.22x`** |
-| **Acurácia Global no ESP32** | `82.55%` (454/550) | `82.55%` (454/550) | **`83.09%` (`457/550`)** | **`+0.54%`** | **`+0.54%`** |
-| **Confiança Média das Predições** | `81.4%` | `81.5%` | **`77.09%`** | - | - |
+| Métrica de Desempenho                 | Teste 1 (Single-Core Seq.) | Teste 2 (Pipeline Dual-Core) | Teste 3 (SRAM + Fork-Join esp-nn) | Ganho vs Teste 2 | Ganho vs Teste 1 |
+| :------------------------------------ | :------------------------: | :--------------------------: | :-------------------------------: | :--------------: | :--------------: |
+| **Tempo Médio de Inferência**         |         `626.6 ms`         |          `777.4 ms`          |          **`336.3 ms`**           |   **`+56.7%`**   |   **`+46.3%`**   |
+| **Mediana da Inferência**             |         ~`625 ms`          |          ~`775 ms`           |          **`336.0 ms`**           |        -         |        -         |
+| **Tempo Médio Decodificação JPEG**    |         `814.0 ms`         |         `1032.4 ms`          |          **`145.2 ms`**           |     `+85.9%`     |     `+82.2%`     |
+| **Cadência Média entre Imagens**      |        `1581.0 ms`         |         `1044.8 ms`          |          **`7173.7 ms`**          |    `-586.6%`     |    `-353.7%`     |
+| **Tempo Total do Lote (550 imagens)** |  `871.51 s` (`14.5 min`)   |    `574.89 s` (`9.6 min`)    |   **`3945.82 s` (`65.76 min`)**   |  **`-586.4%`**   |  **`-352.8%`**   |
+| **Vazão Média (Throughput)**          |        `0.63 img/s`        |         `0.96 img/s`         |         **`0.14 img/s`**          |   **`0.15x`**    |   **`0.22x`**    |
+| **Acurácia Global no ESP32**          |     `82.55%` (454/550)     |      `82.55%` (454/550)      |     **`83.09%` (`457/550`)**      |   **`+0.54%`**   |   **`+0.54%`**   |
+| **Confiança Média das Predições**     |          `81.4%`           |           `81.5%`            |           **`77.09%`**            |        -         |        -         |
 
 ---
 
@@ -78,4 +78,4 @@
 3. **Convergência com o Modelo v08 e Box Averaging Nativo:**
    - A acurácia global no dispositivo atingiu **`83.09%`** com confiança média de **`77.1%`**, refletindo a eliminação de *aliasing* pela decodificação `Modo 7 (RGB8888 + BoxAvg)` pré-computada em LUTs.
 
-4. **Registro de Rastreabilidade:** Dados brutos exportados em [`resultado_inferencia_espnn_sram.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram.csv).
+4. **Registro de Rastreabilidade:** Dados brutos exportados em [`resultado_inferencia_espnn_sram.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv).

@@ -9,7 +9,7 @@
 
 ## 1. Contexto e Motivação do Esforço de Otimização
 
-Após a primeira bateria de testes da arquitetura Dual-Core com otimização de SRAM interna (`docs/OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md`), o sistema atingiu um marco expressivo no tempo de inferência pura da rede neural:
+Após a primeira bateria de testes da arquitetura Dual-Core com otimização de SRAM interna (`docs/04_otimizacao_hardware_e_firmware/01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md`), o sistema atingiu um marco expressivo no tempo de inferência pura da rede neural:
 - O tempo médio de inferência despencou de **`777,4 ms`** (concorrência de PSRAM) para **`550,0 ms`** (**ganho de +29,2%**).
 - Contudo, a decodificação de imagem JPEG no modo *Box Averaging* de alta precisão (`Modo 7: RGB8888 Nativo + BoxAvg`) ainda consumia **`~1.123 ms`** por imagem, tornando-se o **novo gargalo limitante do pipeline**.
 - Além disso, a confiança média estatística das predições apresentou uma leve acomodação de **`81,5%` para `78,8%`**.
@@ -115,7 +115,7 @@ Para superar o gargalo de ~1.123 ms na decodificação e potencializar ainda mai
 
 ## 5. Resultados Empíricos Medidos no Hardware ESP32-S3 (550 Imagens)
 
-O teste completo sobre as 550 fotos do dataset foi executado e registrado em [`model_inference_tests/resultado_inferencia_espnn_sram.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram.csv) e consolidado no [`model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md):
+O teste completo sobre as 550 fotos do dataset foi executado e registrado em [`docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv) e consolidado no [`docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md):
 
 | Métrica no Hardware ESP32-S3 | Fase 1: Baseline Single-Core | Fase 2: Pipeline Dual-Core PSRAM | Fase 3: SRAM + Fork-Join (160 MHz) | **Fase 4: 240 MHz + IDCT 1/4 + BoxAvg (CONCLUÍDO)** | Ganho vs Original |
 | :--- | :---: | :---: | :---: | :---: | :---: |

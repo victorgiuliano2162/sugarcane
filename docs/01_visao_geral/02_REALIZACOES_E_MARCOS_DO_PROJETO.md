@@ -6,7 +6,7 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 ## 🔬 1. Esforço de Ciência de Dados e Auditoria Criptográfica do Dataset
 
-*Referência documental principal:* [`docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md)  
+*Referência documental principal:* [`docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md)  
 *Notebooks implementados:* [`notebooks/cane_disease_esp32s3_v07.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v07.ipynb) e [`notebooks/cane_disease_esp32s3_v08.ipynb`](file:///home/victor/projects/sugarcane/notebooks/cane_disease_esp32s3_v08.ipynb)
 
 - **Investigação do Comportamento Anômalo da Classe `smut` (Carvão da Cana):**
@@ -67,7 +67,7 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 ## 🎨 3. Pesquisa e Engenharia de Sinais na Decodificação de Imagem (`JPEGDraw`)
 
-*Referência documental principal:* [`docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md)  
+*Referência documental principal:* [`docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md)  
 *Código-fonte implementado:* [`src/image_processor.cpp`](file:///home/victor/projects/sugarcane/src/image_processor.cpp) e [`src/image_processor.h`](file:///home/victor/projects/sugarcane/src/image_processor.h)
 
 - **Diagnóstico Teórico do Modo Legado (`Modo 0: RGB565 ZeroFill + Overwrite`):**
@@ -94,7 +94,7 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 ## ⚡ 4. Otimização de Memória SRAM, SIMD e Paralelismo Multi-Core (`esp-nn`)
 
-*Referência documental principal:* [`docs/OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md`](file:///home/victor/projects/sugarcane/docs/OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md)  
+*Referência documental principal:* [`docs/04_otimizacao_hardware_e_firmware/01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md`](file:///home/victor/projects/sugarcane/docs/04_otimizacao_hardware_e_firmware/01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md)  
 *Código-fonte implementado:* [`src/tflite_classifier.cpp`](file:///home/victor/projects/sugarcane/src/tflite_classifier.cpp), [`src/main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp) e patch em [`managed_components/espressif__esp-nn/`](file:///home/victor/projects/sugarcane/managed_components/espressif__esp-nn)
 
 - **Diagnóstico do Gargalo dos Scratch Buffers na Octal PSRAM:**
@@ -148,19 +148,19 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
   - [`model_inference_tests/run_evaluation_dualcore.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_dualcore.py): Cliente de teste assíncrono avançado com controle de janela deslizante (`asyncio.Semaphore(2)`), mantendo 2 imagens simultaneamente no microcontrolador para medição de throughput e cadência sob carga paralela.
 - **Bateria 1: Comparativo Single-Core Sequencial vs. Dual-Core Pipelined (Hardware Real):**
   - Avaliação executada sobre 550 imagens do dataset ($768 \times 1024$) via Wi-Fi no ESP32-S3 físico.
-  - Resultados consolidados em [`model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md):
+  - Resultados consolidados em [`docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md):
     - Redução no tempo total do lote de **871,51 s (14,53 min)** para **574,89 s (9,58 min)** (economia líquida de **296,6 segundos / +34,0% mais rápido**).
     - Salto de vazão de **0,63 imagens/s** para **0,96 imagens/s** (**1,52× maior rendimento**).
     - Redução da cadência média entre predições de **1.581,3 ms** para **1.044,8 ms** por foto.
     - Consistência de classificação bit a bit (acurácia idêntica de 82,55% no modelo `v07` em ambos os modos).
 - **Bateria 2: Benchmark dos 8 Modos de `JPEGDraw` no Modelo `v07` (4.400 Inferências):**
-  - Execução de 550 imagens em cada uma das 8 variantes, gerando a planilha [`model_inference_tests/resultado_comparativo_jpegdraw.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv) e o relatório [`RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md).
+  - Execução de 550 imagens em cada uma das 8 variantes, gerando a planilha [`docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv) e o relatório [`RELATORIO_COMPARATIVO_JPEGDRAW.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md).
   - Descoberta de que o `Modo 5 (RGB565 ZeroFill + BoxAvg)` atingiu a maior acurácia (82,73%), pois o modelo `v07` havia sido treinado com viés de interpolação bilinear e absorvia melhor o leve viés residual do `RGB565`.
   - Constatação de que o `Modo 4 (FastLUT)` reduziu o tempo de decodificação em 18,0% mantendo acurácia compatível.
 - **Bateria 3: Avaliação Global Cruzada no Novo Modelo `v08` (13.104 Inferências):**
-  - Realização de **13.104 inferências** divididas em três baterias independentes, documentadas em [`model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md):
-    1. **Bateria Limpa (550 imagens sem colisão MD5 $\times$ 8 métodos = 4.400 inferências):** Registro em [`resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_limpo_v08.csv).
-    2. **Bateria Bruta (550 primeiras imagens originais $\times$ 8 métodos = 4.400 inferências):** Registro em [`resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv).
+  - Realização de **13.104 inferências** divididas em três baterias independentes, documentadas em [`docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md):
+    1. **Bateria Limpa (550 imagens sem colisão MD5 $\times$ 8 métodos = 4.400 inferências):** Registro em [`resultado_comparativo_jpegdraw_limpo_v08.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv).
+    2. **Bateria Bruta (550 primeiras imagens originais $\times$ 8 métodos = 4.400 inferências):** Registro em [`resultado_comparativo_jpegdraw_v08.csv`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv).
     3. **Bateria de Validação Inédita (1.076 imagens do diretório `val/` nunca vistas no treino = 4.304 inferências).**
   - **Triunfo Definitivo da Opção C (`Modo 7: RGB8888 Nativo + BoxAvg`):**
     - Acurácia de **91,09%** nas 550 amostras limpas (1º lugar absoluto entre todos os modos).
@@ -172,11 +172,11 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 - **Validação Empírica da Otimização de SRAM Interna e Fork-Join (`esp-nn`):**
   - Implementação do script de testes padronizado [`model_inference_tests/run_evaluation_espnn_sram.py`](file:///home/victor/projects/sugarcane/model_inference_tests/run_evaluation_espnn_sram.py).
-  - Execução da bateria completa de 550 imagens diretamente no microcontrolador ESP32-S3 via WebSocket pipelined, documentada em [`model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md`](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM.md) e [`model_inference_tests/resultado_inferencia_espnn_sram.csv`](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram.csv).
+  - Execução da bateria completa de 550 imagens diretamente no microcontrolador ESP32-S3 via WebSocket pipelined, documentada em [`docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md) e [`docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv`](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/03_sram_fork_join_240mhz_bruto_550.csv).
   - **Queda de 29,2% no Tempo de Inferência Neural Pura:** o tempo médio por inferência despencou de **`777,4 ms`** (pipeline anterior com buffers em PSRAM) para **`550,0 ms`** (mediana de **`548,0 ms`**), eliminando a contenção de barramento externo SPI a 40 MHz e aproveitando o worker fork-join cooperativo no Core 0.
 
 - **Fase Avançada de Aceleração Global: Frequência Máxima de 240 MHz + Scale Reduction Adaptativo no IDCT (`JPEGDEC`) + Otimização BoxAvg:**
-  - *Referência Técnica:* [`docs/ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md`](file:///home/victor/projects/sugarcane/docs/ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md)
+  - *Referência Técnica:* [`docs/03_processamento_de_imagem/04_ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/04_ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md)
   - **Elevação do Clock de CPU para 240 MHz (Opção A):** Habilitação de `CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y` no ESP-IDF (+50% de frequência de clock em ambos os núcleos).
   - **Scale Reduction no Domínio da Frequência DCT (Opção B):** Decodificação adaptativa em escala $1/4$ ou $1/2$ na biblioteca `JPEGDEC`, reduzindo em **93,75%** os pixels entregues ao callback de decodificação mantendo resolução sempre $\ge 160 \times 160$ (zero perda por upscaling).
   - **Otimização do Callback e Normalização (Opção D):** Uso de `iWidthUsed` e normalização direta para `int8`.
@@ -189,18 +189,18 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 ## 📖 7. Documentação Técnica Consolidada e Transferência de Conhecimento
 
-*Dossiês criados:* [`DOCUMENTACAO_TECNICA.md`](file:///home/victor/projects/sugarcane/DOCUMENTACAO_TECNICA.md), [`GUIA_DE_USO.md`](file:///home/victor/projects/sugarcane/GUIA_DE_USO.md) e pasta [`docs/`](file:///home/victor/projects/sugarcane/docs)
+*Dossiês criados:* [`docs/01_visao_geral/03_DOCUMENTACAO_TECNICA_E_ARQUITETURA.md`](file:///home/victor/projects/sugarcane/docs/01_visao_geral/03_DOCUMENTACAO_TECNICA_E_ARQUITETURA.md), [`docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md`](file:///home/victor/projects/sugarcane/docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md) e pasta [`docs/`](file:///home/victor/projects/sugarcane/docs)
 
-- **Dossiê Arquitetural Principal ([`DOCUMENTACAO_TECNICA.md`](file:///home/victor/projects/sugarcane/DOCUMENTACAO_TECNICA.md)):**
+- **Dossiê Arquitetural Principal ([`docs/01_visao_geral/03_DOCUMENTACAO_TECNICA_E_ARQUITETURA.md`](file:///home/victor/projects/sugarcane/docs/01_visao_geral/03_DOCUMENTACAO_TECNICA_E_ARQUITETURA.md)):**
   - Documento de 491 linhas contendo diagrama de blocos global, diagramas de sequência Mermaid do fluxo WebSocket/FreeRTOS, mapeamento detalhado da memória estática/dinâmica e resumo fundamentado das 7 principais decisões de engenharia do projeto.
-- **Manual Operacional e Agronômico ([`GUIA_DE_USO.md`](file:///home/victor/projects/sugarcane/GUIA_DE_USO.md)):**
+- **Manual Operacional e Agronômico ([`docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md`](file:///home/victor/projects/sugarcane/docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md)):**
   - Instruções de flashing via PlatformIO (`upload` e `uploadfs`).
   - Scripts práticos em Python para testes interativos de WebSocket, exemplos via Postman e interface web cliente.
   - Tabela agronômica completa com identificação botânica do patógeno, sintomas típicos no campo e recomendações de manejo para cada uma das 11 doenças atendidas.
 - **Monografias Especializadas no Diretório [`docs/`](file:///home/victor/projects/sugarcane/docs):**
-  - [`docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md`](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md): Modelagem matemática da teoria da amostragem, viés DC e prova de sinal nas 8 variantes de conversão de cor.
-  - [`docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md): Levantamento integral dos hashes criptográficos MD5, prova da colisão sobre a Cross-Entropy e formulação das melhorias do `v08`.
-  - [`docs/OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md`](file:///home/victor/projects/sugarcane/docs/OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md): Engenharia de baixo nível do subsistema de memória interna, scratch buffers do `esp-nn` e paralelismo fork-join multi-core.
+  - [`docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md`](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md): Modelagem matemática da teoria da amostragem, viés DC e prova de sinal nas 8 variantes de conversão de cor.
+  - [`docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md`](file:///home/victor/projects/sugarcane/docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md): Levantamento integral dos hashes criptográficos MD5, prova da colisão sobre a Cross-Entropy e formulação das melhorias do `v08`.
+  - [`docs/04_otimizacao_hardware_e_firmware/01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md`](file:///home/victor/projects/sugarcane/docs/04_otimizacao_hardware_e_firmware/01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md): Engenharia de baixo nível do subsistema de memória interna, scratch buffers do `esp-nn` e paralelismo fork-join multi-core.
 
 ---
 
@@ -230,7 +230,7 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 ## 🛰️ 9. Bancada de Co-Simulação Hardware-in-the-Loop (HIL) MAVLink e Mapas de Calor (Fase 3)
 
-*Scripts e ferramentas:* [`scripts/hil_mavlink_simulator.py`](file:///home/victor/projects/sugarcane/scripts/hil_mavlink_simulator.py), [`scripts/generate_infestation_heatmaps.py`](file:///home/victor/projects/sugarcane/scripts/generate_infestation_heatmaps.py), [`docs/CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md`](file:///home/victor/projects/sugarcane/docs/CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md) e diretório [`docs/heatmaps/`](file:///home/victor/projects/sugarcane/docs/heatmaps/)
+*Scripts e ferramentas:* [`scripts/hil_mavlink_simulator.py`](file:///home/victor/projects/sugarcane/scripts/hil_mavlink_simulator.py), [`scripts/generate_infestation_heatmaps.py`](file:///home/victor/projects/sugarcane/scripts/generate_infestation_heatmaps.py), [`docs/06_simulacao_hil_e_sig/01_CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/01_CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md) e diretório [`docs/heatmaps/`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/)
 
 - **Simulador HIL MAVLink v2 ([`scripts/hil_mavlink_simulator.py`](file:///home/victor/projects/sugarcane/scripts/hil_mavlink_simulator.py)):**
   - Implementa a dinâmica de voo tridimensional de um quadricóptero simulado (ArduPilot SITL / GCS) executando plano de voo agrícola em grade regular sobre o Talhão 04 (Ribeirão Preto/SP, Lat `-21.177500`, Lon `-47.810300`, $15\text{ m}$ AGL, $5,0\text{ m/s}$).
@@ -245,12 +245,12 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
     - **Autonomia projetada:** Até **$1.320$ pontos inspecionados** por bateria LiPo padrão (25 min).
 
 - **Gerador Cartográfico de Mapas de Calor e Camadas SIG ([`scripts/generate_infestation_heatmaps.py`](file:///home/victor/projects/sugarcane/scripts/generate_infestation_heatmaps.py)):**
-  - **Camada Vetorial GeoJSON ([`docs/heatmaps/infestacao_talhao.geojson`](file:///home/victor/projects/sugarcane/docs/heatmaps/infestacao_talhao.geojson)):** Padrão RFC 7946 / EPSG:4326 com 55 pontos tridimensionais e atributos para importação direta no QGIS, ArcGIS e Google Earth.
-  - **Dashboard Web GIS Interativo ([`docs/heatmaps/mapa_calor_interativo.html`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_calor_interativo.html)):** Desenvolvido em Leaflet / Folium com satélite Esri de alta resolução, polígono do talhão, trajetória de voo, marcadores categorizados por patologia, régua de medição e três camadas de mapa de calor dinâmico (*Leaflet.heat*).
+  - **Camada Vetorial GeoJSON ([`docs/heatmaps/infestacao_talhao.geojson`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/infestacao_talhao.geojson)):** Padrão RFC 7946 / EPSG:4326 com 55 pontos tridimensionais e atributos para importação direta no QGIS, ArcGIS e Google Earth.
+  - **Dashboard Web GIS Interativo ([`docs/heatmaps/mapa_calor_interativo.html`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_calor_interativo.html)):** Desenvolvido em Leaflet / Folium com satélite Esri de alta resolução, polígono do talhão, trajetória de voo, marcadores categorizados por patologia, régua de medição e três camadas de mapa de calor dinâmico (*Leaflet.heat*).
   - **Painéis Cartográficos Estáticos em Alta Resolução (Matplotlib PNG):**
-    - [`docs/heatmaps/mapa_infestacao_talhao_2d.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_infestacao_talhao_2d.png): Painel com disposição espacial, interpolação contínua (KDE 2D), perfil de latência por ponto e histograma de classes.
-    - [`docs/heatmaps/mapa_foco_carvao_smut.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_foco_carvao_smut.png): Mapa isolando o foco epidêmico de Carvão (*Sporisorium scitamineum*).
-    - [`docs/heatmaps/mapa_foco_ferrugem_brownrust.png`](file:///home/victor/projects/sugarcane/docs/heatmaps/mapa_foco_ferrugem_brownrust.png): Mapa isolando o foco epidêmico de Ferrugem Marrom (*Puccinia melanocephala*).
+    - [`docs/heatmaps/mapa_infestacao_talhao_2d.png`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_infestacao_talhao_2d.png): Painel com disposição espacial, interpolação contínua (KDE 2D), perfil de latência por ponto e histograma de classes.
+    - [`docs/heatmaps/mapa_foco_carvao_smut.png`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_foco_carvao_smut.png): Mapa isolando o foco epidêmico de Carvão (*Sporisorium scitamineum*).
+    - [`docs/heatmaps/mapa_foco_ferrugem_brownrust.png`](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/mapa_foco_ferrugem_brownrust.png): Mapa isolando o foco epidêmico de Ferrugem Marrom (*Puccinia melanocephala*).
 
 ---
 
@@ -268,7 +268,7 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 
 ## 🌐 11. Dashboard Web Vue.js 3 Embarcado, Telemetria Assíncrona e Persistência Flash (Fase 2)
 
-*Referência documental principal:* [`docs/RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md`](file:///home/victor/projects/sugarcane/docs/RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md) e [`docs/ESPECIFICACAO_DASHBOARD_WEB_VUE_E_TELEMETRIA_ESP32S3.md`](file:///home/victor/projects/sugarcane/docs/ESPECIFICACAO_DASHBOARD_WEB_VUE_E_TELEMETRIA_ESP32S3.md)  
+*Referência documental principal:* [`docs/04_otimizacao_hardware_e_firmware/04_FASE2_HOMOLOGACAO_DASHBOARD_VUE3_E_TELEMETRIA.md`](file:///home/victor/projects/sugarcane/docs/04_otimizacao_hardware_e_firmware/04_FASE2_HOMOLOGACAO_DASHBOARD_VUE3_E_TELEMETRIA.md) e [`docs/04_otimizacao_hardware_e_firmware/03_ESPECIFICACAO_DASHBOARD_VUE3_TELEMETRIA_E_GPS.md`](file:///home/victor/projects/sugarcane/docs/04_otimizacao_hardware_e_firmware/03_ESPECIFICACAO_DASHBOARD_VUE3_TELEMETRIA_E_GPS.md)  
 *Módulos e diretórios:* [`frontend/`](file:///home/victor/projects/sugarcane/frontend/), [`scripts/build_and_compress_frontend.py`](file:///home/victor/projects/sugarcane/scripts/build_and_compress_frontend.py), [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp), [`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp) e [`src/main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp)
 
 - **Single Page Application (SPA) Reativa em Vue.js 3 e Leaflet:**

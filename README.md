@@ -48,28 +48,16 @@ A arquitetura proposta substitui paradigmas convencionais — dependentes de con
 
 ## 2. Mapa de Documentação Técnica
 
-A documentação do repositório está subdividida conforme as áreas de concentração da pesquisa e do desenvolvimento:
+Toda a documentação técnica, relatórios de benchmark, estudos teóricos, planilhas CSV e mapas cartográficos está centralizada e segmentada por domínio em **[docs/README.md](docs/README.md)**:
 
-| Categoria | Documento / Link | Descrição |
+| Pasta / Domínio | Documentos Principais | Escopo |
 | :--- | :--- | :--- |
-| **Visão Geral** | [REALIZACOES_DO_PROJETO.md](file:///home/victor/projects/sugarcane/REALIZACOES_DO_PROJETO.md) | Mapeamento exaustivo de todos os esforços e marcos de engenharia do projeto. |
-| **Instalação e Uso** | [GUIA_DE_USO.md](file:///home/victor/projects/sugarcane/GUIA_DE_USO.md) | Guia prático de compilação, gravação de firmware, testes locais e comunicação WebSocket. |
-| **Especificação Firmware** | [DOCUMENTACAO_TECNICA.md](file:///home/victor/projects/sugarcane/DOCUMENTACAO_TECNICA.md) | Arquitetura de software C++, tarefas FreeRTOS e alocação de memória. |
-| **Engenharia de Dados** | [AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md](file:///home/victor/projects/sugarcane/docs/AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md) | Auditoria por hash MD5, descoberta de 614 colisões cruzadas e particionamento limpo. |
-| **Processamento de Sinais** | [ANALISE_JPEGDRAW_CONVERSAO_COR.md](file:///home/victor/projects/sugarcane/docs/ANALISE_JPEGDRAW_CONVERSAO_COR.md) | Avaliação teórica e empírica das variantes da função `JPEGDraw()`. |
-| **Aceleração de Imagem** | [ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md](file:///home/victor/projects/sugarcane/docs/ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md) | Redução de escala via IDCT, frequência de 240 MHz e tabelas LUT em SRAM. |
-| **Otimização de Silício** | [OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md](file:///home/victor/projects/sugarcane/docs/OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md) | Scratch buffer na SRAM interna e paralelismo Dual-Core na biblioteca `esp-nn`. |
-| **Fase 1 e Benchmark** | [RELATORIO_FASE1_MODELO_V08_PSRAM80MHZ_REDE_E_BENCHMARK.md](file:///home/victor/projects/sugarcane/docs/RELATORIO_FASE1_MODELO_V08_PSRAM80MHZ_REDE_E_BENCHMARK.md) | Avaliação da ativação da PSRAM Octal a 80 MHz DDR e compilação `-O2`. |
-| **Cronologia de Testes** | [HISTORICO_CONSOLIDADO_E_CRONOLOGIA_DE_TESTES.md](file:///home/victor/projects/sugarcane/model_inference_tests/HISTORICO_CONSOLIDADO_E_CRONOLOGIA_DE_TESTES.md) | Mapeamento cronológico integral de todos os 8 benchmarks (scripts, CSVs e relatórios). |
-| **Benchmark 132 Amostras** | [RELATORIO_BENCHMARK_132_AMOSTRAS.md](file:///home/victor/projects/sugarcane/docs/RELATORIO_BENCHMARK_132_AMOSTRAS.md) | Relatório comparativo de 132 amostras no hardware físico com SRAM interna e Fork-Join esp-nn. |
-| **Fase 2 e Telemetria** | [RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md](file:///home/victor/projects/sugarcane/docs/RELATORIO_FASE2_DASHBOARD_WEB_VUE_E_TELEMETRIA.md) | Homologação em silício físico da SPA Vue.js 3, concorrência thread-safe e LittleFS. |
-| **Dashboard & Web SPA** | [ESPECIFICACAO_DASHBOARD_WEB_VUE_E_TELEMETRIA_ESP32S3.md](file:///home/victor/projects/sugarcane/docs/ESPECIFICACAO_DASHBOARD_WEB_VUE_E_TELEMETRIA_ESP32S3.md) | Especificação técnica do dashboard Vue.js 3 embarcado no LittleFS, telemetria 1Hz, rede híbrida e mDNS. |
-| **Simulação HIL e SIG** | [CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md](file:///home/victor/projects/sugarcane/docs/CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md) | Arquitetura da co-simulação de voo e geração de mapas de infestação foliar. |
-| **Planejamento / Roadmap**| [DIAGNOSTICO_PENDENCIAS_OPORTUNIDADES_E_PLANO_DE_ACAO.md](file:///home/victor/projects/sugarcane/docs/DIAGNOSTICO_PENDENCIAS_OPORTUNIDADES_E_PLANO_DE_ACAO.md) | Roadmap de prioridades (P1 a P4) e tarefas de continuidade (TF1). |
-| **Ciência de Dados (v09)**| [GUIA_INTERPRETACAO_GRAFICOS_V09.md](file:///home/victor/projects/sugarcane/docs/GUIA_INTERPRETACAO_GRAFICOS_V09.md) | Análise técnica dos 6 gráficos analíticos de ablação, overfitting e Pareto do v09. |
-| **Pesquisa Teórica** | [POR_QUE_A_QUANTIZACAO_MANTEM_OU_MELHORA_O_DESEMPENHO.md](file:///home/victor/projects/sugarcane/docs/POR_QUE_A_QUANTIZACAO_MANTEM_OU_MELHORA_O_DESEMPENHO.md) | Fundamentação científica com 12 referências: Flat Minima, MDL, QAT e Gargalo de Informação. |
-| **Rigor Estatístico** | [ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md](file:///home/victor/projects/sugarcane/docs/ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md) | Análise de variância estocástica, impacto de sementes e intervalo de confiança da acurácia. |
-| **Mundo Aberto & OOD** | [ESTUDO_TECNICO_SUPOSICAO_MUNDO_FECHADO_E_OOD_CANAVIAL.md](file:///home/victor/projects/sugarcane/docs/ESTUDO_TECNICO_SUPOSICAO_MUNDO_FECHADO_E_OOD_CANAVIAL.md) | Estudo sobre mundo fechado, dados OOD (não-cana) e estratégias de triagem (ExG e 12ª classe). |
+| **[`docs/01_visao_geral/`](docs/01_visao_geral/)** | [01_TIMELINE_E_HISTORICO_DA_APLICACAO.md](docs/01_visao_geral/01_TIMELINE_E_HISTORICO_DA_APLICACAO.md) • [02_REALIZACOES_E_MARCOS_DO_PROJETO.md](docs/01_visao_geral/02_REALIZACOES_E_MARCOS_DO_PROJETO.md) • [03_DOCUMENTACAO_TECNICA_E_ARQUITETURA.md](docs/01_visao_geral/03_DOCUMENTACAO_TECNICA_E_ARQUITETURA.md) • [04_GUIA_DE_USO_E_OPERACAO.md](docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md) • [05_DIAGNOSTICO_PENDENCIAS_E_ROADMAP.md](docs/01_visao_geral/05_DIAGNOSTICO_PENDENCIAS_E_ROADMAP.md) | Timeline cronológica unificada, marcos de engenharia, arquitetura do firmware, guia de uso e roadmap. |
+| **[`docs/02_engenharia_de_dados_e_modelos/`](docs/02_engenharia_de_dados_e_modelos/)** | [01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md](docs/02_engenharia_de_dados_e_modelos/01_AUDITORIA_MD5_DATASET_E_TREINAMENTO_V08.md) • [02_ABLACAO_MULTIESCALA_E_GRAFICOS_V09.md](docs/02_engenharia_de_dados_e_modelos/02_ABLACAO_MULTIESCALA_E_GRAFICOS_V09.md) • [03_FUNDAMENTACAO_QUANTIZACAO_INT8_E_QAT.md](docs/02_engenharia_de_dados_e_modelos/03_FUNDAMENTACAO_QUANTIZACAO_INT8_E_QAT.md) • [04_ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md](docs/02_engenharia_de_dados_e_modelos/04_ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md) • [05_ESTUDO_MUNDO_FECHADO_E_DETECCAO_OOD.md](docs/02_engenharia_de_dados_e_modelos/05_ESTUDO_MUNDO_FECHADO_E_DETECCAO_OOD.md) | Auditoria criptográfica MD5, evolução CNN (`v07`→`v09`), teoria INT8/QAT, robustez estatística e OOD. |
+| **[`docs/03_processamento_de_imagem/`](docs/03_processamento_de_imagem/)** | [01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md](docs/03_processamento_de_imagem/01_ANALISE_MATEMATICA_JPEGDRAW_COR_E_AMOSTRAGEM.md) • [02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md](docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md) • [03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md](docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md) • [04_ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md](docs/03_processamento_de_imagem/04_ACELERACAO_IDCT_240MHZ_E_OTIMIZACAO_BOXAVG.md) • `dados/*.csv` | Avaliação dos 8 algoritmos `JPEGDraw()`, BoxAvg RGB8888, IDCT `1/4`–`1/2`, LUTs SRAM e planilhas CSV. |
+| **[`docs/04_otimizacao_hardware_e_firmware/`](docs/04_otimizacao_hardware_e_firmware/)** | [01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md](docs/04_otimizacao_hardware_e_firmware/01_OTIMIZACAO_SRAM_E_FORK_JOIN_DUAL_CORE_ESP_NN.md) • [02_FASE1_PSRAM_80MHZ_BOXACC8B_REDE_E_V08.md](docs/04_otimizacao_hardware_e_firmware/02_FASE1_PSRAM_80MHZ_BOXACC8B_REDE_E_V08.md) • [03_ESPECIFICACAO_DASHBOARD_VUE3_TELEMETRIA_E_GPS.md](docs/04_otimizacao_hardware_e_firmware/03_ESPECIFICACAO_DASHBOARD_VUE3_TELEMETRIA_E_GPS.md) • [04_FASE2_HOMOLOGACAO_DASHBOARD_VUE3_E_TELEMETRIA.md](docs/04_otimizacao_hardware_e_firmware/04_FASE2_HOMOLOGACAO_DASHBOARD_VUE3_E_TELEMETRIA.md) | Scratch SRAM, Fork-Join `esp-nn`, PSRAM 80 MHz DDR, rede híbrida STA/SoftAP, mDNS e dashboard Vue 3. |
+| **[`docs/05_testes_de_desempenho/`](docs/05_testes_de_desempenho/)** | [00_INDICE_E_CRONOLOGIA_DE_BENCHMARKS.md](docs/05_testes_de_desempenho/00_INDICE_E_CRONOLOGIA_DE_BENCHMARKS.md) • Relatórios `01` a `06` • `dados/*.csv` | Cronologia e relatórios de todos os benchmarks em silício físico (550, 132 e 9.269 imagens) com dados brutos. |
+| **[`docs/06_simulacao_hil_e_sig/`](docs/06_simulacao_hil_e_sig/)** | [01_CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md](docs/06_simulacao_hil_e_sig/01_CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md) • `mapas_e_dados/` | Co-simulação HIL MAVLink (55 waypoints), GeoJSON, HTML interativo Leaflet, mapas KDE PNG e CSV. |
 
 ---
 
@@ -142,12 +130,12 @@ Os ensaios de desempenho foram realizados no **dispositivo físico real** (ESP32
 
 | Relatório de Teste | Arquivo de Dados Brutos | Escopo e Principais Conclusões |
 | :--- | :--- | :--- |
-| [RELATORIO_DATASET_COMPLETO.md](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DATASET_COMPLETO.md) | [resultado_inferencia_dataset_completo.csv](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dataset_completo.csv) | **Avaliação exaustiva de 9.269 imagens** (6.748 primárias + 2.521 do conjunto de arquivo). Acurácia de 92,43%, latência de 283,4 ms e caracterização formal do Deslocamento de Domínio (*Domain Shift*). |
-| [RELATORIO_COMPARATIVO_JPEGDRAW_V08.md](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW_V08.md) | [resultado_comparativo_jpegdraw_v08.csv](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw_v08.csv) | Comparativo experimental entre os Modos 0, 1, 2, 4 e 7 sob o modelo v08, comprovando a eficácia do BoxAvg em 24 bits. |
-| [RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md) | [resultado_inferencia_espnn_sram_limpo.csv](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_espnn_sram_limpo.csv) | Mensuração do ganho de aproximadamente 10 ms por inferência obtido ao realocar os buffers da PSRAM para a SRAM interna. |
-| [RELATORIO_DESEMPENHO_DUALCORE.md](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO_DUALCORE.md) | [resultado_inferencia_dualcore.csv](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia_dualcore.csv) | Análise da divisão paralela de trabalho (*Fork-Join*) entre os dois núcleos Xtensa LX7. |
-| [RELATORIO_COMPARATIVO_JPEGDRAW.md](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_COMPARATIVO_JPEGDRAW.md) | [resultado_comparativo_jpegdraw.csv](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_comparativo_jpegdraw.csv) | Diagnóstico do viés sistemático de truncamento (-2,90 LSB) presente no método legado RGB565. |
-| [RELATORIO_DESEMPENHO.md](file:///home/victor/projects/sugarcane/model_inference_tests/RELATORIO_DESEMPENHO.md) | [resultado_inferencia.csv](file:///home/victor/projects/sugarcane/model_inference_tests/resultado_inferencia.csv) | Medições da linha de base inicial do modelo v07. |
+| [RELATORIO_DATASET_COMPLETO.md](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/05_BENCHMARK_EXAUSTIVO_DATASET_COMPLETO_9269.md) | [resultado_inferencia_dataset_completo.csv](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/05_dataset_completo_9269.csv) | **Avaliação exaustiva de 9.269 imagens** (6.748 primárias + 2.521 do conjunto de arquivo). Acurácia de 92,43%, latência de 283,4 ms e caracterização formal do Deslocamento de Domínio (*Domain Shift*). |
+| [RELATORIO_COMPARATIVO_JPEGDRAW_V08.md](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/03_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V08.md) | [resultado_comparativo_jpegdraw_v08.csv](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/02_jpegdraw_8modos_v08_550brutas.csv) | Comparativo experimental entre os Modos 0, 1, 2, 4 e 7 sob o modelo v08, comprovando a eficácia do BoxAvg em 24 bits. |
+| [RELATORIO_DESEMPENHO_ESP_NN_SRAM_LIMPO.md](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/04_BENCHMARK_PSRAM80MHZ_V08_LIMPO_550.md) | [resultado_inferencia_espnn_sram_limpo.csv](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/04_psram80mhz_v08_limpo_550.csv) | Mensuração do ganho de aproximadamente 10 ms por inferência obtido ao realocar os buffers da PSRAM para a SRAM interna. |
+| [RELATORIO_DESEMPENHO_DUALCORE.md](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md) | [resultado_inferencia_dualcore.csv](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/02_pipeline_dual_core_v07_550.csv) | Análise da divisão paralela de trabalho (*Fork-Join*) entre os dois núcleos Xtensa LX7. |
+| [RELATORIO_COMPARATIVO_JPEGDRAW.md](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/02_BENCHMARK_8_MODOS_JPEGDRAW_MODELO_V07.md) | [resultado_comparativo_jpegdraw.csv](file:///home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/01_jpegdraw_8modos_v07_550brutas.csv) | Diagnóstico do viés sistemático de truncamento (-2,90 LSB) presente no método legado RGB565. |
+| [RELATORIO_DESEMPENHO.md](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/01_BENCHMARK_BASELINE_SINGLE_CORE_V07_550.md) | [resultado_inferencia.csv](file:///home/victor/projects/sugarcane/docs/05_testes_de_desempenho/dados/01_baseline_single_core_v07_550.csv) | Medições da linha de base inicial do modelo v07. |
 
 ---
 
@@ -160,7 +148,7 @@ Para atestar a viabilidade do sistema como carga útil de sensoriamento remoto a
   * Envia pacotes MAVLink (`HEARTBEAT`, `GLOBAL_POSITION_INT`, `ATTITUDE`) via porta UDP 14550 para estações de controle em terra (QGroundControl / Mission Planner).
   * Executa a rotina operacional de parada momentânea para captura estável de imagem (*Pause-and-Classify*), transmitindo as amostras ao ESP32-S3 via WebSocket e registrando os diagnósticos georreferenciados.
 * **Gerador Cartográfico de Infestação ([scripts/generate_infestation_heatmaps.py](file:///home/victor/projects/sugarcane/scripts/generate_infestation_heatmaps.py)):**
-  * Processa a série temporal de telemetria e gera os produtos cartográficos arquivados em [docs/heatmaps/](file:///home/victor/projects/sugarcane/docs/heatmaps/):
+  * Processa a série temporal de telemetria e gera os produtos cartográficos arquivados em [docs/heatmaps/](file:///home/victor/projects/sugarcane/docs/06_simulacao_hil_e_sig/mapas_e_dados/):
     * `mapa_infestacao_talhao_2d.png`: Painel geral com interpolação contínua (KDE 2D) e zonas de severidade.
     * `mapa_foco_carvao_smut.png` e `mapa_foco_ferrugem_brownrust.png`: Mapas de calor temáticos para doenças de quarentena fitossanitária crítica.
     * `mapa_calor_interativo.html`: Painel interativo com base cartográfica OpenStreetMap / Leaflet.
@@ -189,22 +177,24 @@ sugarcane/
 │   └── cane_disease_esp32s3_v09.ipynb # Estudo de ablação v09 (α=0.35, 0.50 e 0.75)
 ├── models/                     # Modelos gerados e cabeçalhos C++ derivados da versão v09
 │   └── v9/                     # Binários INT8 e cabeçalho model_cane_disease.h
-├── model_inference_tests/      # Scripts de avaliação em hardware e documentação de ensaios
-│   ├── run_evaluation_all_dataset.py # Executador do teste exaustivo de 9.269 amostras
-│   ├── resultado_inferencia_dataset_completo.csv # Tabela com os dados brutos medidos
-│   └── RELATORIO_DATASET_COMPLETO.md # Relatório técnico consolidado
-├── scripts/                    # Scripts utilitários de inferência, teste HIL e geração SIG
+├── model_inference_tests/      # Scripts Python de avaliação e benchmarking no ESP32-S3
+│   ├── run_evaluation.py       # Benchmark sequencial Single-Core
+│   ├── run_evaluation_dualcore.py # Benchmark assíncrono Dual-Core Pipelined
+│   ├── run_evaluation_espnn_sram.py # Benchmark SRAM/Fork-Join/Telemetria
+│   └── run_evaluation_all_dataset.py # Executador do stress test exaustivo (9.269 amostras)
+├── scripts/                    # Scripts utilitários de inferência, frontend, HIL e geração SIG
 │   ├── test_inference.py       # Validador de inferência (execução local ou via WebSocket)
+│   ├── build_and_compress_frontend.py # Build Vite + compressão Gzip nível 9 para LittleFS
 │   ├── hil_mavlink_simulator.py# Emulador de voo e telemetria HIL via protocolo MAVLink
 │   └── generate_infestation_heatmaps.py # Gerador de mapas de calor e dados GeoJSON
-├── docs/                       # Artigos técnicos e documentação de suporte
-│   ├── heatmaps/               # Produtos cartográficos gerados (PNG, HTML, GeoJSON)
-│   ├── ANALISE_JPEGDRAW_CONVERSAO_COR.md
-│   ├── AUDITORIA_DATASET_E_MELHORIAS_TREINAMENTO_V08.md
-│   ├── OTIMIZACAO_SRAM_E_PARALELISMO_DUAL_CORE_ESP_NN.md
-│   ├── CO_SIMULACAO_HIL_MAVLINK_E_MAPAS_DE_CALOR.md
-│   ├── GUIA_INTERPRETACAO_GRAFICOS_V09.md
-│   └── POR_QUE_A_QUANTIZACAO_MANTEM_OU_MELHORA_O_DESEMPENHO.md
+├── docs/                       # Documentação consolidada, relatórios e CSVs (ver docs/README.md)
+│   ├── README.md               # Índice central navegável de toda a documentação
+│   ├── 01_visao_geral/         # Timeline unificada, realizações, doc técnica, guia de uso e roadmap
+│   ├── 02_engenharia_de_dados_e_modelos/ # Auditoria MD5, ablação v09, teoria INT8, seeds e OOD
+│   ├── 03_processamento_de_imagem/ # Análise e benchmarks dos 8 modos JPEGDraw, IDCT + dados/*.csv
+│   ├── 04_otimizacao_hardware_e_firmware/ # SRAM/Fork-Join esp-nn, Fase 1, SPA Vue 3 e Fase 2
+│   ├── 05_testes_de_desempenho/# Relatórios de benchmarks em silício (01 a 06) + dados/*.csv
+│   └── 06_simulacao_hil_e_sig/ # Co-simulação HIL MAVLink + mapas_e_dados/ (GeoJSON, HTML, PNG, CSV)
 └── tcc/                        # Monografia de Graduação em LaTeX (Normas ABNT / IFPE)
     ├── main.tex / main_standalone.tex # Arquivos-fonte mestres
     ├── config.tex / referencias.bib   # Configurações tipográficas e referências bibliográficas
@@ -215,7 +205,7 @@ sugarcane/
 
 ## 8. Procedimentos de Execução
 
-Orientações detalhadas de bancada podem ser consultadas em [GUIA_DE_USO.md](file:///home/victor/projects/sugarcane/GUIA_DE_USO.md). Os passos operacionais essenciais são descritos a seguir:
+Orientações detalhadas de bancada podem ser consultadas em [GUIA_DE_USO.md](file:///home/victor/projects/sugarcane/docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md). Os passos operacionais essenciais são descritos a seguir:
 
 ### Compilação e Gravação do Firmware (PlatformIO)
 ```bash
@@ -258,11 +248,11 @@ Todo o arcabouço metodológico, modelagem matemática e resultados empíricos e
 * **Monografia Acadêmica Completa:** [tcc/main_standalone.pdf](file:///home/victor/projects/sugarcane/tcc/main_standalone.pdf) (Documento estruturado conforme as normas da ABNT).
 * **Artigo Científico:** [tcc/artigo_ifpe.pdf](file:///home/victor/projects/sugarcane/tcc/artigo_ifpe.pdf) (Síntese no formato padrão de periódicos e conferências).
 * **Capítulos Estruturantes:**
-  1. [tcc/capitulos/introducao.tex](file:///home/victor/projects/sugarcane/tcc/capitulos/introducao.tex): Contextualização socioeconômica da agroindústria sucroalcooleira e objetivos.
-  2. [tcc/capitulos/fundamentacao.tex](file:///home/victor/projects/sugarcane/tcc/capitulos/fundamentacao.tex): Convoluções separáveis, quantização INT8, TinyML e arquitetura ESP32-S3.
-  3. [tcc/capitulos/metodologia.tex](file:///home/victor/projects/sugarcane/tcc/capitulos/metodologia.tex): Auditoria criptográfica, decodificador com BoxAvg e protocolo HIL.
-  4. [tcc/capitulos/resultados.tex](file:///home/victor/projects/sugarcane/tcc/capitulos/resultados.tex): Análise de desempenho em 9.269 imagens, tempos on-chip e matrizes de confusão.
-  5. [tcc/capitulos/conclusao.tex](file:///home/victor/projects/sugarcane/tcc/capitulos/conclusao.tex): Considerações finais, diagnóstico de Deslocamento de Domínio e trabalhos futuros.
+  1. [tcc/capitulos/01_introducao.tex](tcc/capitulos/01_introducao.tex): Contextualização socioeconômica da agroindústria sucroalcooleira e objetivos.
+  2. [tcc/capitulos/02_fundamentacao_teorica.tex](tcc/capitulos/02_fundamentacao_teorica.tex): Convoluções separáveis, quantização INT8, TinyML e arquitetura ESP32-S3.
+  3. [tcc/capitulos/03_metodologia.tex](tcc/capitulos/03_metodologia.tex): Auditoria criptográfica, decodificador com BoxAvg e protocolo HIL.
+  4. [tcc/capitulos/04_resultados_e_discussoes.tex](tcc/capitulos/04_resultados_e_discussoes.tex): Análise de desempenho em 9.269 imagens, tempos on-chip e matrizes de confusão.
+  5. [tcc/capitulos/05_conclusao.tex](tcc/capitulos/05_conclusao.tex): Considerações finais, diagnóstico de Deslocamento de Domínio e trabalhos futuros.
 
 ---
 
