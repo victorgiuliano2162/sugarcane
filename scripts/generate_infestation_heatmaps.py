@@ -553,8 +553,8 @@ def main():
     records = load_csv(args.input)
     print(f"[Info] Carregados {len(records)} registros georreferenciados de {args.input}")
 
-    # Salva nas pastas scripts/output/ e docs/heatmaps/
-    for out_dir in [args.out_dir, "docs/heatmaps"]:
+    # Salva nas pastas scripts/output/ e docs/06_simulacao_hil_e_sig/mapas_e_dados/
+    for out_dir in [args.out_dir, "docs/06_simulacao_hil_e_sig/mapas_e_dados"]:
         geojson_path = os.path.join(out_dir, "infestacao_talhao.geojson")
         html_path = os.path.join(out_dir, "mapa_calor_interativo.html")
         export_geojson(records, geojson_path)

@@ -30,9 +30,9 @@ DEFAULT_ESP32_WS_URL = "ws://192.168.1.19/ws"
 PRIMARY_BASE = "/home/victor/Documents/datasets/Sugarcane leaf image dataset-20261106T004142Z-1-001/Sugarcane leaf image dataset"
 ARCHIVE_BASE = "/home/victor/Documents/sugar-cane/archive"
 
-OUTPUT_DIR = "/home/victor/projects/sugarcane/model_inference_tests"
-DEFAULT_CSV_PATH = os.path.join(OUTPUT_DIR, "resultado_inferencia_dataset_completo.csv")
-DEFAULT_REPORT_PATH = os.path.join(OUTPUT_DIR, "RELATORIO_DATASET_COMPLETO.md")
+OUTPUT_DIR = "/home/victor/projects/sugarcane/docs/05_testes_de_desempenho"
+DEFAULT_CSV_PATH = os.path.join(OUTPUT_DIR, "dados", "05_dataset_completo_9269.csv")
+DEFAULT_REPORT_PATH = os.path.join(OUTPUT_DIR, "05_BENCHMARK_EXAUSTIVO_DATASET_COMPLETO_9269.md")
 
 # Model's native 11 classes
 MODEL_CLASSES = [

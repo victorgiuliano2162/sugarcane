@@ -11,9 +11,9 @@ import websockets
 
 ESP32_WS_URL = "ws://192.168.1.44/ws"
 DATASET_BASE = "/home/victor/Documents/datasets/Sugarcane leaf image dataset-20261106T004142Z-1-001/Sugarcane leaf image dataset"
-OUTPUT_DIR = "/home/victor/projects/sugarcane/model_inference_tests"
-CSV_PATH = os.path.join(OUTPUT_DIR, "resultado_inferencia_dualcore.csv")
-REPORT_PATH = os.path.join(OUTPUT_DIR, "RELATORIO_DESEMPENHO_DUALCORE.md")
+OUTPUT_DIR = "/home/victor/projects/sugarcane/docs/05_testes_de_desempenho"
+CSV_PATH = os.path.join(OUTPUT_DIR, "dados", "02_pipeline_dual_core_v07_550.csv")
+REPORT_PATH = os.path.join(OUTPUT_DIR, "02_BENCHMARK_PIPELINE_DUAL_CORE_V07_550.md")
 
 CLASSES = [
     ("Banded Chlorosis", os.path.join(DATASET_BASE, "Diseases", "Banded Chlorosis")),

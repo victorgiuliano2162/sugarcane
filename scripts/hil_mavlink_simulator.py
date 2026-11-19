@@ -470,8 +470,8 @@ class HilMavlinkSimulator:
             "acerto", "severidade_risco", "arquivo_imagem", "todas_probabilidades"
         ]
 
-        # Salva no caminho solicitado e também copia para docs/heatmaps/
-        target_paths = [self.args.output_csv, "docs/heatmaps/missao_hil_georreferenciada.csv"]
+        # Salva no caminho solicitado e também copia para docs/06_simulacao_hil_e_sig/mapas_e_dados/
+        target_paths = [self.args.output_csv, "docs/06_simulacao_hil_e_sig/mapas_e_dados/missao_hil_georreferenciada.csv"]
 
         for p in target_paths:
             os.makedirs(os.path.dirname(p), exist_ok=True)

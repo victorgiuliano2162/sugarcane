@@ -21,9 +21,9 @@ import websockets
 
 DEFAULT_ESP32_WS_URL = "ws://192.168.1.19/ws"
 DATASET_BASE = "/home/victor/Documents/datasets/Sugarcane leaf image dataset-20261106T004142Z-1-001/Sugarcane leaf image dataset"
-OUTPUT_DIR = "/home/victor/projects/sugarcane/model_inference_tests"
-DEFAULT_CSV_PATH = os.path.join(OUTPUT_DIR, "resultado_inferencia_espnn_sram.csv")
-DEFAULT_REPORT_PATH = os.path.join(OUTPUT_DIR, "RELATORIO_DESEMPENHO_ESP_NN_SRAM.md")
+OUTPUT_DIR = "/home/victor/projects/sugarcane/docs/05_testes_de_desempenho"
+DEFAULT_CSV_PATH = os.path.join(OUTPUT_DIR, "dados", "03_sram_fork_join_240mhz_bruto_550.csv")
+DEFAULT_REPORT_PATH = os.path.join(OUTPUT_DIR, "03_BENCHMARK_SRAM_FORK_JOIN_240MHZ_BRUTO_550.md")
 
 CLASSES = [
     ("Banded Chlorosis", os.path.join(DATASET_BASE, "Diseases", "Banded Chlorosis")),
@@ -53,7 +53,7 @@ async def run_benchmark(ws_url, samples_per_class, csv_path, report_path, use_cl
     os.makedirs(os.path.dirname(os.path.abspath(csv_path)), exist_ok=True)
 
     class_to_dir = {cls_name: cls_path for cls_name, cls_path in CLASSES}
-    clean_csv = os.path.join(OUTPUT_DIR, "resultado_comparativo_jpegdraw_limpo_v08.csv")
+    clean_csv = "/home/victor/projects/sugarcane/docs/03_processamento_de_imagem/dados/03_jpegdraw_8modos_v08_550limpas.csv"
 
     sample_list = []
     if use_clean and os.path.exists(clean_csv):
