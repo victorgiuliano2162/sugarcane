@@ -43,3 +43,6 @@ tcc/**/*.blg
 tcc/**/*.fls
 tcc/**/*.fdb_latexmk
 tcc/**/*.synctex.gz
+
+
+.obsidian
