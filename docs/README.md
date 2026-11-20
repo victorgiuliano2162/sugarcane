@@ -38,6 +38,7 @@ Este diretório concentra toda a documentação técnica, relatórios de benchma
 | 03 | [03_FUNDAMENTACAO_QUANTIZACAO_INT8_E_QAT.md](02_engenharia_de_dados_e_modelos/03_FUNDAMENTACAO_QUANTIZACAO_INT8_E_QAT.md) | Base científica (12 referências): *Flat Minima*, MDL, *Information Bottleneck*, QAT/STE e regularização implícita. |
 | 04 | [04_ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md](02_engenharia_de_dados_e_modelos/04_ROBUSTEZ_ESTATISTICA_E_SEMENTES_ALEATORIAS.md) | Análise de variância estocástica, impacto de sementes aleatórias, $\text{IC}_{95\%}$ e protocolo *Multi-Seed*. |
 | 05 | [05_ESTUDO_MUNDO_FECHADO_E_DETECCAO_OOD.md](02_engenharia_de_dados_e_modelos/05_ESTUDO_MUNDO_FECHADO_E_DETECCAO_OOD.md) | Estudo de vulnerabilidade OOD (não-cana) e estratégias de mitigação (pré-filtro ExG, 12ª classe e thresholding). |
+| 06 | [06_ESTUDO_COMPARATIVO_VERSOES_MOBILENET_E_VIABILIDADE_ESP32S3.md](02_engenharia_de_dados_e_modelos/06_ESTUDO_COMPARATIVO_VERSOES_MOBILENET_E_VIABILIDADE_ESP32S3.md) | Estudo comparativo das versões da MobileNet (V1–V4, esclarecimento "V5") e análise de viabilidade no ESP32-S3. |
 
 ---
 
