@@ -287,3 +287,25 @@ Este documento mapeia detalhadamente todo o esforço de engenharia, ciência de 
 - **Validação Empírica em Silício Físico:**
   - 5,81 MB de Octal PSRAM livre, temperatura estável em ~56,8 °C e latência mantida em 283 ms para inferência e 86 ms para decodificação JPEG.
 
+---
+
+## 🛡️ 12. Endurecimento Arquitetural, Segurança, GPS Real e Observabilidade (23/11/2026)
+
+*Referências:* [`docs/gap-analysis.md`](file:///home/victor/projects/sugarcane/docs/gap-analysis.md) e [`docs/implementation-plan.md`](file:///home/victor/projects/sugarcane/docs/implementation-plan.md)
+
+### Fase 1 — Correções Críticas e Fechamento de Fluxos (`#1` a `#6`)
+- **Envio WebSocket Thread-Safe ([`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp)):** Substituído o enfileiramento com ponteiros de stack/estáticos por cópia alocada (`WsWorkItem`) despachada via `httpd_queue_work` (`ws_send_work_cb`), eliminando condições de corrida e *use-after-return* entre `inference_task`, `telemetry_task` e `httpd`.
+- **Sanitização HTTP e Helper de Streaming ([`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp)):** Unificado o streaming de arquivos em `stream_file_chunks()` (2.048 B com verificação de `NULL`), removidas query strings e bloqueadas sequências `..` e `\` em `GET /assets/*`.
+- **Concorrência de Persistência CSV ([`src/main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp), [`src/web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp)):** Adicionado mutex FreeRTOS `s_csv_mutex` (`csv_lock`, `csv_unlock`, `csv_clear_history`) serializando escrita, leitura (`/api/export-csv`) e truncamento (`clear_history`) de `/storage/inspections.csv` e `s_inspection_counter`.
+- **Credenciais Wi-Fi via NVS e Kconfig ([`src/Kconfig.projbuild`](file:///home/victor/projects/sugarcane/src/Kconfig.projbuild), [`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp)):** Removidas senhas hardcoded do código-fonte; implementada leitura do namespace NVS `wifi_cfg` com fallback em `CONFIG_SUGARCANE_WIFI_*` e inicialização direta em SoftAP se o SSID STA estiver vazio.
+- **Filtro de Telemetria nos Clientes Python ([`scripts/test_inference.py`](file:///home/victor/projects/sugarcane/scripts/test_inference.py), [`scripts/hil_mavlink_simulator.py`](file:///home/victor/projects/sugarcane/scripts/hil_mavlink_simulator.py)):** Filtragem explícita de frames `telemetry` e `diagnosis` durante o `ws.recv()` com timeout de 15 s.
+- **Driver UART GPS NEO-6M e FPS Real ([`src/gps_neo6m.cpp`](file:///home/victor/projects/sugarcane/src/gps_neo6m.cpp), [`src/gps_neo6m.h`](file:///home/victor/projects/sugarcane/src/gps_neo6m.h), [`src/main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp), [`frontend/src/App.vue`](file:///home/victor/projects/sugarcane/frontend/src/App.vue), [`frontend/src/components/TelemetryCards.vue`](file:///home/victor/projects/sugarcane/frontend/src/components/TelemetryCards.vue)):** Leitura UART2 (`9600 bps`) com parser NMEA `$GxGGA`, cálculo dinâmico de `s_last_fps` e remoção dos valores simulados iniciais no dashboard Vue 3.
+
+### Fases 2 e 3 — Resiliência, Segurança, Testes e Documentação (`#7` a `#15`)
+- **UI e Parsing ([`InspectionsTable.vue`](file:///home/victor/projects/sugarcane/frontend/src/components/InspectionsTable.vue), [`App.vue`](file:///home/victor/projects/sugarcane/frontend/src/App.vue)):** Corrigida ordenação por latência (`timing.total_chip_ms`) e cálculo de `anomaly_alert` para payloads legados.
+- **SNTP e Timestamps Reais ([`wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp), [`main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp)):** Inicialização `esp_sntp` em STA e uso de Unix epoch real em `get_current_timestamp()`.
+- **Não Bloqueio, Auth Token e Proteção Térmica ([`web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp), [`main.cpp`](file:///home/victor/projects/sugarcane/src/main.cpp)):** Timeout de 100 ms em `xQueueSend`, respostas JSON de erro, validação de `CONFIG_SUGARCANE_WS_AUTH_TOKEN` no `clear_history`, flag `thermal_alert` e resfriamento preventivo acima de `75 °C`.
+- **Fallback SoftAP Dinâmico e Otimização de Broadcast ([`wifi_setup.cpp`](file:///home/victor/projects/sugarcane/src/wifi_setup.cpp), [`web_server.cpp`](file:///home/victor/projects/sugarcane/src/web_server.cpp)):** Retorno automático para SoftAP após 5 falhas consecutivas em STA e skip da montagem JSON de telemetria sem clientes WS conectados (`web_server_has_ws_clients()`).
+- **Testes Unitários, CI e Docs ([`test/test_image_math/test_main.cpp`](file:///home/victor/projects/sugarcane/test/test_image_math/test_main.cpp), [`.github/workflows/ci.yml`](file:///home/victor/projects/sugarcane/.github/workflows/ci.yml)):** Adicionado teste Unity para quantização BoxAvg, workflow CI (frontend + firmware) e alinhamento da documentação técnica.
+
+

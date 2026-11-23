@@ -161,7 +161,7 @@ Para atestar a viabilidade do sistema como carga útil de sensoriamento remoto a
 ```text
 sugarcane/
 ├── platformio.ini              # Configuração do PlatformIO, partições e diretivas de compilação
-├── partitions.csv              # Tabela de partições do ESP32-S3 (App: 3MB, LittleFS: 1.5MB)
+├── partitions.csv              # Tabela de partições do ESP32-S3 (App: 4MB, LittleFS: 10MB)
 ├── sdkconfig.defaults          # Parâmetros base do ESP-IDF (PSRAM 80MHz DDR, CPU a 240MHz)
 ├── src/                        # Código-fonte em C++ do firmware embarcado
 │   ├── main.cpp                # Inicialização de subsistemas (NVS, LittleFS, Wi-Fi, Tarefas)

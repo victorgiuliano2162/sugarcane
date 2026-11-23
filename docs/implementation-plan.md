@@ -170,24 +170,24 @@ Sanar as falhas críticas de concorrência, segurança, estabilidade de rede/arq
 *(Detalhamento completo disponível sob demanda quando for iniciar a execução destas fases.)*
 
 ### Fase 2: Experiência e Produtividade
-- [ ] **#7** — Corrigir ordenação por `timing.total_chip_ms` em `frontend/src/components/InspectionsTable.vue:184-191` e normalizar `className` no cálculo de `anomaly_alert` em `frontend/src/App.vue:165-167`.
-- [ ] **#8** — Sincronizar relógio do sistema via SNTP (quando em STA) ou via hora UTC do GPS NMEA (`$GPRMC`) para gravar Unix epoch real em `timestamp_epoch` (`src/main.cpp:105`).
-- [ ] **#9** — Substituir `portMAX_DELAY` por timeout finito em `xQueueSend(inference_queue, ...)` e enviar JSON de erro ao cliente WS quando a fila lotar ou `heap_caps_malloc` falhar (`src/web_server.cpp:199-232`).
-- [ ] **#10** — Validar `auth_token` contra valor armazenado em NVS/`Kconfig` antes de executar `clear_history` no handler WebSocket (`src/web_server.cpp:210-219`).
-- [ ] **#11** — Emitir alerta `thermal_alert` na telemetria e aplicar redução preventiva de cadência quando `chip_temp_c > 75.0f` (`src/main.cpp:215-236`).
-- [ ] **#12** — Contabilizar falhas consecutivas de reconexão em `WIFI_EVENT_STA_DISCONNECTED` para acionar `start_softap()` como fallback após queda de rede (`src/wifi_setup.cpp:65-74`).
-- [ ] **#13** — Adicionar testes unitários em `test/` (PlatformIO Unity para `image_processor`) e workflow de CI validando `pio run` e `npm run build` em `frontend/`.
+- [x] **#7** — Corrigir ordenação por `timing.total_chip_ms` em `frontend/src/components/InspectionsTable.vue:184-191` e normalizar `className` no cálculo de `anomaly_alert` em `frontend/src/App.vue:165-167`.
+- [x] **#8** — Sincronizar relógio do sistema via SNTP (quando em STA) para gravar Unix epoch real em `timestamp_epoch` (`src/main.cpp`, `src/wifi_setup.cpp`).
+- [x] **#9** — Substituir `portMAX_DELAY` por timeout finito em `xQueueSend(inference_queue, ...)` e enviar JSON de erro ao cliente WS quando a fila lotar ou `heap_caps_malloc` falhar (`src/web_server.cpp`).
+- [x] **#10** — Validar `auth_token` contra valor armazenado em `Kconfig` (`CONFIG_SUGARCANE_WS_AUTH_TOKEN`) antes de executar `clear_history` no handler WebSocket (`src/web_server.cpp`).
+- [x] **#11** — Emitir alerta `thermal_alert` na telemetria e aplicar redução preventiva de cadência quando `chip_temp_c > 75.0f` (`src/main.cpp`).
+- [x] **#12** — Contabilizar falhas consecutivas de reconexão em `WIFI_EVENT_STA_DISCONNECTED` para acionar `start_softap()` como fallback após queda de rede (`src/wifi_setup.cpp`).
+- [x] **#13** — Adicionar testes unitários em `test/test_image_math/test_main.cpp` (PlatformIO Unity) e workflow de CI em `.github/workflows/ci.yml` validando `pio run` e `npm run build` em `frontend/`.
 
 ### Fase 3: Maturidade e Escala
-- [ ] **#14** — Evitar montagem de JSON em `telemetry_task` quando não houver nenhum cliente WebSocket conectado (`src/main.cpp:215-236`, `src/web_server.cpp:319-343`).
-- [ ] **#15** — Atualizar `README.md:164`, `docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md:78-117` e `docs/04_otimizacao_hardware_e_firmware/03_ESPECIFICACAO_DASHBOARD_VUE3_TELEMETRIA_E_GPS.md` para refletir `partitions.csv` (`4M`/`10M`), `build_and_compress_frontend.py` e o filtro de telemetria WS.
+- [x] **#14** — Evitar montagem de JSON em `telemetry_task` quando não houver nenhum cliente WebSocket conectado (`src/main.cpp`, `src/web_server.cpp`).
+- [x] **#15** — Atualizar `README.md`, `docs/01_visao_geral/04_GUIA_DE_USO_E_OPERACAO.md` e `docs/04_otimizacao_hardware_e_firmware/03_ESPECIFICACAO_DASHBOARD_VUE3_TELEMETRIA_E_GPS.md` para refletir `partitions.csv` (`4M`/`10M`), `build_and_compress_frontend.py` e o filtro de telemetria WS.
 
 ---
 
 ## 4. Checklist Final da Fase 1
 
-- [ ] Todos os itens `#1`, `#2`, `#3`, `#4`, `#5` e `#6` implementados e revisados na branch dedicada.
-- [ ] Firmware compila sem warnings críticos (`pio run`) e frontend compila/comprime sem erros (`python3 scripts/build_and_compress_frontend.py`).
-- [ ] Credenciais expostas anteriormente rotacionadas e ausentes do código-fonte.
-- [ ] Bateria de validação executada: rajada WebSocket com dashboard conectado, `test_inference.py`, `hil_mavlink_simulator.py`, teste de path traversal em `/assets/` e verificação do CSV exportado.
-- [ ] Documentação afetada (`README.md` / `Kconfig` / instruções de configuração Wi-Fi NVS) atualizada.
+- [x] Todos os itens `#1`, `#2`, `#3`, `#4`, `#5` e `#6` implementados e compilados.
+- [x] Firmware compila sem erros (`pio run`) e frontend compila/comprime sem erros (`python3 scripts/build_and_compress_frontend.py`).
+- [ ] Credenciais expostas anteriormente rotacionadas na rede Wi-Fi local (ação operacional externa).
+- [ ] Bateria de validação em hardware executada após gravação (`pio run -t upload && pio run -t uploadfs`): rajada WebSocket com dashboard conectado, `test_inference.py`, `hil_mavlink_simulator.py`, teste de path traversal em `/assets/` e verificação do CSV exportado.
+- [x] Documentação afetada (`README.md`, `04_GUIA_DE_USO_E_OPERACAO.md`, `03_ESPECIFICACAO_...md`, `02_REALIZACOES_E_MARCOS_DO_PROJETO.md`) atualizada.

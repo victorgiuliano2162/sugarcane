@@ -95,8 +95,11 @@ async def classificar(caminho_imagem):
         await ws.send(image_bytes)
 
         print("Aguardando resposta da ESP32...")
-        resposta = await ws.recv()
-        dados = json.loads(resposta)
+        while True:
+            resposta = await ws.recv()
+            dados = json.loads(resposta)
+            if dados.get("type") not in ("telemetry", "diagnosis"):
+                break
 
         print("\n" + "=" * 55)
         print(" RESPOSTA DA INFERÊNCIA NA ESP32-S3")

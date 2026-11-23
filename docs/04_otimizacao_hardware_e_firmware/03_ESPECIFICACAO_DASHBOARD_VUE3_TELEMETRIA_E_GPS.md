@@ -85,7 +85,7 @@ O driver de rede ([`src/wifi_setup.cpp`](file:///home/victor/projects/sugarcane/
    * `assets/app.[hash].js` (~110 KB minificado);
    * `assets/style.[hash].css` (~18 KB minificado);
    * `assets/leaflet.[hash].js` (~140 KB minificado).
-2. Um script de pós-build (`scripts/compress_assets.py`) comprime todos os arquivos estáticos utilizando Gzip em nível máximo (nível 9):
+2. Um script de pós-build (`scripts/build_and_compress_frontend.py`) comprime todos os arquivos estáticos utilizando Gzip em nível máximo (nível 9):
    * `index.html` $\to$ `index.html.gz` (~0,8 KB);
    * `app.js` $\to$ `app.js.gz` (~28 KB);
    * `style.css` $\to$ `style.css.gz` (~4,5 KB);
