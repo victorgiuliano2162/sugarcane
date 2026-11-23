@@ -73,10 +73,12 @@
         <span class="badge badge-info">Modo 7 (24-bit)</span>
       </div>
       <div class="stat-main">
-        <span class="stat-value">{{ (telemetry.fps_throughput || 1.77).toFixed(2) }}</span>
+        <span class="stat-value">{{ telemetry.fps_throughput ? telemetry.fps_throughput.toFixed(2) : '0.00' }}</span>
         <span class="stat-unit">img/s</span>
       </div>
-      <p class="stat-desc">Ciclo Médio On-Chip: ~386 ms</p>
+      <p class="stat-desc">
+        {{ telemetry.fps_throughput > 0 ? `Ciclo Médio: ${(1000 / telemetry.fps_throughput).toFixed(0)} ms` : 'Aguardando inferência' }}
+      </p>
       <div class="pipeline-pills">
         <span class="pill-mini">Dec: ~102ms</span>
         <span class="pill-mini">Inf: ~283ms</span>

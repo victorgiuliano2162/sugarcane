@@ -45,22 +45,22 @@ const wsConnected = ref(false)
 let ws = null
 let reconnectTimer = null
 
-// Estado Reativo Global
+// Estado Reativo Global (valores neutros até chegada do 1º pacote telemetry)
 const telemetry = ref({
-  uptime_s: 1420,
-  chip_temp_c: 48.7,
+  uptime_s: 0,
+  chip_temp_c: null,
   cpu_freq_mhz: 240,
-  sram_free_bytes: 284160,
-  psram_free_bytes: 7184320,
-  wifi_mode: 'STA',
-  rssi_dbm: -58,
-  fps_throughput: 1.77,
+  sram_free_bytes: 0,
+  psram_free_bytes: 0,
+  wifi_mode: '--',
+  rssi_dbm: 0,
+  fps_throughput: 0,
   gps: {
-    fix: true,
-    satellites: 9,
-    lat: -8.053891,
-    lon: -34.881052,
-    alt_m: 24.5
+    fix: false,
+    satellites: 0,
+    lat: 0,
+    lon: 0,
+    alt_m: 0
   }
 })
 
