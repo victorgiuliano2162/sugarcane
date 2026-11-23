@@ -8,6 +8,7 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "mdns.h"
+#include "esp_sntp.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 
@@ -41,6 +42,21 @@ static char s_current_ip[32] = "0.0.0.0";
 static int8_t s_current_rssi = 0;
 static esp_netif_t* s_sta_netif = NULL;
 static esp_netif_t* s_ap_netif = NULL;
+static int s_sta_retry_count = 0;
+static bool s_sta_was_connected = false;
+static bool s_sntp_started = false;
+
+static void start_softap();
+
+static void init_sntp_once() {
+    if (s_sntp_started) return;
+    s_sntp_started = true;
+    esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
+    esp_sntp_setservername(0, "pool.ntp.org");
+    esp_sntp_setservername(1, "a.st1.ntp.br");
+    esp_sntp_init();
+    ESP_LOGI(TAG, "SNTP inicializado para sincronizacao de horario.");
+}
 
 const char* wifi_get_mode_str() {
     return s_current_mode;
@@ -79,13 +95,24 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        ESP_LOGW(TAG, "Tentando reconectar a rede STA...");
-        esp_wifi_connect();
+        s_sta_retry_count++;
+        if (s_sta_was_connected && s_sta_retry_count >= 5) {
+            ESP_LOGW(TAG, "STA desconectado apos %d tentativas. Acionando fallback SoftAP...", s_sta_retry_count);
+            strcpy(s_current_mode, "DISCONNECTED");
+            s_sta_was_connected = false;
+            start_softap();
+        } else {
+            ESP_LOGW(TAG, "Tentando reconectar a rede STA (%d)...", s_sta_retry_count);
+            esp_wifi_connect();
+        }
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         snprintf(s_current_ip, sizeof(s_current_ip), IPSTR, IP2STR(&event->ip_info.ip));
         strcpy(s_current_mode, "STA");
+        s_sta_retry_count = 0;
+        s_sta_was_connected = true;
         ESP_LOGI(TAG, "Modo Station (STA) conectado! IP: %s", s_current_ip);
+        init_sntp_once();
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }

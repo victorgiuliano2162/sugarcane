@@ -38,4 +38,10 @@ menu "Sugarcane AI Wi-Fi Configuration"
         help
             Pino TX do ESP32-S3 conectado ao RX do modulo GPS NEO-6M (evitar GPIOs 26-37 da Octal Flash/PSRAM).
 
+    config SUGARCANE_WS_AUTH_TOKEN
+        string "Token de autenticacao para comandos destrutivos via WebSocket"
+        default "sugarcane"
+        help
+            Token exigido no comando clear_history via WebSocket.
+
 endmenu

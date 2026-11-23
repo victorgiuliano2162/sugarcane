@@ -11,6 +11,10 @@
 #include "freertos/semphr.h"
 #include "wifi_setup.h"
 
+#ifndef CONFIG_SUGARCANE_WS_AUTH_TOKEN
+#define CONFIG_SUGARCANE_WS_AUTH_TOKEN "sugarcane"
+#endif
+
 static const char* TAG = "WEB_SERVER";
 extern QueueHandle_t inference_queue;
 extern bool csv_lock(TickType_t timeout);
@@ -230,30 +234,47 @@ static esp_err_t ws_handler(httpd_req_t *req) {
     if (ws_pkt.len > 0) {
         // Aloca buffer na Octal PSRAM para proteger a SRAM interna
         uint8_t* buf = (uint8_t*)heap_caps_malloc(ws_pkt.len + 1, MALLOC_CAP_SPIRAM);
-        if (buf) {
-            ws_pkt.payload = buf;
-            ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
-            if (ret == ESP_OK) {
-                buf[ws_pkt.len] = '\0';
+        if (!buf) {
+            ESP_LOGE(TAG, "Falha ao alocar %u bytes na PSRAM para frame WS.", (unsigned)(ws_pkt.len + 1));
+            web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"erro\",\"mensagem\":\"Memoria PSRAM insuficiente\"}");
+            return ESP_FAIL;
+        }
 
-                if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
-                    // Trata comandos vindos do Vue
-                    if (strstr((char*)buf, "clear_history")) {
-                        ESP_LOGW(TAG, "Comando clear_history recebido via WebSocket. Truncando inspections.csv...");
+        ws_pkt.payload = buf;
+        ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
+        if (ret == ESP_OK) {
+            buf[ws_pkt.len] = '\0';
+
+            if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
+                // Trata comandos vindos do Vue com validacao de auth_token
+                if (strstr((char*)buf, "clear_history")) {
+                    char expected_token[96];
+                    snprintf(expected_token, sizeof(expected_token), "\"auth_token\":\"%s\"", CONFIG_SUGARCANE_WS_AUTH_TOKEN);
+                    if (strlen(CONFIG_SUGARCANE_WS_AUTH_TOKEN) > 0 && !strstr((char*)buf, expected_token)) {
+                        ESP_LOGW(TAG, "Tentativa de clear_history com auth_token invalido.");
+                        web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"erro\",\"mensagem\":\"Token invalido\"}");
+                    } else {
+                        ESP_LOGW(TAG, "Comando clear_history autorizado. Truncando inspections.csv...");
                         csv_clear_history();
                         web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"ok\",\"msg\":\"Histórico limpo com sucesso\"}");
                     }
+                }
+                free(buf);
+            } else if (ws_pkt.type == HTTPD_WS_TYPE_BINARY) {
+                // Frame JPEG de imagem -> envia para o pipeline de decodificacao sem travar httpd
+                InferenceRequest request = { buf, ws_pkt.len, httpd_req_to_sockfd(req) };
+                if (xQueueSend(inference_queue, &request, pdMS_TO_TICKS(100)) != pdTRUE) {
                     free(buf);
-                } else if (ws_pkt.type == HTTPD_WS_TYPE_BINARY) {
-                    // Frame JPEG de imagem -> envia para o pipeline de decodificação
-                    InferenceRequest request = { buf, ws_pkt.len, httpd_req_to_sockfd(req) };
-                    xQueueSend(inference_queue, &request, portMAX_DELAY);
-                } else {
-                    free(buf);
+                    ESP_LOGW(TAG, "Fila de inferencia cheia; frame descartado.");
+                    web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"erro\",\"mensagem\":\"Fila de inferencia ocupada\"}");
                 }
             } else {
                 free(buf);
             }
+        } else {
+            free(buf);
+            web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"erro\",\"mensagem\":\"Falha ao receber frame WebSocket\"}");
+            return ret;
         }
     }
     return ESP_OK;
@@ -381,6 +402,21 @@ void web_server_send_ws_text(int fd, const char* text) {
     }
 }
 
+bool web_server_has_ws_clients() {
+    if (!server) return false;
+    size_t max_clients = 7;
+    int client_fds[7];
+    if (httpd_get_client_list(server, &max_clients, client_fds) != ESP_OK) {
+        return false;
+    }
+    for (size_t i = 0; i < max_clients; i++) {
+        if (httpd_ws_get_fd_info(server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void web_server_broadcast_ws_text(const char* text) {
     if (!server || !text) return;
     if (!s_ws_mutex) {
@@ -400,4 +436,19 @@ void web_server_broadcast_ws_text(const char* text) {
         }
         xSemaphoreGive(s_ws_mutex);
     }
+}
+
+bool web_server_has_ws_clients() {
+    if (!server) return false;
+    size_t max_clients = 7;
+    int client_fds[7];
+    if (httpd_get_client_list(server, &max_clients, client_fds) != ESP_OK) {
+        return false;
+    }
+    for (size_t i = 0; i < max_clients; i++) {
+        if (httpd_ws_get_fd_info(server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
+            return true;
+        }
+    }
+    return false;
 }

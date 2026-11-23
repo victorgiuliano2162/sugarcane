@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <sys/stat.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -125,12 +126,20 @@ static void init_csv_log() {
     csv_unlock();
 }
 
+static uint32_t get_current_timestamp() {
+    time_t now = time(nullptr);
+    if (now > 1700000000) {
+        return (uint32_t)now;
+    }
+    return (uint32_t)(esp_timer_get_time() / 1000000);
+}
+
 static uint32_t log_inspection(const char* class_name, float confidence, uint32_t decode_ms, uint32_t inf_ms, float temp, double lat, double lon, float alt) {
     uint32_t current_id = 0;
     if (csv_lock(pdMS_TO_TICKS(2000))) {
         s_inspection_counter++;
         current_id = s_inspection_counter;
-        uint32_t epoch = (uint32_t)(esp_timer_get_time() / 1000000);
+        uint32_t epoch = get_current_timestamp();
 
         FILE* f = fopen(CSV_LOG_PATH, "a");
         if (f) {
@@ -225,7 +234,7 @@ void inference_task(void* pvParameters) {
                     "\"confidence\":%.4f,\"anomaly_alert\":%s,\"lat\":%.6f,\"lon\":%.6f,\"alt_m\":%.1f,"
                     "\"timing\":{\"decode_ms\":%lu,\"inference_ms\":%lu,\"total_chip_ms\":%lu}}",
                     (unsigned long)insp_id,
-                    (unsigned long)(esp_timer_get_time() / 1000000),
+                    (unsigned long)get_current_timestamp(),
                     top_class,
                     top_score,
                     (strcmp(top_class, "Healthy Leaves") != 0) ? "true" : "false",
@@ -235,6 +244,11 @@ void inference_task(void* pvParameters) {
                     (unsigned long)total_ms
                 );
                 web_server_broadcast_ws_text(event_json);
+
+                if (temp > 75.0f) {
+                    ESP_LOGW(TAG, "Alerta termico: %.1f C (> 75 C). Aplicando resfriamento preventivo.", temp);
+                    vTaskDelay(pdMS_TO_TICKS(250));
+                }
             } else {
                 xQueueSend(free_tensor_queue, &job.tensor_buf, portMAX_DELAY);
                 web_server_send_ws_text(job.ws_fd, "{\"status\":\"erro\",\"mensagem\":\"Falha ao ler JPEG\"}");

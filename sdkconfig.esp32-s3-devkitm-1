@@ -1097,6 +1097,23 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
+# Sugarcane AI Wi-Fi Configuration
+#
+# default:
+CONFIG_SUGARCANE_WIFI_STA_SSID=""
+# default:
+CONFIG_SUGARCANE_WIFI_STA_PASS=""
+# default:
+CONFIG_SUGARCANE_WIFI_AP_SSID="Sugarcane-AI-AP"
+# default:
+CONFIG_SUGARCANE_WIFI_AP_PASS=""
+# default:
+CONFIG_SUGARCANE_GPS_UART_RX_GPIO=18
+# default:
+CONFIG_SUGARCANE_GPS_UART_TX_GPIO=17
+# end of Sugarcane AI Wi-Fi Configuration
+
+#
 # ESP-NN
 #
 # CONFIG_NN_ANSI_C is not set
