@@ -182,8 +182,12 @@ const filteredList = computed(() => {
   }
 
   return list.slice().sort((a, b) => {
-    let va = a[sortKey.value]
-    let vb = b[sortKey.value]
+    let va = sortKey.value === 'total_ms'
+      ? (a.timing?.total_chip_ms ?? (a.inference_ms ? a.inference_ms + (a.decode_ms || 0) : 0))
+      : a[sortKey.value]
+    let vb = sortKey.value === 'total_ms'
+      ? (b.timing?.total_chip_ms ?? (b.inference_ms ? b.inference_ms + (b.decode_ms || 0) : 0))
+      : b[sortKey.value]
     if (va === undefined) va = 0
     if (vb === undefined) vb = 0
     if (sortOrder.value === 'asc') return va > vb ? 1 : -1

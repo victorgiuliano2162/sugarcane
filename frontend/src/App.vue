@@ -159,12 +159,13 @@ function setupWebSocket() {
         if (data.type === 'telemetry') {
           telemetry.value = { ...telemetry.value, ...data }
         } else if (data.type === 'diagnosis' || data.classe || data.class_name) {
+          const className = data.class_name || data.classe || 'smut'
           const item = {
             id: data.id || (inspections.value.length + 1),
             timestamp: data.timestamp || Math.floor(Date.now() / 1000),
-            class_name: data.class_name || data.classe || 'smut',
+            class_name: className,
             confidence: data.confidence !== undefined ? data.confidence : (data.confianca || 0.85),
-            anomaly_alert: data.class_name !== 'Healthy Leaves',
+            anomaly_alert: className !== 'Healthy Leaves',
             lat: data.lat || telemetry.value.gps?.lat || -8.05389,
             lon: data.lon || telemetry.value.gps?.lon || -34.88105,
             alt_m: data.alt_m || telemetry.value.gps?.alt_m || 24.5,
