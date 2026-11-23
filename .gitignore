@@ -46,3 +46,6 @@ tcc/**/*.synctex.gz
 
 
 .obsidian
+.agents
+sdkconfig.local
+sdkconfig.defaults.local
