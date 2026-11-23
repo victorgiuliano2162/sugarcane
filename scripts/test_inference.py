@@ -90,9 +90,13 @@ async def classify_esp32_async(esp32_ip, image_path):
     t0 = time.perf_counter()
     async with websockets.connect(ws_url, open_timeout=5) as ws:
         await ws.send(img_bytes)
-        raw = await ws.recv()
+        while True:
+            raw = await asyncio.wait_for(ws.recv(), timeout=15.0)
+            data = json.loads(raw)
+            if data.get("type") in ("telemetry", "diagnosis"):
+                continue
+            break
     rtt_ms = (time.perf_counter() - t0) * 1000.0
-    data = json.loads(raw)
     return data, rtt_ms
 
 def main():
