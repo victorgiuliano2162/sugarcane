@@ -5,6 +5,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "freertos/semphr.h"
 #include "esp_timer.h"
 #include "esp_littlefs.h"
 #include "esp_wifi.h"
@@ -17,6 +18,7 @@
 #include "wifi_setup.h"
 #include "tflite_classifier.h"
 #include "web_server.h"
+#include "gps_neo6m.h"
 
 static const char* TAG = "MAIN";
 
@@ -36,7 +38,32 @@ static QueueHandle_t free_tensor_queue; // Pool de Double Buffer na PSRAM
 
 static temperature_sensor_handle_t s_temp_sensor = NULL;
 static uint32_t s_inspection_counter = 0;
+static float s_last_fps = 0.0f;
+static SemaphoreHandle_t s_csv_mutex = NULL;
 static const char* CSV_LOG_PATH = "/storage/inspections.csv";
+
+bool csv_lock(TickType_t timeout) {
+    if (!s_csv_mutex) return false;
+    return xSemaphoreTake(s_csv_mutex, timeout) == pdTRUE;
+}
+
+void csv_unlock() {
+    if (s_csv_mutex) {
+        xSemaphoreGive(s_csv_mutex);
+    }
+}
+
+void csv_clear_history() {
+    if (csv_lock(pdMS_TO_TICKS(2000))) {
+        FILE* f = fopen(CSV_LOG_PATH, "w");
+        if (f) {
+            fputs("id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n", f);
+            fclose(f);
+        }
+        s_inspection_counter = 0;
+        csv_unlock();
+    }
+}
 
 static void init_littlefs() {
     esp_vfs_littlefs_conf_t conf = {
@@ -69,11 +96,8 @@ static float get_chip_temperature() {
     return temp;
 }
 
-void reset_inspection_counter() {
-    s_inspection_counter = 0;
-}
-
 static void init_csv_log() {
+    if (!csv_lock(pdMS_TO_TICKS(2000))) return;
     struct stat st;
     if (stat(CSV_LOG_PATH, &st) != 0) {
         FILE* f = fopen(CSV_LOG_PATH, "w");
@@ -98,18 +122,25 @@ static void init_csv_log() {
             ESP_LOGI(TAG, "CSV existente recuperado com %lu inspeções prévias.", s_inspection_counter);
         }
     }
+    csv_unlock();
 }
 
-static void log_inspection(const char* class_name, float confidence, uint32_t decode_ms, uint32_t inf_ms, float temp, double lat, double lon, float alt) {
-    s_inspection_counter++;
-    uint32_t epoch = (uint32_t)(esp_timer_get_time() / 1000000);
+static uint32_t log_inspection(const char* class_name, float confidence, uint32_t decode_ms, uint32_t inf_ms, float temp, double lat, double lon, float alt) {
+    uint32_t current_id = 0;
+    if (csv_lock(pdMS_TO_TICKS(2000))) {
+        s_inspection_counter++;
+        current_id = s_inspection_counter;
+        uint32_t epoch = (uint32_t)(esp_timer_get_time() / 1000000);
 
-    FILE* f = fopen(CSV_LOG_PATH, "a");
-    if (f) {
-        fprintf(f, "%lu,%lu,%.6f,%.6f,%.1f,%s,%.4f,%.1f,%lu,%lu\n",
-            s_inspection_counter, epoch, lat, lon, alt, class_name, confidence, temp, inf_ms, decode_ms);
-        fclose(f);
+        FILE* f = fopen(CSV_LOG_PATH, "a");
+        if (f) {
+            fprintf(f, "%lu,%lu,%.6f,%.6f,%.1f,%s,%.4f,%.1f,%lu,%lu\n",
+                current_id, epoch, lat, lon, alt, class_name, confidence, temp, inf_ms, decode_ms);
+            fclose(f);
+        }
+        csv_unlock();
     }
+    return current_id;
 }
 
 // ==============================================================
@@ -171,15 +202,18 @@ void inference_task(void* pvParameters) {
                 const char* top_class = classifier_get_top_label();
                 float top_score = classifier_get_top_score();
                 uint32_t inf_ms = classifier_get_last_inference_ms();
+                uint32_t total_ms = job.decode_time_ms + inf_ms;
+                if (total_ms > 0) {
+                    s_last_fps = 1000.0f / (float)total_ms;
+                }
                 float temp = get_chip_temperature();
 
-                // Simulação de coordenadas GPS do talhão até integração física do NEO-6M
-                double lat = -8.05389 + ((s_inspection_counter % 6) * 0.00035);
-                double lon = -34.88105 + ((s_inspection_counter / 6) * 0.00045);
-                float alt = 24.5f;
+                // Coleta coordenadas reais do receptor GPS NEO-6M (ou 0.0 quando sem fix)
+                GpsState gps = {};
+                gps_get_state(&gps);
 
-                // Registra no arquivo de auditoria CSV
-                log_inspection(top_class, top_score, job.decode_time_ms, inf_ms, temp, lat, lon, alt);
+                // Registra no arquivo de auditoria CSV sob mutex
+                uint32_t insp_id = log_inspection(top_class, top_score, job.decode_time_ms, inf_ms, temp, gps.lat, gps.lon, gps.alt_m);
 
                 // Responde ao cliente direto que enviou a foto
                 web_server_send_ws_text(job.ws_fd, classifier_get_json_results());
@@ -190,15 +224,15 @@ void inference_task(void* pvParameters) {
                     "{\"type\":\"diagnosis\",\"id\":%lu,\"timestamp\":%lu,\"class_name\":\"%s\","
                     "\"confidence\":%.4f,\"anomaly_alert\":%s,\"lat\":%.6f,\"lon\":%.6f,\"alt_m\":%.1f,"
                     "\"timing\":{\"decode_ms\":%lu,\"inference_ms\":%lu,\"total_chip_ms\":%lu}}",
-                    s_inspection_counter,
+                    (unsigned long)insp_id,
                     (unsigned long)(esp_timer_get_time() / 1000000),
                     top_class,
                     top_score,
                     (strcmp(top_class, "Healthy Leaves") != 0) ? "true" : "false",
-                    lat, lon, alt,
+                    gps.lat, gps.lon, gps.alt_m,
                     (unsigned long)job.decode_time_ms,
                     (unsigned long)inf_ms,
-                    (unsigned long)(job.decode_time_ms + inf_ms)
+                    (unsigned long)total_ms
                 );
                 web_server_broadcast_ws_text(event_json);
             } else {
@@ -223,12 +257,15 @@ void telemetry_task(void* pvParameters) {
         size_t sram_free = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
         const char* mode = wifi_get_mode_str();
         int8_t rssi = wifi_get_rssi();
+        GpsState gps = {};
+        gps_get_state(&gps);
 
         snprintf(json_buf, sizeof(json_buf),
             "{\"type\":\"telemetry\",\"uptime_s\":%lu,\"chip_temp_c\":%.1f,\"cpu_freq_mhz\":240,"
             "\"sram_free_bytes\":%u,\"psram_free_bytes\":%u,\"wifi_mode\":\"%s\",\"rssi_dbm\":%d,"
-            "\"fps_throughput\":1.77,\"gps\":{\"fix\":true,\"satellites\":9,\"lat\":-8.053891,\"lon\":-34.881052,\"alt_m\":24.5}}",
-            (unsigned long)uptime_s, temp_c, (unsigned int)sram_free, (unsigned int)psram_free, mode, (int)rssi
+            "\"fps_throughput\":%.2f,\"gps\":{\"fix\":%s,\"satellites\":%u,\"lat\":%.6f,\"lon\":%.6f,\"alt_m\":%.1f}}",
+            (unsigned long)uptime_s, temp_c, (unsigned int)sram_free, (unsigned int)psram_free, mode, (int)rssi,
+            s_last_fps, gps.fix ? "true" : "false", (unsigned int)gps.satellites, gps.lat, gps.lon, gps.alt_m
         );
 
         web_server_broadcast_ws_text(json_buf);
@@ -243,9 +280,12 @@ extern "C" void app_main() {
     }
     ESP_ERROR_CHECK(ret);
 
+    s_csv_mutex = xSemaphoreCreateMutex();
+
     init_littlefs();
     init_temp_sensor();
     init_csv_log();
+    gps_neo6m_init();
     
     wifi_init_auto();
 

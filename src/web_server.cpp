@@ -13,9 +13,46 @@
 
 static const char* TAG = "WEB_SERVER";
 extern QueueHandle_t inference_queue;
-extern void reset_inspection_counter();
+extern bool csv_lock(TickType_t timeout);
+extern void csv_unlock();
+extern void csv_clear_history();
 static httpd_handle_t server = NULL;
 static SemaphoreHandle_t s_ws_mutex = NULL;
+
+struct WsWorkItem {
+    httpd_handle_t hd;
+    int fd;
+    char* payload;
+    size_t len;
+};
+
+static esp_err_t stream_file_chunks(httpd_req_t *req, FILE *f) {
+    const size_t kChunkSize = 2048;
+    char* chunk = (char*)heap_caps_malloc(kChunkSize, MALLOC_CAP_SPIRAM);
+    if (!chunk) {
+        chunk = (char*)malloc(kChunkSize);
+    }
+    if (!chunk) {
+        ESP_LOGE(TAG, "Falha ao alocar buffer de streaming (%u bytes)", (unsigned)kChunkSize);
+        httpd_resp_send_500(req);
+        return ESP_ERR_NO_MEM;
+    }
+
+    size_t read_bytes = 0;
+    esp_err_t err = ESP_OK;
+    while ((read_bytes = fread(chunk, 1, kChunkSize, f)) > 0) {
+        err = httpd_resp_send_chunk(req, chunk, read_bytes);
+        if (err != ESP_OK) {
+            break;
+        }
+    }
+    if (err == ESP_OK) {
+        httpd_resp_send_chunk(req, NULL, 0);
+    }
+
+    free(chunk);
+    return err;
+}
 
 // Fallback HTML caso LittleFS não contenha os assets
 static const char FALLBACK_INDEX_HTML[] = R"rawliteral(<!DOCTYPE html>
@@ -67,30 +104,37 @@ static esp_err_t index_handler(httpd_req_t *req) {
     }
     httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
 
-    // Streaming em blocos alocados na Octal PSRAM
-    char* chunk = (char*)heap_caps_malloc(2048, MALLOC_CAP_SPIRAM);
-    if (!chunk) chunk = (char*)malloc(1024);
-
-    size_t read_bytes = 0;
-    while ((read_bytes = fread(chunk, 1, 2048, f)) > 0) {
-        httpd_resp_send_chunk(req, chunk, read_bytes);
-    }
-    httpd_resp_send_chunk(req, NULL, 0);
-
-    free(chunk);
+    // Streaming em blocos alocados na Octal PSRAM (com fallback seguro)
+    esp_err_t err = stream_file_chunks(req, f);
     fclose(f);
-    return ESP_OK;
+    return err;
 }
 
 // ==============================================================
 // Handler: GET /assets/* (Serve arquivos estáticos comprimidos)
 // ==============================================================
 static esp_err_t assets_handler(httpd_req_t *req) {
-    char filepath[128];
-    char gz_filepath[132];
+    // Rejeita path traversal e remove query string
+    if (strstr(req->uri, "..") || strchr(req->uri, '\\')) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid path");
+        return ESP_FAIL;
+    }
 
-    snprintf(filepath, sizeof(filepath), "/storage/www%s", req->uri);
-    snprintf(gz_filepath, sizeof(gz_filepath), "%s.gz", filepath);
+    char clean_uri[128];
+    strncpy(clean_uri, req->uri, sizeof(clean_uri) - 1);
+    clean_uri[sizeof(clean_uri) - 1] = '\0';
+    char* qmark = strchr(clean_uri, '?');
+    if (qmark) *qmark = '\0';
+
+    char filepath[192];
+    char gz_filepath[196];
+
+    int n1 = snprintf(filepath, sizeof(filepath), "/storage/www%s", clean_uri);
+    int n2 = snprintf(gz_filepath, sizeof(gz_filepath), "%s.gz", filepath);
+    if (n1 < 0 || n1 >= (int)sizeof(filepath) || n2 < 0 || n2 >= (int)sizeof(gz_filepath)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "URI too long");
+        return ESP_FAIL;
+    }
 
     FILE* f = fopen(gz_filepath, "rb");
     bool is_gzip = true;
@@ -105,13 +149,13 @@ static esp_err_t assets_handler(httpd_req_t *req) {
         return ESP_FAIL;
     }
 
-    if (strstr(req->uri, ".js")) {
+    if (strstr(clean_uri, ".js")) {
         httpd_resp_set_type(req, "application/javascript");
-    } else if (strstr(req->uri, ".css")) {
+    } else if (strstr(clean_uri, ".css")) {
         httpd_resp_set_type(req, "text/css");
-    } else if (strstr(req->uri, ".svg")) {
+    } else if (strstr(clean_uri, ".svg")) {
         httpd_resp_set_type(req, "image/svg+xml");
-    } else if (strstr(req->uri, ".png")) {
+    } else if (strstr(clean_uri, ".png")) {
         httpd_resp_set_type(req, "image/png");
     }
 
@@ -120,18 +164,9 @@ static esp_err_t assets_handler(httpd_req_t *req) {
     }
     httpd_resp_set_hdr(req, "Cache-Control", "public, max-age=86400, immutable");
 
-    char* chunk = (char*)heap_caps_malloc(2048, MALLOC_CAP_SPIRAM);
-    if (!chunk) chunk = (char*)malloc(1024);
-
-    size_t read_bytes = 0;
-    while ((read_bytes = fread(chunk, 1, 2048, f)) > 0) {
-        httpd_resp_send_chunk(req, chunk, read_bytes);
-    }
-    httpd_resp_send_chunk(req, NULL, 0);
-
-    free(chunk);
+    esp_err_t err = stream_file_chunks(req, f);
     fclose(f);
-    return ESP_OK;
+    return err;
 }
 
 // ==============================================================
@@ -139,31 +174,27 @@ static esp_err_t assets_handler(httpd_req_t *req) {
 // ==============================================================
 static esp_err_t export_csv_handler(httpd_req_t *req) {
     const char* csv_path = "/storage/inspections.csv";
+
+    if (!csv_lock(pdMS_TO_TICKS(2000))) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "CSV busy");
+        return ESP_FAIL;
+    }
+
     FILE* f = fopen(csv_path, "r");
 
     httpd_resp_set_type(req, "text/csv; charset=utf-8");
     httpd_resp_set_hdr(req, "Content-Disposition", "attachment; filename=\"inspecoes_sugarcane_talhao.csv\"");
 
     if (!f) {
-        // Se ainda não houver arquivo, gera um CSV com cabeçalho padrão
-        const char* default_csv = "id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n"
-                                  "1,1731070800,-8.05389,-34.88105,24.5,smut,0.840,48.7,283.4,102.7\n"
-                                  "2,1731070815,-8.05391,-34.88107,24.6,BrownRust,0.980,48.9,283.5,101.8\n";
+        csv_unlock();
+        const char* default_csv = "id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n";
         return httpd_resp_send(req, default_csv, HTTPD_RESP_USE_STRLEN);
     }
 
-    char* chunk = (char*)heap_caps_malloc(2048, MALLOC_CAP_SPIRAM);
-    if (!chunk) chunk = (char*)malloc(1024);
-
-    size_t read_bytes = 0;
-    while ((read_bytes = fread(chunk, 1, 2048, f)) > 0) {
-        httpd_resp_send_chunk(req, chunk, read_bytes);
-    }
-    httpd_resp_send_chunk(req, NULL, 0);
-
-    free(chunk);
+    esp_err_t err = stream_file_chunks(req, f);
     fclose(f);
-    return ESP_OK;
+    csv_unlock();
+    return err;
 }
 
 // ==============================================================
@@ -209,12 +240,7 @@ static esp_err_t ws_handler(httpd_req_t *req) {
                     // Trata comandos vindos do Vue
                     if (strstr((char*)buf, "clear_history")) {
                         ESP_LOGW(TAG, "Comando clear_history recebido via WebSocket. Truncando inspections.csv...");
-                        FILE* f = fopen("/storage/inspections.csv", "w");
-                        if (f) {
-                            fputs("id,timestamp_epoch,lat,lon,alt_m,class_name,confidence,chip_temp_c,inference_ms,decode_ms\n", f);
-                            fclose(f);
-                        }
-                        reset_inspection_counter();
+                        csv_clear_history();
                         web_server_send_ws_text(httpd_req_to_sockfd(req), "{\"status\":\"ok\",\"msg\":\"Histórico limpo com sucesso\"}");
                     }
                     free(buf);
@@ -300,18 +326,57 @@ void web_server_start() {
     }
 }
 
+static void ws_send_work_cb(void* arg) {
+    WsWorkItem* item = (WsWorkItem*)arg;
+    if (!item) return;
+
+    if (item->hd && item->fd >= 0 && item->payload &&
+        httpd_ws_get_fd_info(item->hd, item->fd) == HTTPD_WS_CLIENT_WEBSOCKET) {
+        httpd_ws_frame_t ws_pkt;
+        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+        ws_pkt.payload = (uint8_t*)item->payload;
+        ws_pkt.len = item->len;
+        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+        httpd_ws_send_frame_async(item->hd, item->fd, &ws_pkt);
+    }
+
+    free(item->payload);
+    free(item);
+}
+
+static void enqueue_ws_text(int fd, const char* text, size_t len) {
+    if (!server || fd < 0 || !text || len == 0) return;
+
+    WsWorkItem* item = (WsWorkItem*)malloc(sizeof(WsWorkItem));
+    char* copy = (char*)heap_caps_malloc(len + 1, MALLOC_CAP_SPIRAM);
+    if (!copy) copy = (char*)malloc(len + 1);
+
+    if (!item || !copy) {
+        free(item);
+        free(copy);
+        return;
+    }
+
+    memcpy(copy, text, len);
+    copy[len] = '\0';
+    item->hd = server;
+    item->fd = fd;
+    item->payload = copy;
+    item->len = len;
+
+    if (httpd_queue_work(server, ws_send_work_cb, item) != ESP_OK) {
+        free(item->payload);
+        free(item);
+    }
+}
+
 void web_server_send_ws_text(int fd, const char* text) {
     if (!server || fd < 0 || !text) return;
     if (!s_ws_mutex) {
         s_ws_mutex = xSemaphoreCreateMutex();
     }
     if (xSemaphoreTake(s_ws_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
-        httpd_ws_frame_t ws_pkt;
-        memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-        ws_pkt.payload = (uint8_t*)text;
-        ws_pkt.len = strlen(text);
-        ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-        httpd_ws_send_frame_async(server, fd, &ws_pkt);
+        enqueue_ws_text(fd, text, strlen(text));
         xSemaphoreGive(s_ws_mutex);
     }
 }
@@ -324,17 +389,12 @@ void web_server_broadcast_ws_text(const char* text) {
     if (xSemaphoreTake(s_ws_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
         size_t max_clients = 7;
         int client_fds[7];
+        size_t len = strlen(text);
 
         if (httpd_get_client_list(server, &max_clients, client_fds) == ESP_OK) {
-            httpd_ws_frame_t ws_pkt;
-            memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-            ws_pkt.payload = (uint8_t*)text;
-            ws_pkt.len = strlen(text);
-            ws_pkt.type = HTTPD_WS_TYPE_TEXT;
-
             for (size_t i = 0; i < max_clients; i++) {
                 if (httpd_ws_get_fd_info(server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
-                    httpd_ws_send_frame_async(server, client_fds[i], &ws_pkt);
+                    enqueue_ws_text(client_fds[i], text, len);
                 }
             }
         }

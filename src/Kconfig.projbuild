@@ -1,0 +1,41 @@
+menu "Sugarcane AI Wi-Fi Configuration"
+
+    config SUGARCANE_WIFI_STA_SSID
+        string "Wi-Fi Station SSID (fallback se NVS vazio)"
+        default ""
+        help
+            SSID da rede Wi-Fi local em modo Station. Deixe vazio para iniciar direto em SoftAP ou configurar via NVS (namespace 'wifi_cfg').
+
+    config SUGARCANE_WIFI_STA_PASS
+        string "Wi-Fi Station Password (fallback se NVS vazio)"
+        default ""
+        help
+            Senha da rede Wi-Fi local em modo Station. Nunca commitar senhas reais em sdkconfig.defaults.
+
+    config SUGARCANE_WIFI_AP_SSID
+        string "Wi-Fi SoftAP SSID"
+        default "Sugarcane-AI-AP"
+        help
+            Nome da rede Wi-Fi criada pelo ESP32-S3 em modo SoftAP autonomo.
+
+    config SUGARCANE_WIFI_AP_PASS
+        string "Wi-Fi SoftAP Password"
+        default ""
+        help
+            Senha WPA2 do SoftAP (minimo 8 caracteres). Se vazio, cria rede aberta ou usa valor gravado no NVS ('ap_pass').
+
+    config SUGARCANE_GPS_UART_RX_GPIO
+        int "GPIO RX para GPS NEO-6M (UART2)"
+        default 18
+        range 1 48
+        help
+            Pino RX do ESP32-S3 conectado ao TX do modulo GPS NEO-6M (evitar GPIOs 26-37 da Octal Flash/PSRAM).
+
+    config SUGARCANE_GPS_UART_TX_GPIO
+        int "GPIO TX para GPS NEO-6M (UART2)"
+        default 17
+        range 1 48
+        help
+            Pino TX do ESP32-S3 conectado ao RX do modulo GPS NEO-6M (evitar GPIOs 26-37 da Octal Flash/PSRAM).
+
+endmenu
