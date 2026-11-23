@@ -402,21 +402,6 @@ void web_server_send_ws_text(int fd, const char* text) {
     }
 }
 
-bool web_server_has_ws_clients() {
-    if (!server) return false;
-    size_t max_clients = 7;
-    int client_fds[7];
-    if (httpd_get_client_list(server, &max_clients, client_fds) != ESP_OK) {
-        return false;
-    }
-    for (size_t i = 0; i < max_clients; i++) {
-        if (httpd_ws_get_fd_info(server, client_fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
-            return true;
-        }
-    }
-    return false;
-}
-
 void web_server_broadcast_ws_text(const char* text) {
     if (!server || !text) return;
     if (!s_ws_mutex) {

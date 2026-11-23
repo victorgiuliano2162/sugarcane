@@ -265,8 +265,13 @@ void telemetry_task(void* pvParameters) {
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(1000)); // 1 Hz
 
+        if (!web_server_has_ws_clients()) {
+            continue;
+        }
+
         uint32_t uptime_s = (uint32_t)(esp_timer_get_time() / 1000000);
         float temp_c = get_chip_temperature();
+        bool thermal_alert = (temp_c > 75.0f);
         size_t psram_free = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
         size_t sram_free = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
         const char* mode = wifi_get_mode_str();
@@ -275,10 +280,11 @@ void telemetry_task(void* pvParameters) {
         gps_get_state(&gps);
 
         snprintf(json_buf, sizeof(json_buf),
-            "{\"type\":\"telemetry\",\"uptime_s\":%lu,\"chip_temp_c\":%.1f,\"cpu_freq_mhz\":240,"
+            "{\"type\":\"telemetry\",\"uptime_s\":%lu,\"chip_temp_c\":%.1f,\"thermal_alert\":%s,\"cpu_freq_mhz\":240,"
             "\"sram_free_bytes\":%u,\"psram_free_bytes\":%u,\"wifi_mode\":\"%s\",\"rssi_dbm\":%d,"
             "\"fps_throughput\":%.2f,\"gps\":{\"fix\":%s,\"satellites\":%u,\"lat\":%.6f,\"lon\":%.6f,\"alt_m\":%.1f}}",
-            (unsigned long)uptime_s, temp_c, (unsigned int)sram_free, (unsigned int)psram_free, mode, (int)rssi,
+            (unsigned long)uptime_s, temp_c, thermal_alert ? "true" : "false",
+            (unsigned int)sram_free, (unsigned int)psram_free, mode, (int)rssi,
             s_last_fps, gps.fix ? "true" : "false", (unsigned int)gps.satellites, gps.lat, gps.lon, gps.alt_m
         );
 
