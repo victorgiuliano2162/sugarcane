@@ -14,6 +14,7 @@ Este diretório concentra toda a documentação técnica, relatórios de benchma
 | **[`04_otimizacao_hardware_e_firmware/`](04_otimizacao_hardware_e_firmware/)** | Engenharia de baixo nível no ESP32-S3: SRAM interna, Fork-Join `esp-nn`, PSRAM 80 MHz DDR, rede híbrida e dashboard Vue.js 3. |
 | **[`05_testes_de_desempenho/`](05_testes_de_desempenho/)** | Cronologia e relatórios de todos os benchmarks executados no hardware físico ESP32-S3, com dados brutos em `dados/`. |
 | **[`06_simulacao_hil_e_sig/`](06_simulacao_hil_e_sig/)** | Co-simulação Hardware-in-the-Loop (HIL) MAVLink e produtos cartográficos (GeoJSON, HTML interativo, PNGs KDE e CSV) em `mapas_e_dados/`. |
+| **[`07_mapeamento_desenvolvimento_e_arquitetura/`](07_mapeamento_desenvolvimento_e_arquitetura/)** | Mapeamento integral dos 73 commits, 10 etapas evolutivas, 10 viradas de arquitetura, inventário de módulos, pontos de execução e maturidade atual. |
 
 ---
 
@@ -90,3 +91,16 @@ Este diretório concentra toda a documentação técnica, relatórios de benchma
 | SIG | [`mapas_e_dados/infestacao_talhao.geojson`](06_simulacao_hil_e_sig/mapas_e_dados/infestacao_talhao.geojson) | Camada vetorial GeoJSON (RFC 7946 / EPSG:4326) para QGIS/ArcGIS. |
 | SIG | [`mapas_e_dados/mapa_calor_interativo.html`](06_simulacao_hil_e_sig/mapas_e_dados/mapa_calor_interativo.html) | Dashboard Web GIS interativo (Leaflet / Folium). |
 | IMG | [`mapas_e_dados/`](06_simulacao_hil_e_sig/mapas_e_dados/) | Painéis KDE 2D estáticos (`mapa_infestacao_talhao_2d.png`, `mapa_foco_carvao_smut.png`, `mapa_foco_ferrugem_brownrust.png`). |
+
+---
+
+## 7. Mapeamento de Desenvolvimento, Execução e Viradas de Arquitetura (`07_mapeamento_desenvolvimento_e_arquitetura/`)
+
+| # | Documento | Descrição |
+| :-: | :--- | :--- |
+| 00 | [00_INDICE_MAPEAMENTO_DO_PROJETO.md](07_mapeamento_desenvolvimento_e_arquitetura/00_INDICE_MAPEAMENTO_DO_PROJETO.md) | Índice mestre da série, fluxo de leitura por perfil e resumo quantitativo ponta a ponta. |
+| 01 | [01_ETAPAS_DE_DESENVOLVIMENTO_E_HISTORICO_DE_COMMITS.md](07_mapeamento_desenvolvimento_e_arquitetura/01_ETAPAS_DE_DESENVOLVIMENTO_E_HISTORICO_DE_COMMITS.md) | Mapeamento integral dos 73 commits em 10 etapas evolutivas (`06/11` a `23/11`), reversões e lições operacionais. |
+| 02 | [02_VIRADAS_DE_ARQUITETURA_E_DECISOES_TECNICAS.md](07_mapeamento_desenvolvimento_e_arquitetura/02_VIRADAS_DE_ARQUITETURA_E_DECISOES_TECNICAS.md) | 10 viradas de arquitetura (ADRs) com problema, causa raiz, decisão, impacto e tabela das 6 gerações. |
+| 03 | [03_MAPA_DE_IMPLEMENTACAO_E_MODULOS.md](07_mapeamento_desenvolvimento_e_arquitetura/03_MAPA_DE_IMPLEMENTACAO_E_MODULOS.md) | Inventário técnico de `src/`, `managed_components/`, tasks FreeRTOS, mapa de memória, `frontend/`, `scripts/` e `notebooks/`. |
+| 04 | [04_PONTOS_DE_EXECUCAO_E_FLUXOS_OPERACIONAIS.md](07_mapeamento_desenvolvimento_e_arquitetura/04_PONTOS_DE_EXECUCAO_E_FLUXOS_OPERACIONAIS.md) | Sequência de boot (`app_main`), fluxo WS/FreeRTOS, catálogo de rotas HTTP/WS JSON e comandos de execução. |
+| 05 | [05_ESTADO_ATUAL_LACUNAS_E_MATURIDADE.md](07_mapeamento_desenvolvimento_e_arquitetura/05_ESTADO_ATUAL_LACUNAS_E_MATURIDADE.md) | Matriz de maturidade no commit `49d53a8`, pendências operacionais, inconsistências de código e roadmap. |
